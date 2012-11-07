@@ -15,7 +15,7 @@ savehistory() {
   cmd="$(sed ':a;N;$!ba;s/\\/\\\\/g;s/\n/\\n/g' <<<"$cmd")"
   dir="$(sed ':a;N;$!ba;s/\\/\\\\/g;s/\n/\\n/g;s/$/\\$/g' <<<"$PWD")"
   now="$(date +%s)"
-  echo "$now \$ $dir \$ $line \$ $$ \$ $LASTSTATUS \$ $USER \$ $cmd" >> $(historyfile)
+  echo "$now \$ $line \$ $$ \$ $LASTSTATUS \$ $dir \$ $USER \$ $cmd" >> $(historyfile)
 }
 
 savelasthistory() {
