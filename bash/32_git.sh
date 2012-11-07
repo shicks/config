@@ -5,6 +5,7 @@ function update_git_branch {
     GITROOT=""
     return
   fi
+  GIT=$(realpath "$GIT")
   GITROOT=$(dirname "$GIT")
   local HEAD="$(cat "$GIT/HEAD" 2> /dev/null)"
   if [[ "$HEAD" =~ ^ref: ]]; then
@@ -15,13 +16,13 @@ function update_git_branch {
       local HASH="$(git rev-parse HEAD 2>/dev/null)"
     fi
     GIT_BRANCH="${GIT_BRANCH}(${HASH:0:6})"
-    GIT_BRANCH="$(basename "$(dirname "$GIT")"):$GIT_BRANCH"
+    GIT_BRANCH="$(basename "$GITROOT"):$GIT_BRANCH"
     
   elif [ -z "$HEAD" ]; then
     GIT_BRANCH=""
   else
     GIT_BRANCH="${HEAD:0:6}"
-    GIT_BRANCH="$(basename "$(dirname "$GIT")"):$GIT_BRANCH"
+    GIT_BRANCH="$(basename "$GITROOT"):$GIT_BRANCH"
   fi
 }
 
