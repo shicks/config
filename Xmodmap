@@ -1,0 +1,7 @@
+! keycode 108 = Alt_R
+
+remove lock = Caps_Lock
+add control = Caps_Lock
+
+keysym Caps_Lock = Control_L
+keycode 135 = Multi_key

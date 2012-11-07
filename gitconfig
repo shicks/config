@@ -1,0 +1,19 @@
+[user]
+  name = Stephen Hicks
+  email = sdh@google.com
+
+[alias]
+  changes = log --color --graph --decorate
+  co = checkout
+  cod = checkout --detach
+  b = branch
+  amend = commit --amend -C HEAD
+  s = status
+  statys = status
+  statis = status
+
+[color]
+  ui = auto
+
+[core]
+  excludesfile = /home/sdh/.gitignore_global

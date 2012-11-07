@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Installer script to set up symlinks for configuration files.
+# Assumes it is being run as `./install <path>`, i.e. from the directory
+# it lives in.
+
+conf=$(dirname "$0")
+conf=${conf-.}
+cd $conf
+conf=$(pwd -P)
+
+home=${1:-$HOME}
+
+echo "Installing config files from $conf into $home..."
+
+function safe_link {
+  if [ -h "$home/$2" -a "$(readlink $home/$2)" = "$conf/$1" ]; then
+    # it's already there
+    :
+  elif [ -s "$home/$2" ]; then
+    echo "Cannot symlink "$conf/$1" -> "$home/$2": file exists." >&2
+  else
+    ln -s "$conf/$1" "$home/$2"
+  fi
+}
+
+safe_link Xmodmap .Xmodmap
+safe_link Xdefaults .Xdefaults
+safe_link tmux.conf .tmux.conf
+safe_link bashrc .bashrc
+safe_link gitconfig .gitconfig
+
+cd bash
+mkdir -p $home/.bash.d
+for a in *.sh; do
+  safe_link bash/$a .bash.d/$a
+done
+
+mkdir -p $home/.bash.d/completion
