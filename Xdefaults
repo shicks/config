@@ -45,17 +45,20 @@ URxvt.background: rgba:0000/0000/0000/f800
 URxvt.termName: rxvt-unicode-256color
 
 ! Note: sends S-<f9>
-URxvt.keysym.C-BackSpace: \033[33~
+!URxvt.keysym.C-BackSpace: \033[33~
 !URxvt.keysym.C-Up: \033[1;5A
 !URxvt.keysym.C-Down: \033[1;5B
 !URxvt.keysym.C-Right: \033[1;5C
 !URxvt.keysym.C-Left: \033[1;5D
 
+! Just send M-BackSpace for C-BackSpace
+URxvt.keysym.C-BackSpace: \033\177
+
 ! These seem to work better - M-Od for backwards-word
-URxvt.keysym.C-Up: \033Oa
-URxvt.keysym.C-Down: \033Ob
-URxvt.keysym.C-Right: \033Oc
-URxvt.keysym.C-Left: \033Od
+!URxvt.keysym.C-Up: \033OA
+!URxvt.keysym.C-Down: \033OB
+!URxvt.keysym.C-Right: \033OC
+!URxvt.keysym.C-Left: \033OD
 
 ! send C-Z L and C-Z N on C-PgUp and C-PgDn
 URxvt.keysym.C-Prior: \032p
@@ -78,3 +81,7 @@ URxvt.keysym.Control-Shift-O: \033[36~
 !URxvt.keysym.Meta-Greater: \033\076
 
 URxvt.iconFile: /usr/share/icons/gnome/32x32/apps/gnome-terminal.png
+
+!! tmux 1.5 renders italics "properly", but it's harder to spot at a glance,
+!! so instead we highlight them extra.  An alternative is screen-noit
+URxvt.colorIT: #ff0000

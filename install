@@ -14,26 +14,62 @@ home=${1:-$HOME}
 echo "Installing config files from $conf into $home..."
 
 function safe_link {
-  if [ -h "$home/$2" -a "$(readlink $home/$2)" = "$conf/$1" ]; then
+  target=$2
+  if [ -z "$target" ]; then
+    target=".$1"
+  fi
+  target="$home/$target"
+  source="$conf/$1"
+  if [ -h "$target" -a "$(readlink $target)" = "$source" ]; then
     # it's already there
     :
-  elif [ -s "$home/$2" ]; then
-    echo "Cannot symlink "$conf/$1" -> "$home/$2": file exists." >&2
+  elif [ -s "$target" ]; then
+    echo "Cannot symlink "$source" -> "$target": file exists." >&2
   else
-    ln -s "$conf/$1" "$home/$2"
+    ln -s "$source" "$target"
   fi
 }
 
-safe_link Xmodmap .Xmodmap
-safe_link Xdefaults .Xdefaults
-safe_link tmux.conf .tmux.conf
-safe_link bashrc .bashrc
-safe_link gitconfig .gitconfig
+safe_link Xmodmap
+safe_link Xdefaults
+safe_link tmux.conf
+safe_link bashrc
+safe_link gitconfig
+safe_link gitignore_global
+safe_link gtkrc-2.0
+safe_link aspell.en.pws
 
+# Link everything in the bash directory
 cd bash
 mkdir -p $home/.bash.d
 for a in *.sh; do
   safe_link bash/$a .bash.d/$a
 done
 
+# Unlink everything in the disabled directory
+if [ -d disabled ]; then
+  cd disabled
+  for a in *.sh; do
+    target="$home/.bash.d/$a"
+    if [ -h $target -a "$(readlink $target)" = "$conf/bash/$a" ]; then
+      rm -f $target
+    elif [ -s "$target" ]; then
+      echo "Refusing to delete non-symlink $target even though disabled."
+    fi
+  done
+  cd ..
+fi
+cd ..
+
+# Make bash completion dir so somebody doesn't complain
 mkdir -p $home/.bash.d/completion
+
+# Link all the emacs files
+cd emacs
+mkdir -p $home/.emacs.d
+for a in *.el; do
+  safe_link emacs/$a .emacs.d/$a
+done
+
+# Install the tmux-256color terminfo config
+$conf/gen/tmux

@@ -1,9 +1,16 @@
-PROMPT_COMMAND='LASTSTATUS=$?; shift_in; set_prompt; $GOOGLE_PROMPT_COMMAND; drawlinebreak'
+if ! $(type google_prompt_command 2> /dev/null); then
+  function google_prompt_command { :; }
+fi
+
+PROMPT_COMMAND='LASTSTATUS=$?; shift_in; set_prompt; savelasthistory; google_prompt_command; drawlinebreak'
+
+if ! $(type google_cd_hook 2> /dev/null); then
+  function google_cd_hook { :; }
+fi
 
 ## NOTE: order matters here (for unsymlink?)
-#CD_HOOK="save_dir; unsymlink; abbrev_dir; google3_shortcuts"
-
-CD_HOOK='save_dir; $GOOGLE_CD_HOOK'
+# CD_HOOK='save_dir; unsymlink; google_cd_hook'
+CD_HOOK='save_dir; google_cd_hook'
 
 #eval $CD_HOOK
 
