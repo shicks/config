@@ -6,9 +6,6 @@
 ;; Set up load path
 (add-to-list 'load-path "~/config/emacs")
 
-;; First bring in standard Google settings
-(require 'google)
-
 ;; My own settings
 (require 'sdh-misc)
 (require 'sdh-keys)
