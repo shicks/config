@@ -103,6 +103,9 @@ cd ..
 # Make bash completion dir so somebody doesn't complain
 mkdir -p $home/.bash.d/completion
 
+# Make sure history dir exists
+mkdir -p $home/history
+
 # Link all the emacs files
 #cd emacs
 #mkdir -p $home/.emacs.d

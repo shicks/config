@@ -47,8 +47,9 @@
 (xterm-mouse-mode t)
 
 ;(set-cursor-color "")
-;(set-background-color "Black")
-;(set-foreground-color "white")
+(set-foreground-color "white")
+(set-background-color "black")
+;(set-foreground-color "brightwhite")
 
 ;(set-cursor-color "Black")
 ;(set-face-background 'default "brightwhite") ;; this is a fix for flymake...?

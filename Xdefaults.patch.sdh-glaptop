@@ -1,0 +1,4 @@
+#!/usr/bin/perl -p
+# COMMENT=!
+
+s/URxvt.geometry:.*/URxvt.geometry:   162x36/;

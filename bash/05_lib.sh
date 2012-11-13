@@ -31,3 +31,9 @@ function add_command {
   # Now clean up any extra semis
   strip_semis "$1"
 }
+
+function ensure_function {
+  if ! type "$1" &> /dev/null; then
+    eval "function $1 { :; }"
+  fi
+}

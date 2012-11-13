@@ -1,3 +1,8 @@
+
+Emacs.background: Black
+Emacs.foreground: White
+
+
 URxvt.geometry:   204x70
 URxvt.saveLines:  8192
 
