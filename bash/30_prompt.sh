@@ -27,11 +27,16 @@ function ps1_dir {
 }
 
 function ps1_host {
+  local hostcolor
+  case "$(hostname -s)" in
+    (sdh-glaptop) hostcolor=$(color -p magenta) ;;
+    (*) hostcolor=$(color -p green) ;;
+  esac
   if [ -z "$VANITY_HOSTNAME" ]; then
     VANITY_HOSTNAME=$([ -f /etc/vanity-hostname ] &&
         sed s/\\..*// /etc/vanity-hostname || hostname -s)
   fi
-  echo $VANITY_HOSTNAME
+  echo $hostcolor$(whoami)@$VANITY_HOSTNAME
 }
 
 function ps1_status {
@@ -39,6 +44,8 @@ function ps1_status {
     echo " $(color -p red):-($LASTSTATUS$(color -p off)"
   fi
 }
+
+ensure_function ps1_google
 
 ## This is where the prompt actually gets set.
 function set_prompt {
@@ -54,7 +61,7 @@ function set_prompt {
     fi
     DIR=$GIT_BRANCH
   else
-    FRONT="$(color -p green)$(whoami)@$(ps1_host)$(color -p off)"
+    FRONT="$(ps1_host)$(color -p off)"
   fi
   PS1="$(ps1_debian)$FRONT$(ps1_google)$(ps1_time)$(ps1_status)"
   PS1="$PS1 $(color -p blue)$(ps1_dir)$(color -p off)$(ps1_dollar) "
