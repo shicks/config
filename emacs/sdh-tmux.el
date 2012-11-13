@@ -9,8 +9,8 @@
 ;; ctrl arrow keys
 (global-set-key (kbd "M-[ A") 'my-scroll-down)
 (global-set-key (kbd "M-[ B") 'my-scroll-up)
-(global-set-key (kbd "M-[ C") 'right-word)
-(global-set-key (kbd "M-[ D") 'left-word)
+(global-set-key (kbd "M-[ C") 'forward-word)
+(global-set-key (kbd "M-[ D") 'backward-word)
 
 ;; These are bound by URxvt
 (global-set-key (kbd "M-[ 3 4 ~") 'duplicate-line)

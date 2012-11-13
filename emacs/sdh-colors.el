@@ -30,6 +30,14 @@
  '(ediff-odd-diff-B ((((class color)) (:background "plum" :foreground "black"))))
 )
 
+;; These are temporary, until we figure out WTF is wrong with the colors!!!
+;(custom-set-faces
+; '(mode-line ((((class color)) (:background "white" :foreground "black"))))
+; '(mode-line-inactive ((((class color)) (:foreground "brightblack" :background "black"))))
+; '(flymake-errline ((((class color)) (:background "red" :foreground "black"))))
+; '(flymake-warnline ((((class color)) (:background "blue" :foreground "white"))))
+;)
+
 ; '(flymake-errline ((((class color)) (:background "brightred" :foreground "brightwhite"))))
 ; '(flymake-warnline ((((class color)) (:background "brightblue" :foreground "brightwhite"))))
 ;)
@@ -40,7 +48,7 @@
 
 ;(set-cursor-color "")
 ;(set-background-color "Black")
-;(set-foreground-color "brightwhite")
+;(set-foreground-color "white")
 
 ;(set-cursor-color "Black")
 ;(set-face-background 'default "brightwhite") ;; this is a fix for flymake...?

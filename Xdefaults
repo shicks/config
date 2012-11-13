@@ -44,6 +44,8 @@ URxvt.background: rgba:0000/0000/0000/f800
 
 URxvt.termName: rxvt-unicode-256color
 
+URxvt.scrollBar: false
+
 ! Note: sends S-<f9>
 !URxvt.keysym.C-BackSpace: \033[33~
 !URxvt.keysym.C-Up: \033[1;5A
@@ -60,10 +62,13 @@ URxvt.keysym.C-BackSpace: \033\177
 !URxvt.keysym.C-Right: \033OC
 !URxvt.keysym.C-Left: \033OD
 
-! send C-Z L and C-Z N on C-PgUp and C-PgDn
+! send C-Z p and C-Z n on C-PgUp and C-PgDn
+! (\032 is C-Z)
+URxvt.keysym.C-S-N: \032c
 URxvt.keysym.C-Prior: \032p
 URxvt.keysym.C-Next: \032n
-URxvt.keysym.C-S-N: \032c
+URxvt.keysym.C-S-Prior: \032P
+URxvt.keysym.C-S-Next: \032N
 
 ! handle c-shift better
 URxvt.iso14755: false

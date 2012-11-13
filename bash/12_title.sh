@@ -10,7 +10,7 @@ case "$TERM" in
       echo -ne "\033]0;$1\007\033]777;tabbedex;set_tab_name;$1\007"
     }
     ;;
-  screen*)
+  screen*|tmux*)
     function set_title {
       echo -ne "\033]0;$1\007\033]777;tabbedex;set_tab_name;$1\007"
       #echo -ne "\032,$1\015"
