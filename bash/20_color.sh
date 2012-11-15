@@ -9,12 +9,23 @@ function unset_ansi_colors {
   alias color=:
 }
 
+case "$(basename $SHELL)" in
+  (bash)
+    PROMPT_ESCAPE_OPEN='\['
+    PROMPT_ESCAPE_CLOSE='\]'
+    ;;
+  (zsh)
+    PROMPT_ESCAPE_OPEN='%{'
+    PROMPT_ESCAPE_CLOSE='%}'
+    ;;
+esac
+
 function ansi_color {
   local o=""
   local c=""
   while [ -n "$1" ]; do
     case "$1" in
-      -p)      o='\['; c='\]' ;;
+      -p)      o=$PROMPT_ESCAPE_OPEN; c=$PROMPT_ESCAPE_CLOSE ;;
       off)     echo -ne "$o\033[00m$c" ;;
       black)   echo -ne "$o\033[01;30m$c" ;;
       red)     echo -ne "$o\033[01;31m$c" ;;

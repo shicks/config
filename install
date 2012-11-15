@@ -72,6 +72,7 @@ safe_link Xmodmap
 safe_link Xdefaults
 safe_link tmux.conf
 safe_link bashrc
+safe_link zshrc
 safe_link gitconfig
 safe_link gitignore_global
 safe_link gtkrc-2.0
@@ -117,9 +118,13 @@ mkdir -p $home/history
 $conf/gen/tmux
 
 # Set up chrome/emacs keybindings using the tool instead
-if which gconftool-2 &>/dev/null; then
-  gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs --type string
-fi
-if which gsettings &>/dev/null; then
-  gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
+# NOTE: this only works in we're running locally
+if [ "$1" = -e ]; then
+  if which gconftool-2 &>/dev/null; then
+    gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs \
+        --type string
+  fi
+  if which gsettings &>/dev/null; then
+    gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
+  fi
 fi

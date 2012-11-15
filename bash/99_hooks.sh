@@ -1,10 +1,42 @@
 ensure_function google_prompt_command
-PROMPT_COMMAND='LASTSTATUS=$?; shift_in; set_prompt; savelasthistory; google_prompt_command; drawlinebreak'
-
-## NOTE: order matters here (for unsymlink?)
-# CD_HOOK='save_dir; unsymlink; google_cd_hook'
 ensure_function google_cd_hook
-CD_HOOK='save_dir; google_cd_hook'
+
+case "$(basename $SHELL)" in
+
+  (bash)
+    PROMPT_COMMAND='LASTSTATUS=$?; shift_in; set_prompt;
+                    savelasthistory; google_prompt_command; drawlinebreak'
+
+    ## NOTE: order matters here (for unsymlink?)
+    # CD_HOOK='save_dir; unsymlink; google_cd_hook'
+    CD_HOOK='save_dir; google_cd_hook'
+    eval $CD_HOOK
+    ;;
+
+  (zsh)
+    function precmd {
+      LASTSTATUS=$?
+      shift_in
+      set_prompt
+      savelasthistory
+      google_prompt_command
+      drawlinebreak
+    }
+    function chpwd {
+      save_dir
+      google_cd_hook
+    }
+    function preexec {
+      # TODO(sdh): possibilities
+      # 1. record command here
+      # 2. set up timer
+      # 3. set up output capture
+      :
+    }
+    chpwd
+    ;;
+esac
+
 
 #eval $CD_HOOK
 

@@ -32,6 +32,7 @@ function cd_pop {
   DIRS=("${DIRS[@]:$((n+1))}")
 }
 
+# TODO(sdh): make this work
 function match_dir {
   local dir=$1
   local oldpwd=$PWD
@@ -84,6 +85,7 @@ function cd_up {
 }
 
 function cd_interactive {
+  # Allows picking which dir we want, using j/k to switch back/forth
   local i=0
   local ans
   while [ -n "${DIRS[$i]}" ]; do
@@ -117,6 +119,28 @@ function my_cd {
   eval $CD_HOOK
 }
 
+# TODO(sdh): remove this if i ever fix match_dir
+
+case "$(basename $SHELL)" in
+  (bash)
+    function my_cd {
+      command cd "$@"
+      eval $CD_HOOK
+    }
+    function run_cd_hook {
+      eval $CD_HOOK
+    }
+    ;;
+  (zsh)
+    function my_cd {
+      chdir "$@"
+    }
+    function run_cd_hook {
+      :
+    }
+    ;;
+esac
+
 function cd {
   case "$1" in
     (-i)  cd_interactive
@@ -138,9 +162,9 @@ function cd {
 }
 function pushd {
   command pushd "$@"
-  eval $CD_HOOK
+  run_cd_hook
 }
 function popd {
   command popd "$@"
-  eval $CD_HOOK
+  run_cd_hook
 }
