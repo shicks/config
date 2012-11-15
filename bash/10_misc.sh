@@ -40,9 +40,11 @@ case "$(basename $SHELL)" in
     # TODO(sdh) subword-forward and subword-backward???
 
     # For urxvt/tmux
-    bindkey '\eOD' backward-word  # C-<left>
+    bindkey '\eOd' backward-word  # C-<left> outside tmux
+    bindkey '\eOD' backward-word  # C-<left> inside tmux
     bindkey '\e\eD' backward-word # M-<left>
-    bindkey '\eOC' forward-word   # C-<right>
+    bindkey '\eOc' forward-word  # C-<right> outside tmux
+    bindkey '\eOC' forward-word   # C-<right> inside tmux
     bindkey '\e\eC' forward-word  # M-<right>
 
     zle_highlight=(region:"bg=87,fg=black" special:standout
