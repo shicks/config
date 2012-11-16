@@ -19,6 +19,7 @@ case "$(basename $SHELL)" in
     # For urxvt/tmux
     bind '"\eOD": backward-word'
     bind '"\eOC": forward-word'
+    bind -r '\e[36~'
     ;;
 
   (zsh)
@@ -46,6 +47,11 @@ case "$(basename $SHELL)" in
     bindkey '\eOc' forward-word  # C-<right> outside tmux
     bindkey '\eOC' forward-word   # C-<right> inside tmux
     bindkey '\e\eC' forward-word  # M-<right>
+
+    # Unbind ^[[33~ since we use it as a prefix shift.
+    function noop { :; }
+    zle -N noop
+    bindkey '\e[36~' noop
 
     zle_highlight=(region:"bg=87,fg=black" special:standout
         suffix:bold isearch:underline)

@@ -51,17 +51,26 @@
     (shell-command "xclip -o" 1)
     (forward-char (- (buffer-size) bs))))
 
+;; TODO(sdh): find a prefix we can send for ALL super/C-S- keys in urxvt
+;; We want one that will be minimally intrusive, like F-13 or something
+;; We could also just teach zsh/bash to ignore the prefix and either
+;; just handle the S-k or the C-k... (probably the latter).
+
 (defun copy-to-x ()
   "Copies the current region to the X clipboard via the urxvt mycopy extension."
   (interactive)
   (let* ((text (buffer-substring-no-properties (point) (mark)))
-         (encoded (base64-encode-string text t)))
+         (encoded (base64-encode-string text t))
+         (directive (concat "\C-[]777;mycopy;" encoded "\C-G")))
     ; (shell-command-on-region (point) (mark) "xclip -in"))
-    (message encoded)
+    ; (message encoded)
     ;; non-tmux:
     ; (send-string-to-terminal (concat "\C-[]777;mycopy;" encoded "\C-G"))
     ;; tmux (post update) -> double the \033's and end with \033\\
-    (send-string-to-terminal (concat "\C-[Ptmux;\C-[\C-[]777;mycopy;" encoded "\C-G\C-[\\"))
+    (if (fboundp 'send-string-through-tmux)
+        (send-string-through-tmux directive)
+      (send-string-to-terminal directive))
+    ;;(send-string-to-terminal (concat "\C-[Ptmux;\C-[\C-[]777;mycopy;" encoded "\C-G\C-[\\"))
 ))
 
 ;;;;;;;;;;;;;;;;

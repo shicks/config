@@ -40,9 +40,18 @@ URxvt.font: xft:Monospace:pixelsize=13
 URxvt.letterSpace: -1
 
 !,tabbedex
-URxvt.perl-ext-common : default,matcher,mycopy-osc,overlay-osc
+!,set-option-osc
+URxvt.perl-ext-common : default,matcher,mycopy-osc
 URxvt.urlLauncher     : google-chrome --user-data-dir=/usr/local/google/chrome/corp
 URxvt.matcher.button  : 1
+
+! prevents man/less from disappearing from scrollback
+URxvt.secondaryScreen : false
+
+! TODO(sdh): consider using this (or temporary toggling via plugin, if that works)
+!            once we figure out how to make tmux understand S-PPage and S-NPage
+!            and do the right thing with the history there...
+! URxvt.saveLines : 0
 
 URxvt.depth: 32
 URxvt.background: rgba:0000/0000/0000/f800
@@ -67,31 +76,91 @@ URxvt.keysym.C-BackSpace: \033\177
 !URxvt.keysym.C-Right: \033OC
 !URxvt.keysym.C-Left: \033OD
 
-! send C-Z p and C-Z n on C-PgUp and C-PgDn
+! Send C-Z c on C-S-N to make a new window.  This is crummy.
 ! (\032 is C-Z)
-URxvt.keysym.C-S-N: \032c
-URxvt.keysym.C-Prior: \032p
-URxvt.keysym.C-Next: \032n
-URxvt.keysym.C-S-Prior: \032P
-URxvt.keysym.C-S-Next: \032N
+!URxvt.keysym.C-S-N: \032c
+!URxvt.keysym.C-Prior: \032p
+!URxvt.keysym.C-Next: \032n
+!URxvt.keysym.C-S-Prior: \032P
+!URxvt.keysym.C-S-Next: \032N
 
 ! handle c-shift better
 URxvt.iso14755: false
 !URxvt.iso14755_52: false
 
+
+!URxvt.iconFile: /usr/share/icons/gnome/32x32/apps/gnome-terminal.png
+URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
+
+!! tmux 1.5 renders italics "properly", but it's harder to spot at a glance,
+!! so instead we highlight them extra.  An alternative is screen-noit
+!URxvt.colorIT: #ff0000
+
+
+! TODO(sdh): why does list: not work?
+URxvt.keysym.Control-Shift-A: \033[36~\001
+URxvt.keysym.Control-Shift-B: \033[36~\002
+URxvt.keysym.Control-Shift-C: \033[36~\003
+URxvt.keysym.Control-Shift-D: \033[36~\004
+URxvt.keysym.Control-Shift-E: \033[36~\005
+URxvt.keysym.Control-Shift-F: \033[36~\006
+URxvt.keysym.Control-Shift-G: \033[36~\007
+URxvt.keysym.Control-Shift-H: \033[36~\010
+URxvt.keysym.Control-Shift-I: \033[36~\011
+URxvt.keysym.Control-Shift-J: \033[36~\012
+URxvt.keysym.Control-Shift-K: \033[36~\013
+URxvt.keysym.Control-Shift-L: \033[36~\014
+URxvt.keysym.Control-Shift-M: \033[36~\015
+URxvt.keysym.Control-Shift-N: \033[36~\016
+URxvt.keysym.Control-Shift-O: \033[36~\017
+URxvt.keysym.Control-Shift-P: \033[36~\020
+URxvt.keysym.Control-Shift-Q: \033[36~\021
+URxvt.keysym.Control-Shift-R: \033[36~\022
+URxvt.keysym.Control-Shift-S: \033[36~\023
+URxvt.keysym.Control-Shift-T: \033[36~\024
+URxvt.keysym.Control-Shift-U: \033[36~\025
+URxvt.keysym.Control-Shift-V: \033[36~\026
+URxvt.keysym.Control-Shift-W: \033[36~\027
+URxvt.keysym.Control-Shift-X: \033[36~\030
+URxvt.keysym.Control-Shift-Y: \033[36~\031
+URxvt.keysym.Control-Shift-Z: \033[36~\032
+
+URxvt.keysym.Control-Meta-Shift-A: \033[36~\033\001
+URxvt.keysym.Control-Meta-Shift-B: \033[36~\033\002
+URxvt.keysym.Control-Meta-Shift-C: \033[36~\033\003
+URxvt.keysym.Control-Meta-Shift-D: \033[36~\033\004
+URxvt.keysym.Control-Meta-Shift-E: \033[36~\033\005
+URxvt.keysym.Control-Meta-Shift-F: \033[36~\033\006
+URxvt.keysym.Control-Meta-Shift-G: \033[36~\033\007
+URxvt.keysym.Control-Meta-Shift-H: \033[36~\033\010
+URxvt.keysym.Control-Meta-Shift-I: \033[36~\033\011
+URxvt.keysym.Control-Meta-Shift-J: \033[36~\033\012
+URxvt.keysym.Control-Meta-Shift-K: \033[36~\033\013
+URxvt.keysym.Control-Meta-Shift-L: \033[36~\033\014
+URxvt.keysym.Control-Meta-Shift-M: \033[36~\033\015
+URxvt.keysym.Control-Meta-Shift-N: \033[36~\033\016
+URxvt.keysym.Control-Meta-Shift-O: \033[36~\033\017
+URxvt.keysym.Control-Meta-Shift-P: \033[36~\033\020
+URxvt.keysym.Control-Meta-Shift-Q: \033[36~\033\021
+URxvt.keysym.Control-Meta-Shift-R: \033[36~\033\022
+URxvt.keysym.Control-Meta-Shift-S: \033[36~\033\023
+URxvt.keysym.Control-Meta-Shift-T: \033[36~\033\024
+URxvt.keysym.Control-Meta-Shift-U: \033[36~\033\025
+URxvt.keysym.Control-Meta-Shift-V: \033[36~\033\026
+URxvt.keysym.Control-Meta-Shift-W: \033[36~\033\027
+URxvt.keysym.Control-Meta-Shift-X: \033[36~\033\030
+URxvt.keysym.Control-Meta-Shift-Y: \033[36~\033\031
+URxvt.keysym.Control-Meta-Shift-Z: \033[36~\033\032
+
+!URxvt.keysym.Control-Meta-Shift-V: \033[33~\e\026
+
 ! use random F-keys for these - we can bind them in bash/emacs
 !!!! note: previously this was \033xduplicate-line\015
-URxvt.keysym.Control-Shift-K: \033[34~
-URxvt.keysym.Control-Meta-Shift-V: \033[35~
-URxvt.keysym.Control-Shift-O: \033[36~
+!URxvt.keysym.Control-Shift-K: \033[34~
+!URxvt.keysym.Control-Meta-Shift-V: \033[35~
+!URxvt.keysym.Control-Shift-O: \033[36~
 
 !URxvt.keysym.Meta-Shift-Comma: \033\074
 !URxvt.keysym.Meta-Less: \033\074
 !URxvt.keysym.Meta-Shift-Period: \033\076
 !URxvt.keysym.Meta-Greater: \033\076
-
-URxvt.iconFile: /usr/share/icons/gnome/32x32/apps/gnome-terminal.png
-
-!! tmux 1.5 renders italics "properly", but it's harder to spot at a glance,
-!! so instead we highlight them extra.  An alternative is screen-noit
-URxvt.colorIT: #ff0000
