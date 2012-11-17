@@ -1,6 +1,12 @@
 ensure_function google_prompt_command
 ensure_function google_cd_hook
 
+ensure_function shift_in
+ensure_function set_prompt
+ensure_function drawlinebreak
+ensure_function savelasthistory
+ensure_function save_dir
+
 case "$(basename $SHELL)" in
 
   (bash)
