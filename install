@@ -4,6 +4,9 @@
 # Assumes it is being run as `./install <path>`, i.e. from the directory
 # it lives in.
 
+# TODO(sdh): add conditional logic to the patch scripts, so that
+# we can do feature testing rather than whitelist machines.
+
 conf=$(dirname "$0")
 conf=${conf-.}
 cd $conf
