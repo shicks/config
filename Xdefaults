@@ -152,6 +152,62 @@ URxvt.keysym.Control-Meta-Shift-X: \033[36~\033\030
 URxvt.keysym.Control-Meta-Shift-Y: \033[36~\033\031
 URxvt.keysym.Control-Meta-Shift-Z: \033[36~\033\032
 
+! TODO(sdh): figure out what happens with shift...
+! TODO(sdh): disable \033[37~ in zsh and bash
+! URxvt.keysym.Mod4-A: \033[37~A
+! URxvt.keysym.Mod4-B: \033[37~B
+! URxvt.keysym.Mod4-C: \033[37~C
+! URxvt.keysym.Mod4-D: \033[37~D
+! URxvt.keysym.Mod4-E: \033[37~E
+! URxvt.keysym.Mod4-F: \033[37~F
+! URxvt.keysym.Mod4-G: \033[37~G
+! URxvt.keysym.Mod4-H: \033[37~H
+! URxvt.keysym.Mod4-I: \033[37~I
+! URxvt.keysym.Mod4-J: \033[37~J
+! URxvt.keysym.Mod4-K: \033[37~K
+! URxvt.keysym.Mod4-L: \033[37~L
+! URxvt.keysym.Mod4-M: \033[37~M
+! URxvt.keysym.Mod4-N: \033[37~N
+! URxvt.keysym.Mod4-O: \033[37~O
+! URxvt.keysym.Mod4-P: \033[37~P
+! URxvt.keysym.Mod4-Q: \033[37~Q
+! URxvt.keysym.Mod4-R: \033[37~R
+! URxvt.keysym.Mod4-S: \033[37~S
+! URxvt.keysym.Mod4-T: \033[37~T
+! URxvt.keysym.Mod4-U: \033[37~U
+! URxvt.keysym.Mod4-V: \033[37~V
+! URxvt.keysym.Mod4-W: \033[37~W
+! URxvt.keysym.Mod4-X: \033[37~X
+! URxvt.keysym.Mod4-Y: \033[37~Y
+! URxvt.keysym.Mod4-Z: \033[37~Z
+
+! URxvt.keysym.Control-Mod4-A: \033[37~\001
+! URxvt.keysym.Control-Mod4-B: \033[37~\002
+! URxvt.keysym.Control-Mod4-C: \033[37~\003
+! URxvt.keysym.Control-Mod4-D: \033[37~\004
+! URxvt.keysym.Control-Mod4-E: \033[37~\005
+! URxvt.keysym.Control-Mod4-F: \033[37~\006
+! URxvt.keysym.Control-Mod4-G: \033[37~\007
+! URxvt.keysym.Control-Mod4-H: \033[37~\010
+! URxvt.keysym.Control-Mod4-I: \033[37~\011
+! URxvt.keysym.Control-Mod4-J: \033[37~\012
+! URxvt.keysym.Control-Mod4-K: \033[37~\013
+! URxvt.keysym.Control-Mod4-L: \033[37~\014
+! URxvt.keysym.Control-Mod4-M: \033[37~\015
+! URxvt.keysym.Control-Mod4-N: \033[37~\016
+! URxvt.keysym.Control-Mod4-O: \033[37~\017
+! URxvt.keysym.Control-Mod4-P: \033[37~\020
+! URxvt.keysym.Control-Mod4-Q: \033[37~\021
+! URxvt.keysym.Control-Mod4-R: \033[37~\022
+! URxvt.keysym.Control-Mod4-S: \033[37~\023
+! URxvt.keysym.Control-Mod4-T: \033[37~\024
+! URxvt.keysym.Control-Mod4-U: \033[37~\025
+! URxvt.keysym.Control-Mod4-V: \033[37~\026
+! URxvt.keysym.Control-Mod4-W: \033[37~\027
+! URxvt.keysym.Control-Mod4-X: \033[37~\030
+! URxvt.keysym.Control-Mod4-Y: \033[37~\031
+! URxvt.keysym.Control-Mod4-Z: \033[37~\032
+
 !URxvt.keysym.Control-Meta-Shift-V: \033[33~\e\026
 
 ! use random F-keys for these - we can bind them in bash/emacs
