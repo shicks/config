@@ -1,0 +1,93 @@
+#!/usr/bin/perl
+
+# Interactive git-add using meld.
+# Usage: git iadd
+# Changes added to the right-hand pane will be staged.
+
+use strict;
+use File::Basename qw/dirname/;
+use File::Path qw/mkpath/;
+use File::Temp qw/tempdir/;
+
+my $clobber = 0;
+my $noclean = 0;
+my $verbose = 0;
+while ($_ = shift) {
+  if ($_ eq '-c') {
+    $clobber = 1;
+  } elsif ($_ eq '-n') {
+    $noclean = 1;
+  } elsif ($_ eq '-v') {
+    $verbose = 1;
+  } else {
+    die "unknown option: $_";
+  }
+}
+
+sub dircat {
+    my ($a, $b) = @_;
+    return $b if $b =~ m|^/|;
+    return "$a/$b";
+}
+
+# find the git root and export
+my $root = $ENV{'PWD'};
+while (!-d "$root/.git") {
+    $root = dirname $root;
+    die "cannot find git root" if $root =~ /^.$/;
+}
+chdir $root;
+
+# make a tempdir for root of each tree
+my $tempdir = tempdir();
+my $index = "$tempdir/index";
+my $stage = "$tempdir/stage";
+my $working = "$tempdir/working";
+mkdir $working;
+
+# Supposedly meld has an "ignore symlinks" option but I can't seem
+# to find it anywhere.  So instead, we're going to resort to all sorts
+# of dirty tricks to figure out what's changed.
+my @files = ();
+open STATUS, "git status|";
+while (<STATUS>) {
+  push @files, $1 if /(\S+)\s*$/ && -e $1;
+}
+
+print "Files: @files\n" if $verbose;
+
+# Checkout the chosen files from the index twice.
+system "git checkout-index --prefix=$index/ @files 2>/dev/null";
+system "git checkout-index --prefix=$stage/ @files 2>/dev/null";
+
+# Copy the same files from the working dir.
+foreach (@files) {
+  my $dir = dirname $_;
+  mkpath "$working/$dir" unless -d "$working/$dir";
+  system "cp -r $root/$_ $working/$dir";
+}
+
+# Run meld to allow the user to reconcile the changes.
+system "meld $working $stage";
+
+# Make a patch.
+chdir $tempdir;
+system "diff -aurN index stage > PATCH";
+
+# Apply the patch to the index only.
+chdir $root;
+system "git apply --cache $tempdir/PATCH";
+
+# Finally go back and clobber any changed files in the working dir.
+if ($clobber) {
+  foreach (@files) {
+    if (-e "$working/$_") {
+      system "cp $working/$_ $_";
+    } else {
+      unlink "$_";
+    }
+  }
+}
+
+# Clean up after myself.
+system "rm -rf $tempdir" unless $noclean

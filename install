@@ -103,6 +103,13 @@ function install_files {
   fi
   cd ..
 
+  # Link everything in the bin directory
+  cd bash
+  mkdir -p $home/local/bin
+  for a in *.sh; do
+    safe_link bin/$a local/bin/$a
+  done
+
   # Make bash completion dir so somebody doesn't complain
   mkdir -p $home/.bash.d/completion
 
