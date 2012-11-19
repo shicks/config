@@ -20,6 +20,7 @@ case "$(basename $SHELL)" in
     bind '"\eOD": backward-word'
     bind '"\eOC": forward-word'
     bind -r '\e[36~'
+    bind -r '\e[37~'
     ;;
 
   (zsh)
@@ -52,6 +53,7 @@ case "$(basename $SHELL)" in
     function noop { :; }
     zle -N noop
     bindkey '\e[36~' noop
+    bindkey '\e[37~' noop
 
     zle_highlight=(region:"bg=87,fg=black" special:standout
         suffix:bold isearch:underline)

@@ -3,7 +3,7 @@ Emacs.background: Black
 Emacs.foreground: White
 
 
-URxvt.geometry:   204x70
+URxvt.geometry:   203x70
 URxvt.saveLines:  8192
 
 ! to match gnome-terminal "Linux console" scheme
@@ -152,34 +152,60 @@ URxvt.keysym.Control-Meta-Shift-X: \033[36~\033\030
 URxvt.keysym.Control-Meta-Shift-Y: \033[36~\033\031
 URxvt.keysym.Control-Meta-Shift-Z: \033[36~\033\032
 
-! TODO(sdh): figure out what happens with shift...
-! TODO(sdh): disable \033[37~ in zsh and bash
-! URxvt.keysym.Mod4-A: \033[37~A
-! URxvt.keysym.Mod4-B: \033[37~B
-! URxvt.keysym.Mod4-C: \033[37~C
-! URxvt.keysym.Mod4-D: \033[37~D
-! URxvt.keysym.Mod4-E: \033[37~E
-! URxvt.keysym.Mod4-F: \033[37~F
-! URxvt.keysym.Mod4-G: \033[37~G
-! URxvt.keysym.Mod4-H: \033[37~H
-! URxvt.keysym.Mod4-I: \033[37~I
-! URxvt.keysym.Mod4-J: \033[37~J
-! URxvt.keysym.Mod4-K: \033[37~K
-! URxvt.keysym.Mod4-L: \033[37~L
-! URxvt.keysym.Mod4-M: \033[37~M
-! URxvt.keysym.Mod4-N: \033[37~N
-! URxvt.keysym.Mod4-O: \033[37~O
-! URxvt.keysym.Mod4-P: \033[37~P
-! URxvt.keysym.Mod4-Q: \033[37~Q
-! URxvt.keysym.Mod4-R: \033[37~R
-! URxvt.keysym.Mod4-S: \033[37~S
-! URxvt.keysym.Mod4-T: \033[37~T
-! URxvt.keysym.Mod4-U: \033[37~U
-! URxvt.keysym.Mod4-V: \033[37~V
-! URxvt.keysym.Mod4-W: \033[37~W
-! URxvt.keysym.Mod4-X: \033[37~X
-! URxvt.keysym.Mod4-Y: \033[37~Y
-! URxvt.keysym.Mod4-Z: \033[37~Z
+! Define keys using super
+URxvt.keysym.Mod4-A: \033[37~A
+URxvt.keysym.Mod4-B: \033[37~B
+URxvt.keysym.Mod4-C: \033[37~C
+URxvt.keysym.Mod4-D: \033[37~D
+URxvt.keysym.Mod4-E: \033[37~E
+URxvt.keysym.Mod4-F: \033[37~F
+URxvt.keysym.Mod4-G: \033[37~G
+URxvt.keysym.Mod4-H: \033[37~H
+URxvt.keysym.Mod4-I: \033[37~I
+URxvt.keysym.Mod4-J: \033[37~J
+URxvt.keysym.Mod4-K: \033[37~K
+URxvt.keysym.Mod4-L: \033[37~L
+URxvt.keysym.Mod4-M: \033[37~M
+URxvt.keysym.Mod4-N: \033[37~N
+URxvt.keysym.Mod4-O: \033[37~O
+URxvt.keysym.Mod4-P: \033[37~P
+URxvt.keysym.Mod4-Q: \033[37~Q
+URxvt.keysym.Mod4-R: \033[37~R
+URxvt.keysym.Mod4-S: \033[37~S
+URxvt.keysym.Mod4-T: \033[37~T
+URxvt.keysym.Mod4-U: \033[37~U
+URxvt.keysym.Mod4-V: \033[37~V
+URxvt.keysym.Mod4-W: \033[37~W
+URxvt.keysym.Mod4-X: \033[37~X
+URxvt.keysym.Mod4-Y: \033[37~Y
+URxvt.keysym.Mod4-Z: \033[37~Z
+
+URxvt.keysym.Mod4-a: \033[37~a
+URxvt.keysym.Mod4-b: \033[37~b
+URxvt.keysym.Mod4-c: \033[37~c
+URxvt.keysym.Mod4-d: \033[37~d
+URxvt.keysym.Mod4-e: \033[37~e
+URxvt.keysym.Mod4-f: \033[37~f
+URxvt.keysym.Mod4-g: \033[37~g
+URxvt.keysym.Mod4-h: \033[37~h
+URxvt.keysym.Mod4-i: \033[37~i
+URxvt.keysym.Mod4-j: \033[37~j
+URxvt.keysym.Mod4-k: \033[37~k
+URxvt.keysym.Mod4-l: \033[37~l
+URxvt.keysym.Mod4-m: \033[37~m
+URxvt.keysym.Mod4-n: \033[37~n
+URxvt.keysym.Mod4-o: \033[37~o
+URxvt.keysym.Mod4-p: \033[37~p
+URxvt.keysym.Mod4-q: \033[37~q
+URxvt.keysym.Mod4-r: \033[37~r
+URxvt.keysym.Mod4-s: \033[37~s
+URxvt.keysym.Mod4-t: \033[37~t
+URxvt.keysym.Mod4-u: \033[37~u
+URxvt.keysym.Mod4-v: \033[37~v
+URxvt.keysym.Mod4-w: \033[37~w
+URxvt.keysym.Mod4-x: \033[37~x
+URxvt.keysym.Mod4-y: \033[37~y
+URxvt.keysym.Mod4-z: \033[37~z
 
 ! URxvt.keysym.Control-Mod4-A: \033[37~\001
 ! URxvt.keysym.Control-Mod4-B: \033[37~\002
