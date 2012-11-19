@@ -27,7 +27,7 @@ function update_git_branch {
     else
       local HASH="$(git rev-parse HEAD 2>/dev/null)"
     fi
-    GIT_BRANCH="${GIT_BRANCH}(${HASH:0:6})"
+    GIT_BRANCH="${GIT_BRANCH}($(substr "$HASH" 0 6))"
     GIT_BRANCH="$(git_repo_name "$GITROOT"):$GIT_BRANCH"
     
   elif [ -z "$HEAD" ]; then
