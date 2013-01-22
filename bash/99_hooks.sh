@@ -24,6 +24,7 @@ case "$(basename $SHELL)" in
       LASTSTATUS=$?
       shift_in
       set_prompt
+      end_timer # TODO(sdh): record time in history?
       savelasthistory
       google_prompt_command
       drawlinebreak
@@ -33,11 +34,8 @@ case "$(basename $SHELL)" in
       google_cd_hook
     }
     function preexec {
-      # TODO(sdh): possibilities
-      # 1. record command here
-      # 2. set up timer
-      # 3. set up output capture
-      :
+      # TODO(sdh): possibilities - record command here, set up output capture
+      start_timer
     }
     chpwd
     ;;

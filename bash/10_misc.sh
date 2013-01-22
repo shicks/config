@@ -89,7 +89,62 @@ case "$(basename $SHELL)" in
     bindkey '\ew' copy_region
     bindkey '\eW' copy_region
 
+    # Enable automatic timing
+    function start_timer {
+      LAST_START_SECONDS=$SECONDS
+    }
+    function end_timer {
+      if [ -n "$LAST_START_SECONDS" ]; then
+        local diff=$((SECONDS - LAST_START_SECONDS))
+        if [ $diff -gt ${REPORTTIME:-5} ]; then
+          local hours=$((diff / 3600))
+          local mins=$((diff / 60 % 60))
+          local secs=$((diff % 60))
+          hours=${hours#0}
+          mins=${mins#0}
+          time="${hours:+${hours}h}${mins:+${mins}m}${secs}s"
+          echo "$time wallclock"
+        fi
+        LAST_START_SECONDS=
+      fi
+    }
+
+    # TODO(sdh): consider putting all these functions into a
+    # directory on $fpath and version-controlling that dir?
+    # (We could potentially emulate $fpath in bash as well by
+    # calling eval with a function wrapper?)
+
+    # Make word operations work like bash, but with subword mode
     autoload -U select-word-style
     select-word-style Bash
+    # This is a slight change from /usr/share/zsh/functions/Zle,
+    # taken from http://stackoverflow.com/questions/10847255
+    function forward-word-match {
+      emulate -L zsh
+      setopt extendedglob
+      autoload -Uz match-words-by-style
+      local curcontext=":zle:$WIDGET" word
+      local -a matched_words
+      integer count=${NUMERIC:-1}
+      if (( count < 0 )); then
+        (( NUMERIC = -count ))
+        zle ${WIDGET/forward/backward}
+        return
+      fi
+      while (( count-- )); do
+        match-words-by-style
+        if [[ -n $matched_words[4] ]]; then
+          word=$matched_words[4]$matched_words[5]
+        else
+          word=$matched_words[5]
+        fi
+        if [[ -n $word ]]; then
+          (( CURSOR += ${#word} ))
+        else
+          return 1
+        fi
+      done
+      return 0
+    }
     ;;
 esac

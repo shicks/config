@@ -15,6 +15,7 @@
 ;; Language-specific settings
 (require 'sdh-perl)
 (require 'sdh-git)
+(require 'closure-template-html-mode)
   ; TODO(sdh): ledger
 
 ;; Custom configuration settings go in their own file.

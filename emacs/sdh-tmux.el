@@ -17,6 +17,7 @@
 ;(global-set-key (kbd "M-[ 3 5 ~") 'scroll-other-window-down)
 
 (global-set-key (kbd "M-[ 3 6 ~ C-k") 'duplicate-line)
+(global-set-key (kbd "M-[ 3 6 ~ C-t") 'transpose-chars-backwards)
 (global-set-key (kbd "M-[ 3 6 ~ C-M-v") 'scroll-other-window-down)
 (global-set-key (kbd "ESC <up>") 'move-line-or-region-up)
 (global-set-key (kbd "ESC <down>") 'move-line-or-region-down)
