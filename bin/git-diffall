@@ -1,0 +1,140 @@
+#!/usr/bin/perl
+
+# TODO(sdh): make index default, rather than HEAD (iadd already does this...?)
+# TODO(sdh): better confirmation/options for deleting/changing files
+
+
+# TODO(sdh): use `git diff --raw BRANCH` along with `git show HASH`
+# This will eliminate the need for the helper (finally!)
+# And we'll know the full state of everything, including adds
+# in both repos, etc.
+
+use strict;
+use File::Basename qw/dirname/;
+use File::Path qw/mkpath/;
+use File::Temp qw/tempfile tempdir/;
+use Term::ReadKey qw/ReadMode ReadKey/;
+
+sub dircat {
+    my ($a, $b) = @_;
+    return $b if $b =~ m|^/|;
+    return "$a/$b";
+}
+
+my $clobber = 0;
+$ENV{'COPY'} = "cp"; # changed to "ln -s" for clobber
+
+# find the git root and export
+my $root = $ENV{'PWD'};
+while (!-d "$root/.git") {
+    $root = dirname $root;
+    die "cannot find git root" if $root =~ /^.$/;
+}
+$ENV{'ROOT'} = $root;
+
+# export pidfile
+my ($fh, $pidfile) = tempfile();
+print $fh "$$\n";
+close $fh;
+$ENV{'PIDFILE'} = $pidfile;
+
+# make a tempdir for root of symlink tree
+my $dirname = tempdir();
+$ENV{'DIRNAME'} = $dirname;
+mkdir "$dirname/old";
+mkdir "$dirname/new";
+
+# figure out if we're interactive
+my $commit = "HEAD";
+foreach (@ARGV) {
+    if (/^-i$/) {
+        # my @prevs = (); # later we'll store/retrieve w/ jk (?)
+        open LOG, "git log|";
+        my $info = <LOG>;
+        while (<LOG>) {
+            if (/^commit\s+[0-9a-f]{40}/) {
+                print "${info}diff against this commit? [yN]";
+                ReadMode 4;
+                my $answer = ReadKey();
+                ReadMode 0;
+                print "$answer\n";
+                exit if ord($answer) == 3; # ^C
+                print "\n" unless $answer eq "\n";
+                if (lc($answer) eq 'y') {
+                    $info =~ /commit\s+([0-9a-f]{40})/ or die "no commit";
+                    $commit = $1;
+                    last;
+                }
+                $info = $_; # discard previous...
+            } else {
+                $info .= $_;
+            }
+        }
+        close LOG;
+        last
+    } elsif (/^-c$/ or /^--clobber$/) {
+        $clobber = 1;
+        $ENV{'COPY'} = "ln -s";
+    } else {
+        my $parsed = `git rev-parse "$_"`;
+        chomp $parsed;
+        if ($parsed =~ /^[0-9a-f]+$/) {
+            $commit = $parsed; # be smarter?
+        } else {
+            die "bad flag: $_";
+        }
+    }
+}
+
+my %current = ();
+
+# spawn diff children
+$ENV{'GIT_EXTERNAL_DIFF'} = "diffall-helper";
+open FILES, "git diff --name-only $commit -- |";
+while (<FILES>) {
+    chomp $_;
+    my $file = dircat $root, $_;
+    $current{$_} = 1 if -e $file;
+    system "git diff --ext-diff $commit -- $file >/dev/null &";
+}
+close FILES;
+sleep 1;
+
+# run the meld
+system 'meld', "$dirname/old", "$dirname/new";
+
+# Take care of added/deleted files if we said to clobber
+if ($clobber) {
+    # did we add any files?
+    open NEW, "find $dirname/new/ -type f |";
+    while (<NEW>) {
+        chomp $_;
+        my $tmp = $_;
+        s|$dirname/new/|| or die "malformed filename: $_";
+        next if exists $current{$_};
+        my $repo = dircat $root, $_;
+        my $repodir = dirname $repo;
+        unless (-d $repodir) {
+            print "mkdir -p '$repodir'\n";
+            mkpath $repodir;
+        }
+        print "cp '$tmp' '$repo'\n";
+        system "cp '$tmp' '$repo'";
+        print "git add '$repo'\n";
+        system "git add '$repo'";
+    }
+    close NEW;
+
+    # did we delete any files?
+    foreach (keys %current) {
+        my $tmp = dircat "$dirname/new", $_;
+        next if -e $tmp or /READONLY/; # temp fix for readonly
+        my $repo = dircat $root, $_;
+        print "rm -f '$repo'\n";
+        unlink $repo;
+    }
+}
+
+# clean up
+system 'rm', '-rf', $dirname;
+system 'rm', '-f', $pidfile;

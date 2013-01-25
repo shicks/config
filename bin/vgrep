@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+# vertical grep
+# allows specifying a delimiter between records and prints entire
+# matching records.
+
+# Usage: vgrep [delimiter regex] [pattern regex]
+
+my $delim = shift or die "Usage: vgrep [delimiter regex] [pattern regex]";
+my $pattern = shift or die "Usage: vgrep [delimiter regex] [pattern regex]";
+
+my $buf = '';
+my $matched = 0;
+my $lastdelim = '';
+while (<>) {
+  if (/$delim/) {
+    print "$lastdelim$buf" if $matched;
+    $lastdelim = $_ if $matched;
+    $matched = 0;
+    $buf = '';
+  } else {
+    $buf = "$buf$_";
+    $matched = 1 if /$pattern/;
+  }
+}
+print "$lastdelim$buf" if $matched;

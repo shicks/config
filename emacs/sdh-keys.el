@@ -27,6 +27,7 @@
 (global-set-key (kbd "M-<down>") 'move-line-or-region-down)
 (global-set-key (kbd "C-c <tab>") 'indent-region)
 (global-set-key (kbd "S-C-k") 'duplicate-line)
+(global-set-key (kbd "S-C-t") 'transpose-chars-backwards)
 (global-set-key "\C-k" 'kill-line)
 (global-set-key '[?\C-x down] 'bury-buffer)
 (global-set-key (kbd "C-x M-b") 'other-buffer-other-window)
@@ -45,9 +46,10 @@
 
 
 ;; perforce keybindings are a pain, and seem to keep overriding me.
-(defun set-prev-window-key () "" (interactive) (global-set-key "\C-xp" 'prev-window))
+(defun set-prev-window-key () "" (interactive) (global-set-key "\C-xp" 'sdh-prev-window))
 (global-set-key "\C-xp\C-xp" 'set-prev-window-key)
-(global-set-key "\C-xp" 'prev-window)
+(global-set-key "\C-xp" 'sdh-prev-window)
+(global-set-key "\C-xo" 'sdh-other-window)
 
 ;; Obsolete bindings
 ;(global-set-key "\C-CC-Z" '(replace-regexp "<[^<>]*>" "")) ;; For c++ errors

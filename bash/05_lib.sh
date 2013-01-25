@@ -37,3 +37,22 @@ function ensure_function {
     eval "function $1 { :; }"
   fi
 }
+
+case "$(basename $SHELL)" in
+  (bash)
+    function substr {
+      local x=$1
+      local count=$(($3-$2))
+      echo ${x:$2:$count}
+    }
+    ;;
+  (zsh)
+    function substr {
+      local x=$1
+      local start=$(($2+1))
+      local end=$3
+      echo $x[$start,$end]
+    }
+    ;;
+esac
+

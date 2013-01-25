@@ -1,0 +1,168 @@
+#!/usr/bin/perl
+
+# Rebases an entire tree from one spot on the commit tree to another.
+# Usage: git rebase-tree [--onto COMMIT] [--from COMMIT] COMMIT...
+# If --onto is omitted, HEAD is used instead
+# If --from is omitted, the common ancesotor of all the other commits is used
+
+use strict;
+
+my $verbose = 1;
+
+sub usage {
+    print STDERR <<EOF;
+Usage: git rebase-tree [--onto COMMIT] [--from COMMIT] COMMIT...
+EOF
+    exit 1;
+}
+
+sub barf {
+    print STDERR "@_\n";
+    exit 1;
+}
+
+sub debug {
+    print STDERR "$_[0]\n" if $verbose >= $_[1];
+}
+
+sub run {
+    debug "> @_", 1;
+    system "@_";
+}
+
+sub out {
+    debug "> $_[0]", 1;
+    my $result = `$_[0]`;
+    chomp $result;
+    debug "= $result", 2;
+    return $result;
+}
+
+sub get_hash {
+    my $hash = out "git rev-parse $_[0]";
+    barf "Unable to parse commit $_[0]" if $?;
+    return $hash;
+}
+
+sub hash_exists {
+    run "git rev-parse $_[0] > /dev/null 2>&1";
+    return not $?;
+}
+
+sub append {
+    return $_[0] ? "$_[0],$_[1]" : $_[1];
+}
+
+my $from = "";
+my $onto = "HEAD";
+my @branches = ();
+
+# Make sure the working tree is clean
+barf "Cannot rebase with uncommitted changes." if out "git diff HEAD";
+
+# Read args
+while ($_ = shift) {
+    if ($_ eq "--from") {
+        $from = shift;
+    } elsif ($_ eq "--onto") {
+        $onto = shift;
+    } elsif (/^-v/) {
+        $verbose += 1;
+        if (length $_ > 2) {
+            s/-\K.//;
+            redo;
+        }
+    } elsif ($_ eq "-q") {
+        $verbose = 0;
+    } elsif (/^-/) {
+        usage;
+    } else {
+        push @branches, $_;
+    }
+}
+usage unless @branches;
+
+# Make $onto a hash
+$onto = get_hash $onto;
+
+# Make $from a hash, using the merge-base as a default
+# (and making sure it's a unique base).
+$from = out "git merge-base --all --octopus @branches $onto" unless $from;
+barf "Multiple common ancestors found: $from" if $from =~ /\s\S/;
+$from = get_hash $from;
+
+debug "\$from = $from", 1;
+
+# Temporary storage of tags we create.
+
+# Make maps of commit hash -> branch name vice versa
+my %names = ();
+my %branches = ();
+my @scan = ();
+foreach my $branch (@branches) {
+    my $commit = get_hash $branch;
+    $names{$commit} = append $names{$commit}, $branch;
+    $branches{$branch} = $commit;
+    push @scan, $commit;
+}
+
+# Make a map of commit -> parent commit and vice versa
+my %parents = ();
+my %children = ();
+while (my $commit = pop @scan) {
+    debug "Checking $commit", 1;
+    if ($commit ne $from and not exists $parents{$commit}) {
+        my $parent = get_hash "$commit^";
+        $parents{$commit} = $parent;
+        $children{$parent} = append $children{$parent}, $commit;
+        push @scan, $parent unless $parent eq $from;
+        my $name = $names{$commit} || $commit;
+        barf "Commit has multiple parents: $name" if hash_exists "$commit^2";
+    }
+}
+
+# Start rebasing
+my %rebased = ();
+sub rebase {
+    my $base = $_[0];
+    my $target = $_[1];
+    foreach my $commit (split /,/, $children{$base}) {
+        run "git checkout $commit 2> /dev/null";
+        run "git rebase --onto $target $base $commit";
+        if ($? != 0) { # We have a conflict.  Let the user sort it out.
+            my $descr =
+              out "git log --max-count=1 --oneline --color --decorate $commit";
+            for (;;) {
+                print "CONFLICTS rebasing $descr\n";
+                my $response;
+                do {
+                    print "Retry, skip or abort? [rsa] ";
+                    $response = <STDIN>;
+                } while ($response !~ /^[rsa]$/i);
+                if ($response =~ /a/i) {
+                    barf "Aborting";
+                } elsif ($response =~ /s/i) {
+                    return;
+                } else {
+                    run "git rebase --continue";
+                    last unless $?;
+                }
+            }
+        }
+        my $newcommit = get_hash "HEAD";
+        if (exists $names{$commit}) {
+            foreach my $name (split /,/, $names{$commit}) {
+                $rebased{$name} = $newcommit;
+            }
+        }
+        rebase($commit, $newcommit) if exists $children{$base};
+    }
+}
+rebase($from, $onto);
+
+# Now we need to reset all the rebased branches
+foreach my $branch (keys %rebased) {
+    my $target = $rebased{$branch};
+    run "git checkout $branch";
+    run "git reset --hard $target";
+}

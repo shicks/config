@@ -1,0 +1,20 @@
+#! perl
+
+# copies text to the x clipboard
+# printf "\033]777;mycopy;<base64-encoded text>\007"
+# TODO: figure out how to sign/verify
+
+use MIME::Base64;
+
+sub on_osc_seq_perl {
+  my ($self, $osc, $resp) = @_;
+
+  return unless $osc =~ s/^mycopy;//;
+
+  system "echo $osc > ~/mycopy";
+  open XCLIP, "|xclip -i";
+  print XCLIP decode_base64($osc);
+  close XCLIP;
+
+  1
+}

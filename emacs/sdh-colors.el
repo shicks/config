@@ -16,6 +16,8 @@
  '(flymake-errline ((((class color)) (:background "color-52"))))
  '(flymake-warnline ((((class color)) (:background "color-17"))))
 
+ '(cperl-array-face ((((class color)) (:background "color-94" :foreground "yellow" :weight bold))))
+
 ; '(ediff-current-diff-A ((((class color)) (:background "brightwhite" :foreground "firebrick"))))
 ; '(ediff-current-diff-B ((((class color)) (:background "brightwhite" :foreground "dark green"))))
  ;'(ediff-even-diff-A ((((class color)) (:background "plum" :foreground "black"))))
@@ -29,6 +31,14 @@
  '(ediff-odd-diff-A ((((class color)) (:background "plum" :foreground "black"))))
  '(ediff-odd-diff-B ((((class color)) (:background "plum" :foreground "black"))))
 )
+
+;; These are temporary, until we figure out WTF is wrong with the colors!!!
+;(custom-set-faces
+; '(mode-line ((((class color)) (:background "white" :foreground "black"))))
+; '(mode-line-inactive ((((class color)) (:foreground "brightblack" :background "black"))))
+; '(flymake-errline ((((class color)) (:background "red" :foreground "black"))))
+; '(flymake-warnline ((((class color)) (:background "blue" :foreground "white"))))
+;)
 
 ; '(flymake-errline ((((class color)) (:background "brightred" :foreground "brightwhite"))))
 ; '(flymake-warnline ((((class color)) (:background "brightblue" :foreground "brightwhite"))))

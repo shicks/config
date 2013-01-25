@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Runs tap_presubmit in the review client.
+# Exports first.
+
+set -e
+
+projects=''
+while [ $# -gt 0 ]; do
+  projects=$projects,$1
+  shift
+done
+projects=${projects#,}
+
+git5 export
+cd $(git rev-parse --git-dir)/../review/$(git branch | sed -n '/^\* / s/^\* //p')
+cl=$(g4 p | perl -ne 'if (/Change (\d+)/) { print "$1\n"; exit }')
+tap_presubmit --email --detach -p "$projects" -c $cl

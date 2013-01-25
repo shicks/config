@@ -4,14 +4,15 @@
 # Assumes it is being run as `./install <path>`, i.e. from the directory
 # it lives in.
 
+# TODO(sdh): add conditional logic to the patch scripts, so that
+# we can do feature testing rather than whitelist machines.
+
 conf=$(dirname "$0")
 conf=${conf-.}
 cd $conf
 conf=$(pwd -P)
 
-home=${1:-$HOME}
-
-echo "Installing config files from $conf into $home..."
+home=$HOME
 
 function safe_patch {
   source_orig=$1
@@ -48,7 +49,9 @@ function safe_link {
   if [ -z "$target" ]; then
     target=".$1"
   fi
-  target="$home/$target"
+  if [ -n "${target%%/*}" ]; then # relative path
+    target="$home/$target"
+  fi
   source="$conf/$1"
 
   # check for a hostname-specific patch
@@ -68,58 +71,121 @@ function safe_link {
   fi
 }
 
-safe_link Xmodmap
-safe_link Xdefaults
-safe_link tmux.conf
-safe_link bashrc
-safe_link gitconfig
-safe_link gitignore_global
-safe_link gtkrc-2.0
-safe_link aspell.en.pws
-safe_link dot-emacs .emacs
+function install_files {
+  echo "Installing config files from $conf into $home..."
 
-# Link everything in the bash directory
-cd bash
-mkdir -p $home/.bash.d
-for a in *.sh; do
-  safe_link bash/$a .bash.d/$a
-done
+  safe_link Xmodmap
+  safe_link Xdefaults
+  safe_link tmux.conf
+  safe_link bashrc
+  safe_link zshrc
+  safe_link gitconfig
+  safe_link gitignore_global
+  safe_link aspell.en.pws
+  safe_link dot-emacs .emacs
 
-# Unlink everything in the disabled directory
-if [ -d disabled ]; then
-  cd disabled
+  # Link everything in the bash directory
+  cd bash
+  mkdir -p $home/.bash.d
   for a in *.sh; do
-    target="$home/.bash.d/$a"
-    if [ -h $target -a "$(readlink $target)" = "$conf/bash/$a" ]; then
-      rm -f $target
-    elif [ -s "$target" ]; then
-      echo "Refusing to delete non-symlink $target even though disabled."
-    fi
+    safe_link bash/$a .bash.d/$a
   done
+
+  # Unlink everything in the disabled directory
+  if [ -d disabled ]; then
+    cd disabled
+    for a in *.sh; do
+      target="$home/.bash.d/$a"
+      if [ -h $target -a "$(readlink $target)" = "$conf/bash/$a" ]; then
+        rm -f $target
+      elif [ -s "$target" ]; then
+        echo "Refusing to delete non-symlink $target even though disabled."
+      fi
+    done
+    cd ..
+  fi
   cd ..
+
+  # Link everything in the bin directory
+  mkdir -p $home/local/bin
+  for a in bin/*; do
+    safe_link $a local/$a
+  done
+
+  # Make bash completion dir so somebody doesn't complain
+  mkdir -p $home/.bash.d/completion
+
+  # Make sure history dir exists
+  mkdir -p $home/history
+
+  # Install urxvt extensions
+  install_urxvt
+
+  # Link all the emacs files
+  #cd emacs
+  #mkdir -p $home/.emacs.d
+  #for a in *.el; do
+  #  safe_link emacs/$a .emacs.d/$a
+  #done
+}
+
+function install_term {
+  # Install the tmux-256color terminfo config
+  echo "Generating tmux-256color.terminfo..."
+  $conf/gen/tmux
+}
+
+function install_gtk {
+  # Set up chrome/emacs keybindings using the tool instead
+  # NOTE: this only works in we're running locally
+  echo "Configuring gtk keybindings..."
+  safe_link gtkrc-2.0
+  if which gconftool-2 &>/dev/null; then
+    gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs \
+        --type string
+  fi
+  if which gsettings &>/dev/null; then
+    gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
+  fi
+}
+
+function install_urxvt {
+  # Detects URXVT install dir and installs it - called from install_files
+  if ! which urxvt &> /dev/null; then return; fi
+  local urxvt=$(readlink -f $(which urxvt))
+  local perldir=${urxvt%/bin*}/lib/urxvt/perl
+  safe_link urxvt/mycopy-osc ${perldir}/mycopy-osc
+}
+
+function print_usage {
+  cat <<EOF
+Usage: install [home dir] [files|term|gtk|all]...
+Note that the home dir MUST come first if it is given
+Functions:
+  files - symlink all dot-files
+  term  - generate the tmux-256color terminfo
+  gtk   - configure gtk apps to use emacs keybindings
+  all   - all of the above
+EOF
+  exit 1
+}
+
+if [ $# -eq 0 ]; then
+  print_usage
 fi
-cd ..
 
-# Make bash completion dir so somebody doesn't complain
-mkdir -p $home/.bash.d/completion
-
-# Make sure history dir exists
-mkdir -p $home/history
-
-# Link all the emacs files
-#cd emacs
-#mkdir -p $home/.emacs.d
-#for a in *.el; do
-#  safe_link emacs/$a .emacs.d/$a
-#done
-
-# Install the tmux-256color terminfo config
-$conf/gen/tmux
-
-# Set up chrome/emacs keybindings using the tool instead
-if which gconftool-2 &>/dev/null; then
-  gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs --type string
-fi
-if which gsettings &>/dev/null; then
-  gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
-fi
+while [ $# -gt 0 ]; do
+  case "$1" in 
+    (files) install_files ;;
+    (term)  install_term ;;
+    (gtk)   install_gtk ;;
+    (all)   install_files; install_term; install_gtk ;;
+    (*) if [ -f $1 ]; then
+          home=$1
+        else
+          print_usage
+        fi
+        ;;
+  esac
+  shift
+done

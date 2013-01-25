@@ -19,6 +19,8 @@
 
 (setq inhibit-splash-screen t)  ; Never show splash screen
 
+(setq delete-active-region nil) ; don't delete active regions on backspace
+
 ;(setq debugger 'edebug-debug)  ; Use edebug for emacs lisp
 
 (require 'savehist) ;; this was history.el but it led to circular dep
@@ -51,17 +53,26 @@
     (shell-command "xclip -o" 1)
     (forward-char (- (buffer-size) bs))))
 
+;; TODO(sdh): find a prefix we can send for ALL super/C-S- keys in urxvt
+;; We want one that will be minimally intrusive, like F-13 or something
+;; We could also just teach zsh/bash to ignore the prefix and either
+;; just handle the S-k or the C-k... (probably the latter).
+
 (defun copy-to-x ()
   "Copies the current region to the X clipboard via the urxvt mycopy extension."
   (interactive)
   (let* ((text (buffer-substring-no-properties (point) (mark)))
-         (encoded (base64-encode-string text t)))
+         (encoded (base64-encode-string text t))
+         (directive (concat "\C-[]777;mycopy;" encoded "\C-G")))
     ; (shell-command-on-region (point) (mark) "xclip -in"))
-    (message encoded)
+    ; (message encoded)
     ;; non-tmux:
     ; (send-string-to-terminal (concat "\C-[]777;mycopy;" encoded "\C-G"))
     ;; tmux (post update) -> double the \033's and end with \033\\
-    (send-string-to-terminal (concat "\C-[Ptmux;\C-[\C-[]777;mycopy;" encoded "\C-G\C-[\\"))
+    (if (fboundp 'send-string-through-tmux)
+        (send-string-through-tmux directive)
+      (send-string-to-terminal directive))
+    ;;(send-string-to-terminal (concat "\C-[Ptmux;\C-[\C-[]777;mycopy;" encoded "\C-G\C-[\\"))
 ))
 
 ;;;;;;;;;;;;;;;;
@@ -218,6 +229,13 @@
 
 
 ;;;;;;;;;;;;;;;;
+;; Editing functions
+
+(defun transpose-chars-backwards (arg)
+  (interactive "p")
+  (transpose-chars (- arg)))
+
+;;;;;;;;;;;;;;;;
 ;; Window management
 
 (defun swap-windows (win)
@@ -257,6 +275,29 @@
   (interactive "p")
   (other-window (- win)))
 
+;; For use in slightly-cramped screens
+;; We could consider making the size variable, depending on file type?
+(defun enlarge-window-to-100 ()
+  "Enlarges the given window to 100 columns under certain circumstances."
+  (interactive)
+  (if (and (not (one-window-p))
+           (< (frame-width) 203)
+           (> (frame-width) 163)
+           (< (window-width) 101))
+      (enlarge-window-horizontally (- 101 (window-width)))))
+
+(defun sdh-other-window (win)
+  "Move to next window and maybe enlarge it"
+  (interactive "p")
+  (other-window win)
+  (enlarge-window-to-100))
+
+(defun sdh-prev-window (win)
+  "Move to prev window and maybe enlarge it"
+  (interactive "p")
+  (prev-window win)
+  (enlarge-window-to-100))
+
 ;; Many functions replace the buffer in the current window when
 ;; we'd rather them open in a new window.  This function moves
 ;; the current buffer to the other window and then opens the
@@ -265,7 +306,7 @@
   "Moves this buffer to other window and other buffer in this window."
   (interactive)
   (switch-to-buffer (other-buffer))
-  (other-window 1)
+  (sdh-other-window 1)
   (switch-to-buffer (other-buffer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
