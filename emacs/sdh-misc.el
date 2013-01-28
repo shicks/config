@@ -19,6 +19,8 @@
 
 (setq inhibit-splash-screen t)  ; Never show splash screen
 
+(setq delete-active-region nil) ; don't delete active regions on backspace
+
 ;(setq debugger 'edebug-debug)  ; Use edebug for emacs lisp
 
 (require 'savehist) ;; this was history.el but it led to circular dep
@@ -227,6 +229,13 @@
 
 
 ;;;;;;;;;;;;;;;;
+;; Editing functions
+
+(defun transpose-chars-backwards (arg)
+  (interactive "p")
+  (transpose-chars (- arg)))
+
+;;;;;;;;;;;;;;;;
 ;; Window management
 
 (defun swap-windows (win)
@@ -266,6 +275,29 @@
   (interactive "p")
   (other-window (- win)))
 
+;; For use in slightly-cramped screens
+;; We could consider making the size variable, depending on file type?
+(defun enlarge-window-to-100 ()
+  "Enlarges the given window to 100 columns under certain circumstances."
+  (interactive)
+  (if (and (not (one-window-p))
+           (< (frame-width) 203)
+           (> (frame-width) 163)
+           (< (window-width) 101))
+      (enlarge-window-horizontally (- 101 (window-width)))))
+
+(defun sdh-other-window (win)
+  "Move to next window and maybe enlarge it"
+  (interactive "p")
+  (other-window win)
+  (enlarge-window-to-100))
+
+(defun sdh-prev-window (win)
+  "Move to prev window and maybe enlarge it"
+  (interactive "p")
+  (prev-window win)
+  (enlarge-window-to-100))
+
 ;; Many functions replace the buffer in the current window when
 ;; we'd rather them open in a new window.  This function moves
 ;; the current buffer to the other window and then opens the
@@ -274,7 +306,7 @@
   "Moves this buffer to other window and other buffer in this window."
   (interactive)
   (switch-to-buffer (other-buffer))
-  (other-window 1)
+  (sdh-other-window 1)
   (switch-to-buffer (other-buffer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

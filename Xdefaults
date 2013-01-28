@@ -40,8 +40,7 @@ URxvt.font: xft:Monospace:pixelsize=13
 URxvt.letterSpace: -1
 
 !,tabbedex
-!,set-option-osc
-URxvt.perl-ext-common : default,matcher,mycopy-osc
+URxvt.perl-ext-common : default,matcher,mycopy-osc,set-option-osc
 URxvt.urlLauncher     : google-chrome --user-data-dir=/usr/local/google/chrome/corp
 URxvt.matcher.button  : 1
 
@@ -51,7 +50,7 @@ URxvt.secondaryScreen : false
 ! TODO(sdh): consider using this (or temporary toggling via plugin, if that works)
 !            once we figure out how to make tmux understand S-PPage and S-NPage
 !            and do the right thing with the history there...
-! URxvt.saveLines : 0
+URxvt.saveLines : 0
 
 URxvt.depth: 32
 URxvt.background: rgba:0000/0000/0000/f800

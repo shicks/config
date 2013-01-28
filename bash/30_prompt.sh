@@ -6,8 +6,8 @@ function ps1_dollar {
 function ps1_time {
   local timecolor
   case "$(hostname -s)" in
-    (baley) timecolor=cyan ;;
-    (visitor-1600-2q5c) timecolor=magenta ;;
+    (baley|daneel) timecolor=cyan ;;
+    (sdh-glaptop) timecolor=magenta ;;
     (*) timecolor=red ;;
   esac
   echo " $(color -p $timecolor)[$(date +"%a %H:%M")]$(color -p off)"
