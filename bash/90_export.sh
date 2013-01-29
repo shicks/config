@@ -1,7 +1,10 @@
 ## Various exports
 
 ### TODO - emacsclient?  switch on TERM?
-export EDITOR=quickemacs
+case "$HOSTNAME" in
+  baley) export EDITOR=quickemacs ;;
+  *) export EDITOR='emacs -q' ;;
+esac
 
 export PATH=$HOME/local/bin:$PATH
 
