@@ -39,3 +39,7 @@ make && make install
 cd ~/local/opt
 ln -s urxvt-$URXVT urxvt
 ln -s ../opt/urxvt/bin/urxvt bin/urxvt
+
+# Change the config git origin to be writable
+sed -i 's|git://github.com/shicks/config|git@github.com:shicks/config.git|' \
+    ~/config/.git/config
