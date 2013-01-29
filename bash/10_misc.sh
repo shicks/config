@@ -29,6 +29,8 @@ case "$(basename $SHELL)" in
     HISTSIZE=1000
     SAVEHIST=1000
     setopt SH_WORD_SPLIT
+    setopt no_nomatch
+    setopt interactivecomments
     bindkey -e
     # End of lines configured by zsh-newuser-install
     # The following lines were added by compinstall
