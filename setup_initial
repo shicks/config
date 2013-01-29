@@ -1,0 +1,41 @@
+#!/bin/sh
+
+TMUX=1.7-sdh
+URXVT=9.16
+
+sudo aptitude install g++ xclip install autoconf automake
+sudo aptitude build-dep tmux rxvt-unicode
+
+# Generate ssh keys and paste into github
+if [ ! -e ~/.ssh/id_rsa.pub ]; then
+  cd ~/.ssh
+  echo -e "\n\n\n\n\n" | ssh-keygen -t rsa -C stephenhicks@gmail.com
+  xclip -sel clip < id_rsa.pub
+fi
+echo "Please paste the clipboard into the browser and press enter."
+google-chrome https://github.com/settings/ssh &
+
+# Fetch git repos for tmux and download rxvt-unicode
+mkdir -p ~/Downloads/src
+cd ~/Downloads/src
+git clone git@github.com:shicks/tmux.git
+cd tmux
+git pull origin $TMUX
+git checkout $TMUX 
+./autogen.sh
+./configure --prefix=$HOME/local/opt/tmux-$TMUX
+make && make install
+mkdir -p ~/local/bin
+cd ~/local/opt
+ln -s tmux-$TMUX tmux
+ln -s ../opt/tmux/bin/tmux bin/tmux
+
+cd ~/Downloads/src
+wget http://dist.schmorp.de/rxvt-unicode/rxvt-unicode-$URXVT.tar.bz2
+tar jxvf rxvt-unicode-$URXVT.tar.bz2
+cd rxvt-unicode-$URXVT
+./configure --prefix=$HOME/local/opt/urxvt-$URXVT --enable-256-color --enable-xft --enable-font-styles --enable-transparency --enable-fading --enable-mousewheel --enable-selectionscrolling --enable-keepscrolling
+make && make install
+cd ~/local/opt
+ln -s urxvt-$URXVT urxvt
+ln -s ../opt/urxvt/bin/urxvt bin/urxvt

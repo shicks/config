@@ -137,15 +137,33 @@ function install_term {
 
 function install_gtk {
   # Set up chrome/emacs keybindings using the tool instead
+  # Also set up focus follows mouse and window buttons
   # NOTE: this only works in we're running locally
   echo "Configuring gtk keybindings..."
   safe_link gtkrc-2.0
-  if which gconftool-2 &>/dev/null; then
-    gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs \
-        --type string
-  fi
   if which gsettings &>/dev/null; then
     gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
+    gsettings set org.gnome.desktop.wm.preferences focus-mode sloppy
+    gsettings set org.gnome.desktop.wm.preferences auto-raise false
+    gsettings set org.gnome.desktop.wm.preferences button-layout \
+        'menu:minimize,maximize,close'
+    gsettings set org.gnome.desktop.wm.preferences \
+        action-double-click-titlebar 'toggle-shade'
+    gsettings set org.gnome.desktop.wm.preferences \
+        resize-with-right-button true
+  elif which gconftool-2 &>/dev/null; then
+    gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs \
+        --type string
+    gconftool-2 --set /apps/metacity/general/focus_mode sloppy \
+        --type string
+    gconftool-2 --set /apps/metacity/general/auto-raise false \
+        --type bool
+    gconftool-2 --set /apps/metacity/general/button_layout \
+        'menu:minimize,maximize,close' --type string
+    gconftool-2 --set /apps/metacity/general/action_double_click_titlebar \
+        'toggle_shade' --type string
+    gconftool-2 --set /apps/metacity/general/resize_with_right_button \
+        true --type bool
   fi
 }
 
