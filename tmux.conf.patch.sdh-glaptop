@@ -4,3 +4,5 @@
 /mouse-select-window/d
 /C-S-PPage/d
 /C-S-NPage/d
+
+/status-bg/ s/green/"#aa99ff"/
