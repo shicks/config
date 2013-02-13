@@ -25,7 +25,7 @@ case "$(basename $SHELL)" in
       shift_in
       set_prompt
       end_timer # TODO(sdh): record time in history?
-      savelasthistory
+      savelasthistory # TODO(sdh): move this to preexec?
       google_prompt_command
       drawlinebreak
     }

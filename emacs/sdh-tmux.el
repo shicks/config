@@ -30,9 +30,10 @@
 
 (defun send-string-through-tmux (string)
   "Escape a string so that tmux ignores it"
-  (send-string-to-terminal (concat
-                            "\C-[Ptmux;"
-                            (replace-regexp-in-string "\C-[" "\C-[\C-[" string)
-                            "\C-[\\")))
+  (let ((directive (concat "\033Ptmux;"
+                           (replace-regexp-in-string "\033" "\033\033" string)
+                           "\033\\")))
+    ;;(message directive)
+    (send-string-to-terminal directive)))
 
 (provide 'sdh-tmux)

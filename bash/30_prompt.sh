@@ -46,10 +46,12 @@ function ps1_status {
 }
 
 ensure_function ps1_google
+ensure_function update_branch_google
 
 ## This is where the prompt actually gets set.
 function set_prompt {
   update_git_branch #update_branch_after_checkout
+  update_branch_google
   local FRONT
   local DIR=$(ps1_dir)
   ## TODO(sdh): add a prodaccess check - red "LOAS" when missing

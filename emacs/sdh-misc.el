@@ -63,7 +63,7 @@
   (interactive)
   (let* ((text (buffer-substring-no-properties (point) (mark)))
          (encoded (base64-encode-string text t))
-         (directive (concat "\C-[]777;mycopy;" encoded "\C-G")))
+         (directive (concat "\033]777;mycopy;" encoded "\007")))
     ; (shell-command-on-region (point) (mark) "xclip -in"))
     ; (message encoded)
     ;; non-tmux:
@@ -229,6 +229,29 @@
 
 
 ;;;;;;;;;;;;;;;;
+;; Line numbers
+
+(defun add-line-numbers-to-region (start end)
+  (interactive "r")
+  (let* ((lines (count-lines start end))
+         (fmt (if (< lines 100) " %02d " " %03d ")))
+    (add-line-numbers-with-format start lines fmt)))
+
+(defun add-line-numbers-to-region-with-pattern (start end fmt)
+  (interactive (let ((string (read-string
+                              "Format string ( %02d ): " nil nil " %02d ")))
+                 (list (region-beginning) (region-end) string)))
+  (add-line-numbers-with-format start (count-lines start end) fmt))
+
+(defun add-line-numbers-with-format (start lines fmt)
+  (save-excursion
+    (goto-char start)
+    (beginning-of-line)
+    (dotimes (line lines)
+      (insert (format fmt (+ 1 line)))
+      (goto-char (point-at-bol 2)))))
+
+;;;;;;;;;;;;;;;;
 ;; Editing functions
 
 (defun transpose-chars-backwards (arg)
@@ -308,6 +331,15 @@
   (switch-to-buffer (other-buffer))
   (sdh-other-window 1)
   (switch-to-buffer (other-buffer)))
+
+;; exchange-point-and-mark has weird behavior in transient-mark-mode.  This
+;; simply reverses the effect of the prefix argument under certain situations.
+(defun sdh-exchange-point-and-mark (arg)
+  "Exchange point and mark.  Same as `exchange-point-and-mark', but we invert
+the prefix argument in transient mark mode (unless the mark is active)."
+  (interactive "P")
+  (exchange-point-and-mark
+   (if (and transient-mark-mode (not mark-active)) (not arg) arg)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
