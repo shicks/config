@@ -31,6 +31,7 @@ case "$(basename $SHELL)" in
     setopt SH_WORD_SPLIT
     setopt no_nomatch
     setopt interactivecomments
+    setopt autopushd
     bindkey -e
     # End of lines configured by zsh-newuser-install
     # The following lines were added by compinstall
@@ -54,8 +55,10 @@ case "$(basename $SHELL)" in
     # Unbind ^[[33~ since we use it as a prefix shift.
     function noop { :; }
     zle -N noop
-    bindkey '\e[36~' noop
+    bindkey '\e[36~' noop # Custom prefix for C-S and super
     bindkey '\e[37~' noop
+    bindkey '\e[5~' noop # Page up and Page down
+    bindkey '\e[6~' noop
 
     zle_highlight=(region:"bg=87,fg=black" special:standout
         suffix:bold isearch:underline)
@@ -148,5 +151,43 @@ case "$(basename $SHELL)" in
       done
       return 0
     }
+
+
+    ################################################################
+    # This should go in 50_dirs but it doesn't work...?
+
+    function lsd {
+      popd -l | perl -ne '
+        my $i = 0;
+        my $prev = "";
+        while (s/(\S+) ?//) {
+          next if $1 eq $prev;
+          printf "%3d   %s\n", $i, $1 if $i;
+          $i++; $prev = $1;
+          last if $i == 30;
+        }'
+    }
+
+    function cd {
+      if [ "$1" == "-l" ]; then
+        lsd
+        return
+      elif [ "${1#-}" != "$1" ]; then
+        dir=${1#-}
+        dir="$(lsd | perl -ne '
+          while (<>) {
+            if (/^\s*'"$dir"'\s+(.*)/) {
+              print $1;
+              exit;
+            }
+          }
+          print STDERR "No dir found for '"$dir"'.";')"
+        echo "cd $dir"
+        builtin cd "$(echo $dir | perl -pe 's+~(/|$)+$ENV{'HOME'}$1+g')"
+      else
+        builtin cd "$@"
+      fi
+    }
+
     ;;
 esac
