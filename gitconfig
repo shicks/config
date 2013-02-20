@@ -17,5 +17,3 @@
 
 [core]
   excludesfile = /home/sdh/.gitignore_global
-[push]
-	default = simple

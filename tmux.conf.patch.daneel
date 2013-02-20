@@ -1,0 +1,3 @@
+#!/bin/sed -f
+
+/status-bg/ s/green/"#ddcc44"/
