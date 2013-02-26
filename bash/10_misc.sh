@@ -109,6 +109,9 @@ case "$(basename $SHELL)" in
           mins=${mins#0}
           time="${hours:+${hours}h}${mins:+${mins}m}${secs}s"
           echo "$time wallclock"
+          case $TERM in # only send BEL if we're in tmux
+            (tmux*) echo -e '\007' ;;
+          esac
         fi
         LAST_START_SECONDS=
       fi
@@ -172,7 +175,7 @@ case "$(basename $SHELL)" in
       if [ "$1" == "-l" ]; then
         lsd
         return
-      elif [ "${1#-}" != "$1" ]; then
+      elif [ "${1#-?}" != "$1" ]; then
         dir=${1#-}
         dir="$(lsd | perl -ne '
           while (<>) {
