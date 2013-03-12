@@ -24,7 +24,18 @@ case "$(basename $SHELL)" in
     ;;
 
   (zsh)
+    # NOTE: for some reason, zsh on quantal (5.0.0, rather than 4.2) is sending
+    # smkx (set cursor mode: ESC [ ? 1 h ESC =) right before accepting user input,
+    # and urxvt seems to be interpreting this as a reason to swap left/right and
+    # ctrl-left/right.  The following line is from Etc/FAQ in zsh's sources, and
+    # basically tells zsh to leave us in Application mode all the time, rather
+    # than switching to keypad mode.  I don't fully understand why this is needed
+    # or what it's all about, and it generally seems wrong.
+    function zle-line-init() { echoti rmkx; }
+    zle -N zle-line-init
+
     # Configuration copied from zsh-newuser-install
+
     HISTFILE=~/.histfile
     HISTSIZE=1000
     SAVEHIST=1000
