@@ -41,6 +41,8 @@ case "$(basename $SHELL)" in
     compinit
     # End of lines added by compinstall
 
+    zstyle ':completion:*' completer _complete _ignored _files
+
     #####
     # TODO(sdh) subword-forward and subword-backward???
 
