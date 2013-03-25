@@ -66,12 +66,14 @@ function safe_link {
   fi
 
   # Now see if it's a dir, in which case we make a symlink tree
+  # TODO(sdh): should probably just flatten with `find`.
   if [ -d "$source" ]; then
     if [ -e "$target" -a ! -d "$target" ]; then
       echo "Cannot symlink tree $source -> $target: file exists." >&2
     fi
     mkdir -p $target
     for a in $(ls -a $source); do
+      if [ "$a" = . -o "$a" = .. -o -h "$source/$a" ]; then continue; fi
       safe_link $1/$a ${2:-.$1}/$a
     done
     return
