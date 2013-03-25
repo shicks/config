@@ -43,33 +43,47 @@ EOF
   fi
 }
 
+
 function safe_link {
-  # figure out filenames
-  target=$2
+  # First set parameters/defaults
+  local target=$2
   if [ -z "$target" ]; then
     target=".$1"
   fi
-  if [ -n "${target%%/*}" ]; then # relative path
+  if [ -n "${target%%/*}" ]; then # allow absolute paths
     target="$home/$target"
   fi
-  source="$conf/$1"
+  local source="$conf/$1"
 
-  # check for a hostname-specific patch
+  # Now see if it's a dir, in which case we make a symlink tree
+  if [ -d "$source" ]; then
+    if [ -e "$target" -a ! -d "$target" ]; then
+      echo "Cannot symlink tree $source -> $target: file exists." >&2
+    fi
+    mkdir -p $target
+    for a in $source/*; do
+      safe_link $source/$a $target/$a
+    done
+    return
+  fi
+
+  # Check for a hostname-specific patch
   if [ -e $source.patch.$(hostname -s) ]; then
     safe_patch $source $source.patch.$(hostname -s) $target
     return
   fi
 
-  # make the link
+  # Otherwise do some safety checks and make the link
   if [ -h "$target" -a "$(readlink $target)" = "$source" ]; then
     # it's already there
     :
-  elif [ -s "$target" ]; then
-    echo "Cannot symlink "$source" -> "$target": file exists." >&2
+  elif [ -s "$target" -o -d "$target" ]; then
+    echo "Cannot symlink $source -> $target: file exists." >&2
   else
     ln -s "$source" "$target"
   fi
 }
+
 
 function install_files {
   echo "Installing config files from $conf into $home..."
@@ -127,6 +141,13 @@ function install_files {
   #for a in *.el; do
   #  safe_link emacs/$a .emacs.d/$a
   #done
+
+  # Install .gitconfig.d
+  cd git
+  mkdir -p $home/.gitconfig.d
+  for a in *; do
+    safe_link $a .gitconfig.d/$a
+  done
 }
 
 function install_term {
