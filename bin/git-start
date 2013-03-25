@@ -1,0 +1,5 @@
+#!/bin/sh
+# Makes a new repository with a single empty commit.
+
+git init
+git commit --allow-empty -m "Empty initial commit"
