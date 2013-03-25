@@ -7,6 +7,7 @@
 # TODO(sdh): add conditional logic to the patch scripts, so that
 # we can do feature testing rather than whitelist machines.
 
+verbose=false
 conf=$(dirname "$0")
 conf=${conf-.}
 cd $conf
@@ -14,7 +15,12 @@ conf=$(pwd -P)
 
 home=$HOME
 
+function whisper {
+  if $verbose; then echo "$@"; fi
+}
+
 function safe_patch {
+  whisper SAFE_PATCH "$@"
   source_orig=$1
   patch=$2
   target=$3
@@ -46,14 +52,16 @@ EOF
 
 function safe_link {
   # First set parameters/defaults
-  local target=$2
-  if [ -z "$target" ]; then
-    target=".$1"
-  fi
+  whisper SAFE_LINK "$@"
+  local target=${2:-.$1}
   if [ -n "${target%%/*}" ]; then # allow absolute paths
     target="$home/$target"
   fi
   local source="$conf/$1"
+  if [ ! -e "$source" ]; then
+    echo "ERROR: $source does not exist" >&2
+    return
+  fi
 
   # Now see if it's a dir, in which case we make a symlink tree
   if [ -d "$source" ]; then
@@ -61,8 +69,8 @@ function safe_link {
       echo "Cannot symlink tree $source -> $target: file exists." >&2
     fi
     mkdir -p $target
-    for a in $source/*; do
-      safe_link $source/$a $target/$a
+    for a in $(ls -a $source); do
+      safe_link $1/$a ${2:-.$1}/$a
     done
     return
   fi
@@ -77,6 +85,10 @@ function safe_link {
   if [ -h "$target" -a "$(readlink $target)" = "$source" ]; then
     # it's already there
     :
+  elif [ -s "$target" ] && diff -q "$source" "$target" &> /dev/null; then
+    # identical file: remove and symlink
+    rm "$target"
+    ln -s "$source" "$target"
   elif [ -s "$target" -o -d "$target" ]; then
     echo "Cannot symlink $source -> $target: file exists." >&2
   else
@@ -143,11 +155,15 @@ function install_files {
   #done
 
   # Install .gitconfig.d
-  cd git
-  mkdir -p $home/.gitconfig.d
-  for a in *; do
-    safe_link $a .gitconfig.d/$a
-  done
+  mkdir -p $home/.gitconfig.d/templates
+  if [ -e /usr/share/git-core/templates ]; then
+    cp -nr /usr/share/git-core/templates/* $home/.gitconfig.d/templates
+  fi
+  if [ -e git ]; then # this is safe to remove if we ever add a git/ dir
+    for a in git/*; do
+      safe_link $a .gitconfig.d/${a#git/}
+    done
+  fi
 }
 
 function install_term {
