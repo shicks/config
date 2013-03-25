@@ -7,6 +7,8 @@
 # TODO(sdh): add conditional logic to the patch scripts, so that
 # we can do feature testing rather than whitelist machines.
 
+# TODO(sdh): support a NOCOMMENT directive in patches
+
 verbose=false
 conf=$(dirname "$0")
 conf=${conf-.}
