@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 TMUX=1.7-sdh
 URXVT=9.16
 
@@ -43,3 +45,12 @@ ln -s ../opt/urxvt/bin/urxvt bin/urxvt
 # Change the config git origin to be writable
 sed -i 's|git://github.com/shicks/config|git@github.com:shicks/config.git|' \
     ~/config/.git/config
+
+# Change the default terminal
+gconftool --type string --set /desktop/gnome/applications/terminal/exec $HOME/local/bin/urxvt
+
+# Also need to fix
+#  - uninstall global app menu
+#  - use ccsm to disable unity app switcher, enable standard app switcher
+#  - use ubuntu2d because 3d app switcher brings down laptop
+# what else...?
