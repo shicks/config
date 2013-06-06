@@ -341,6 +341,30 @@ the prefix argument in transient mark mode (unless the mark is active)."
   (exchange-point-and-mark
    (if (and transient-mark-mode (not mark-active)) (not arg) arg)))
 
+;;;;;;;;;;;;;;;;
+;; Backup files
+
+(setq backup-directory-alist `(("." . "~/.emacs_backups")))
+(setq delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+
+(defun sdh-delete-old-backup-files ()
+  "Deletes old backup files."
+  (interactive)
+  (message "Deleting old backup files...")
+  (let ((week (* 60 60 24 7))
+        (current (float-time (current-time))))
+    (dolist (file (directory-files "~/.emacs_backups" t))
+      (when (and (backup-file-name-p file)
+                 (> (- current (float-time (fifth (file-attributes file))))
+                    week))
+        (message "%s" file)
+        (delete-file file))))
+)
+(sdh-delete-old-backup-files)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide 'sdh-misc)
