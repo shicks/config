@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then
+  echo 'Usage: git children COMMIT-LIKE' >&2
+  exit 1
+fi  
+
+ref=$(git rev-parse $1)
+space=''
+for b in $(git branch | sed s/^..//); do
+  if [ "$(git merge-base "$b" "$ref")" = "$ref" -a \
+       "$(git rev-parse "$b")" != "$ref" ]; then
+    echo -n "$space$b"
+    space=' '
+  fi
+done
+
+if [ -n "$space" ]; then
+  echo
+fi
