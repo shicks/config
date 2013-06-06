@@ -1,9 +1,12 @@
 
+mkdir -p $HOME/.sh
+
 function ps1_dollar {
   case "$UID" in (0) echo '#' ;; (*) echo '$' ;; esac
 }
 
 function ps1_time {
+  touch -d "now + 5 minutes" $HOME/.sh/$$.ps1time
   local timecolor
   case "$(hostname -s)" in
     (baley|daneel) timecolor=cyan ;;
@@ -11,6 +14,13 @@ function ps1_time {
     (*) timecolor=red ;;
   esac
   echo " $(color -p $timecolor)[$(date +"%a %H:%M")]$(color -p off)"
+}
+
+function show_exec_time {
+  touch $HOME/.sh/now
+  if [ $HOME/.sh/now -nt $HOME/.sh/$$.ps1time ]; then
+    echo "Execution began at $(date +"%a %H:%M")"
+  fi
 }
 
 function unset_time {
