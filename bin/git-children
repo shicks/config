@@ -7,9 +7,9 @@ fi
 
 ref=$(git rev-parse $1)
 space=''
-for b in $(git branch | sed s/^..//); do
-  if [ "$(git merge-base "$b" "$ref")" = "$ref" -a \
-       "$(git rev-parse "$b")" != "$ref" ]; then
+for b in $(git branch | grep -v 'detached from HEAD' | sed s/^..//); do
+  if [ "$(git rev-parse "$b")" = "$ref" ]; then continue; fi
+  if [ "$(git merge-base "$b" "$ref")" = "$ref" ]; then
     echo -n "$space$b"
     space=' '
   fi
