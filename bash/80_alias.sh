@@ -30,3 +30,5 @@ alias got=git
 
 alias ::='EDITOR=: P4EDITOR=: '
 alias :c='PAGER=cat '
+
+alias unletterbox="mplayer -vf crop=704:352:8:64"
