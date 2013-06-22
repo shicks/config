@@ -7,6 +7,9 @@
 # TODO(sdh): add conditional logic to the patch scripts, so that
 # we can do feature testing rather than whitelist machines.
 
+# TODO(sdh): support a NOCOMMENT directive in patches
+
+verbose=false
 conf=$(dirname "$0")
 conf=${conf-.}
 cd $conf
@@ -14,7 +17,12 @@ conf=$(pwd -P)
 
 home=$HOME
 
+function whisper {
+  if $verbose; then echo "$@"; fi
+}
+
 function safe_patch {
+  whisper SAFE_PATCH "$@"
   source_orig=$1
   patch=$2
   target=$3
@@ -43,33 +51,55 @@ EOF
   fi
 }
 
+
 function safe_link {
-  # figure out filenames
-  target=$2
-  if [ -z "$target" ]; then
-    target=".$1"
-  fi
-  if [ -n "${target%%/*}" ]; then # relative path
+  # First set parameters/defaults
+  whisper SAFE_LINK "$@"
+  local target=${2:-.$1}
+  if [ -n "${target%%/*}" ]; then # allow absolute paths
     target="$home/$target"
   fi
-  source="$conf/$1"
+  local source="$conf/$1"
+  if [ ! -e "$source" ]; then
+    echo "ERROR: $source does not exist" >&2
+    return
+  fi
 
-  # check for a hostname-specific patch
+  # Now see if it's a dir, in which case we make a symlink tree
+  # TODO(sdh): should probably just flatten with `find`.
+  if [ -d "$source" ]; then
+    if [ -e "$target" -a ! -d "$target" ]; then
+      echo "Cannot symlink tree $source -> $target: file exists." >&2
+    fi
+    mkdir -p $target
+    for a in $(ls -a $source); do
+      if [ "$a" = . -o "$a" = .. -o -h "$source/$a" ]; then continue; fi
+      safe_link $1/$a ${2:-.$1}/$a
+    done
+    return
+  fi
+
+  # Check for a hostname-specific patch
   if [ -e $source.patch.$(hostname -s) ]; then
     safe_patch $source $source.patch.$(hostname -s) $target
     return
   fi
 
-  # make the link
+  # Otherwise do some safety checks and make the link
   if [ -h "$target" -a "$(readlink $target)" = "$source" ]; then
     # it's already there
     :
-  elif [ -s "$target" ]; then
-    echo "Cannot symlink "$source" -> "$target": file exists." >&2
+  elif [ -s "$target" ] && diff -q "$source" "$target" &> /dev/null; then
+    # identical file: remove and symlink
+    rm "$target"
+    ln -s "$source" "$target"
+  elif [ -s "$target" -o -d "$target" ]; then
+    echo "Cannot symlink $source -> $target: file exists." >&2
   else
     ln -s "$source" "$target"
   fi
 }
+
 
 function install_files {
   echo "Installing config files from $conf into $home..."
@@ -127,6 +157,17 @@ function install_files {
   #for a in *.el; do
   #  safe_link emacs/$a .emacs.d/$a
   #done
+
+  # Install .gitconfig.d
+  mkdir -p $home/.gitconfig.d/templates
+  if [ -e /usr/share/git-core/templates ]; then
+    cp -nr /usr/share/git-core/templates/* $home/.gitconfig.d/templates
+  fi
+  if [ -e git ]; then # this is safe to remove if we ever add a git/ dir
+    for a in git/*; do
+      safe_link $a .gitconfig.d/${a#git/}
+    done
+  fi
 }
 
 function install_term {

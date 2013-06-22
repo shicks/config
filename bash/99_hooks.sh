@@ -35,6 +35,7 @@ case "$(basename $SHELL)" in
     }
     function preexec {
       # TODO(sdh): possibilities - record command here, set up output capture
+      show_exec_time
       case $TERM in
         (tmux*) set_title_term "..." ;;
       esac

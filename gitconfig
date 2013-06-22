@@ -17,3 +17,6 @@
 
 [core]
   excludesfile = /home/sdh/.gitignore_global
+
+[init]
+  templatedir = ~/.gitconfig.d/templates

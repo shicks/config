@@ -39,6 +39,7 @@ case "$(basename $SHELL)" in
     HISTFILE=~/.histfile
     HISTSIZE=1000
     SAVEHIST=1000
+    setopt hist_ignore_dups
     setopt SH_WORD_SPLIT
     setopt no_nomatch
     setopt interactivecomments
