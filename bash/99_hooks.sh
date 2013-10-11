@@ -37,7 +37,19 @@ case "$(basename $SHELL)" in
       # TODO(sdh): possibilities - record command here, set up output capture
       show_exec_time
       case $TERM in
-        (tmux*) set_title_term "..." ;;
+        (tmux*)
+          local cmd="$1"
+          cmd=${cmd/git /git-}
+          cmd=${cmd%% *}
+          cmd=${cmd##*/}
+          # TODO(sdh): record ports, working dirs, etc?
+          if [ -z "${cmd%%emacs*}" ]; then
+            cmd=+
+          elif [ "${#cmd}" -gt 10 ]; then
+            cmd=...
+          fi
+          set_title_term "[$cmd]"
+          ;;
       esac
       start_timer
     }

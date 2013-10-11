@@ -52,6 +52,7 @@ function ps1_host {
 function ps1_status {
   if [ "$LASTSTATUS" -ne 0 ]; then
     echo " $(color -p red):-($LASTSTATUS$(color -p off)"
+    # echo -ne '\a' # beep
   fi
 }
 

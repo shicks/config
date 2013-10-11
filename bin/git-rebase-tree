@@ -8,6 +8,7 @@
 use strict;
 
 my $verbose = 1;
+my $hooks = 1;
 
 sub usage {
     print STDERR <<EOF;
@@ -56,6 +57,8 @@ sub append {
 my $from = "";
 my $onto = "HEAD";
 my @branches = ();
+my $gitdir = `git rev-parse --show-toplevel`;
+chomp $gitdir; $gitdir = "$gitdir/.git";
 
 # Make sure the working tree is clean
 barf "Cannot rebase with uncommitted changes." if out "git diff HEAD";
@@ -74,6 +77,8 @@ while ($_ = shift) {
         }
     } elsif ($_ eq "-q") {
         $verbose = 0;
+    } elsif ($_ eq "--nohooks") {
+        $hooks = 0;
     } elsif (/^-/) {
         usage;
     } else {
@@ -165,4 +170,11 @@ foreach my $branch (keys %rebased) {
     my $target = $rebased{$branch};
     run "git checkout $branch";
     run "git reset --hard $target";
+    if ($hooks) {
+        my $hook = "$gitdir/hooks/post-rebase-tree";
+        run "$hook $branch" if -e $hook;
+    }
 }
+
+# Finally check out the last branch
+run "git checkout $branches[$#branches]";
