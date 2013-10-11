@@ -2,7 +2,7 @@
 
 ### TODO - emacsclient?  switch on TERM?
 case "$(hostname -s)" in
-  baley) export EDITOR=quickemacs ;;
+  dors) export EDITOR=quickemacs ;;
   *) export EDITOR='emacs -q' ;;
 esac
 

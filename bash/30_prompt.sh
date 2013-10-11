@@ -9,7 +9,7 @@ function ps1_time {
   touch -d "now + 5 minutes" $HOME/.sh/$$.ps1time
   local timecolor
   case "$(hostname -s)" in
-    (baley|daneel) timecolor=cyan ;;
+    (dors|daneel) timecolor=cyan ;;
     (sdh-glaptop) timecolor=magenta ;;
     (*) timecolor=red ;;
   esac

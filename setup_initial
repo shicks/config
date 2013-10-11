@@ -3,7 +3,7 @@
 set -e
 
 TMUX=1.7-sdh
-URXVT=9.16
+URXVT=9.18
 
 sudo aptitude install g++ xclip install autoconf automake
 sudo aptitude build-dep tmux rxvt-unicode
@@ -30,7 +30,7 @@ make && make install
 mkdir -p ~/local/bin
 cd ~/local/opt
 ln -s tmux-$TMUX tmux
-ln -s ../opt/tmux/bin/tmux bin/tmux
+ln -s ../opt/tmux/bin/tmux ../bin/tmux
 
 cd ~/Downloads/src
 wget http://dist.schmorp.de/rxvt-unicode/rxvt-unicode-$URXVT.tar.bz2
@@ -40,7 +40,7 @@ cd rxvt-unicode-$URXVT
 make && make install
 cd ~/local/opt
 ln -s urxvt-$URXVT urxvt
-ln -s ../opt/urxvt/bin/urxvt bin/urxvt
+ln -s ../opt/urxvt/bin/urxvt ../bin/urxvt
 
 # Change the config git origin to be writable
 sed -i 's|git://github.com/shicks/config|git@github.com:shicks/config.git|' \
