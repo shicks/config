@@ -16,7 +16,8 @@
  '(flymake-errline ((((class color)) (:background "color-52"))))
  '(flymake-warnline ((((class color)) (:background "color-17"))))
 
- '(cperl-array-face ((((class color)) (:background "color-94" :foreground "yellow" :weight bold))))
+; '(cperl-array-face ((((class color)) (:background "color-94" :foreground "yellow" :weight bold))))
+ '(cperl-array-face ((((class color)) (:background "wheat" :foreground "yellow" :weight normal))))
 
 ; '(ediff-current-diff-A ((((class color)) (:background "brightwhite" :foreground "firebrick"))))
 ; '(ediff-current-diff-B ((((class color)) (:background "brightwhite" :foreground "dark green"))))

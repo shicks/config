@@ -41,7 +41,7 @@ URxvt.letterSpace: -1
 
 !,tabbedex
 URxvt.perl-ext-common : default,matcher,mycopy-osc,set-option-osc
-URxvt.urlLauncher     : google-chrome --user-data-dir=/usr/local/google/chrome/corp
+URxvt.url-launcher    : google-chrome
 URxvt.matcher.button  : 1
 
 ! prevents man/less from disappearing from scrollback

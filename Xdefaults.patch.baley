@@ -1,0 +1,4 @@
+#!/usr/bin/perl -p
+# COMMENT=!
+
+s|google-chrome|/usr/local/google/home/sdh/local/bin/chrome-corp|;

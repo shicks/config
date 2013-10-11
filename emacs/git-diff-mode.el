@@ -164,15 +164,16 @@ Returns t if the line is indeed a file."
         (insert (git-diff-repeat " " depth))
         (insert (propertize file 'face face))
         ;; Add the change stats
-        (if (member face '(git-diff-rename git-diff-copy git-diff-change))
+        ;(if (member face '(git-diff-rename git-diff-copy git-diff-change))
             (progn
               (if (> added 0)
-                  (insert (propertize (concat " +" (number-to-string added))
+                  (insert (propertize (concat "  +" (number-to-string added))
                                       'face 'git-diff-create)))
               (if (> deleted 0)
-                  (insert (propertize (concat " -" (number-to-string deleted))
+                  (insert (propertize (concat "  -" (number-to-string deleted))
                                       'face 'git-diff-delete)))
-              ))
+              )
+        ;)
         ;; Record the file in the hash
         (puthash (line-number-at-pos) change git-diff-files)
         (insert "\n")
