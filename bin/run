@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+use strict;
+
+# Usage: run <command...>
+# Runs the command, printing it to stdout first.  Useful for scripts.
+
+my @toPrint = map { 
+  local($_) = $_;
+  if (/\s/ and not /'/) {
+    $_ = "'$_'";
+  } else {
+    s/\\/\\\\/g;
+    s/"/\\"/g;
+    s/`/\\`/g;
+    s/\$/\\\$/g;
+    if (/\s/) {
+      $_ = "\"$_\"";
+    } else {
+      s/'/\\'/g;
+    }
+  }
+  $_;
+} @ARGV;
+
+print "\e[1;30m@toPrint\e[m\n";
+system @ARGV;
+exit $? >> 8;

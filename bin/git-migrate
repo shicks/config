@@ -1,0 +1,124 @@
+#!/usr/bin/perl
+
+# Migrates branches from one tree to another.
+# Usage: git migrate [--to COMMIT] COMMIT...
+# If --to is omitted, HEAD is used instead
+# The post-rebase-tree hook is run on the new branches.
+# This is useful for follow-up after interactive rebase.
+
+use strict;
+
+my $verbose = 1;
+my $hooks = 1;
+
+sub usage {
+    print STDERR <<EOF;
+Usage: git migrate [--to COMMIT] COMMIT...
+EOF
+    exit 1;
+}
+
+sub barf {
+    print STDERR "@_\n";
+    exit 1;
+}
+
+sub debug {
+    print STDERR "$_[0]\n" if $verbose >= $_[1];
+}
+
+sub run {
+    debug "> @_", 1;
+    system "@_";
+}
+
+sub out {
+    debug "> $_[0]", 1;
+    my $result = `$_[0]`;
+    chomp $result;
+    debug "= $result", 2;
+    return $result;
+}
+
+sub get_hash {
+    my $hash = out "git rev-parse $_[0]";
+    barf "Unable to parse commit $_[0]" if $?;
+    return $hash;
+}
+
+sub hash_exists {
+    run "git rev-parse $_[0] > /dev/null 2>&1";
+    return not $?;
+}
+
+sub append {
+    return $_[0] ? "$_[0],$_[1]" : $_[1];
+}
+
+sub get_descr {
+    return out "git show --oneline $hash | head -1 | sed 's/^[0-9a-f]* //'";
+}
+
+my $to = "HEAD";
+my @branches = ();
+my $gitdir = `git rev-parse --show-toplevel`;
+chomp $gitdir; $gitdir = "$gitdir/.git";
+
+# Make sure the working tree is clean
+barf "Cannot rebase with uncommitted changes." if out "git diff HEAD";
+
+# Read args
+while ($_ = shift) {
+    if ($_ eq "--to") {
+        $onto = shift;
+    } elsif (/^-v/) {
+        $verbose += 1;
+        if (length $_ > 2) {
+            s/-\K.//;
+            redo;
+        }
+    } elsif ($_ eq "-q") {
+        $verbose = 0;
+    } elsif ($_ eq "--nohooks") {
+        $hooks = 0;
+    } elsif (/^-/) {
+        usage;
+    } else {
+        push @branches, $_;
+    }
+}
+usage unless @branches;
+
+# Make $onto a hash
+$to = get_hash $to;
+
+# First make a map from descriptions to hashes
+my %descrs = ();
+my $hash = $to;
+while (not hash_exists("$hash^2")) {
+  my $descr = get_descr($hash);
+  barf "two hashes with same description: $descr" if $descrs{$descr};
+  $descrs{$descr} = $hash;
+  $hash = get_hash "$hash^";
+}
+
+# Make sure they all map
+my %branches = ();
+foreach my $branch (@branches) {
+  my $descr = get_descr($branch);
+  my $trans = $descrs{$descr};
+  barf "could not find equivalent commit for $branch" unless $trans;
+  barf "found same commit for $branch" if $trans eq get_hash($branch);
+  $branches{$branch} = $trans;
+}
+
+# Now we need to reset all the rebased branches
+foreach my $branch (@branches) {
+    my $target = $branches{$branch};
+    run "git checkout $branch";
+    run "git reset --hard $target";
+    if ($hooks) {
+        my $hook = "$gitdir/hooks/post-rebase-tree";
+        run "$hook $branch" if -e $hook;
+    }
+}
