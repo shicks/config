@@ -16,7 +16,10 @@
 (require 'sdh-perl)
 (require 'sdh-git)
 (require 'closure-template-html-mode)
-  ; TODO(sdh): ledger
+
+(if (string= system-name "daneel")
+    (load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
+)
 
 ;; Custom configuration settings go in their own file.
 (setq custom-file "~/config/emacs/custom.el")
