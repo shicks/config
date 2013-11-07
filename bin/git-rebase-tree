@@ -81,7 +81,7 @@ while ($_ = shift) {
         $hooks = 0;
     } elsif (/^-/) {
         usage;
-    } else {
+    } elsif ($_ ne $onto) { # silently ignore 'rebase-tree --onto master master'
         push @branches, $_;
     }
 }

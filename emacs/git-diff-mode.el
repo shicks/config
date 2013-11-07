@@ -302,11 +302,13 @@ a buffer of recursive directory/file diffs, linking to ediff
 to change individual files."
   (interactive "sBranch: ")
   (setq debug-on-error t)
-  (let ((buf (get-buffer-create "*git-diff*"))
+  (let ((pwd default-directory)
+        (buf (get-buffer-create "*git-diff*"))
         (cmd (concat "git diff --numstat --summary "
                      "--find-renames --find-copies "
                      branch)))
     (switch-to-buffer buf)
+    (setq default-directory pwd)
     (shell-command cmd buf)
     (git-diff-mode)
     (toggle-read-only 0)
