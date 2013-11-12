@@ -20,6 +20,25 @@ sub dircat {
     return $b if $b =~ m|^/|;
     return "$a/$b";
 }
+sub copy_if_exists {
+    my ($a, $b) = @_;
+    system "$ENV{'COPY'} '$a' '$b'" if $a ne "/dev/null" and -e $a;
+}
+
+if (@ARGV == 7 and $ENV{'COPY'} and $ENV{'ROOT'} and $ENV{'DIRNAME'}
+    and $ENV{'PIDFILE'} and $ARGV[2] =~ /^[0-9a-f]+|\.$/i and $ARGV[3] =~ /^\d+|\.$/
+    and $ARGV[5] =~ /^[0-9a-f]+|\.$/i and $ARGV[6] =~ /^\d+|\.$/) {
+  # We're being used as the difftool
+  my ($path, $oldfile, $a, $b, $newfile, $c, $d) = @ARGV;
+  my $dirname = $ENV{'DIRNAME'};
+  my $root = $ENV{'ROOT'};
+  mkpath(dirname("$dirname/old/$path"));
+  mkpath(dirname("$dirname/new/$path"));
+  copy_if_exists(dircat($root, $oldfile), "$dirname/old/$path");
+  copy_if_exists(dircat($root, $newfile), "$dirname/new/$path");
+  while (-e $ENV{'PIDFILE'}) { sleep 1; }
+  exit 0;
+}
 
 my $clobber = 0;
 $ENV{'COPY'} = "cp"; # changed to "ln -s" for clobber
@@ -50,6 +69,7 @@ my $commit = "HEAD";
 foreach (@ARGV) {
     if (/^-i$/) {
         # TODO(sdh): what the heck does this flag do?
+        #     It looks like it iterates over commits to find the diff target
         # my @prevs = (); # later we'll store/retrieve w/ jk (?)
         open LOG, "git log|";
         my $info = <LOG>;
@@ -91,7 +111,7 @@ foreach (@ARGV) {
 my %current = ();
 
 # spawn diff children
-$ENV{'GIT_EXTERNAL_DIFF'} = "diffall-helper";
+$ENV{'GIT_EXTERNAL_DIFF'} = "$0";
 open FILES, "git diff --name-only $commit -- |";
 while (<FILES>) {
     chomp $_;
