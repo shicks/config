@@ -39,6 +39,7 @@ close $fh;
 $ENV{'PIDFILE'} = $pidfile;
 
 # make a tempdir for root of symlink tree
+my @added_dirs = ();
 my $dirname = tempdir();
 $ENV{'DIRNAME'} = $dirname;
 mkdir "$dirname/old";
@@ -48,6 +49,7 @@ mkdir "$dirname/new";
 my $commit = "HEAD";
 foreach (@ARGV) {
     if (/^-i$/) {
+        # TODO(sdh): what the heck does this flag do?
         # my @prevs = (); # later we'll store/retrieve w/ jk (?)
         open LOG, "git log|";
         my $info = <LOG>;
@@ -95,6 +97,10 @@ while (<FILES>) {
     chomp $_;
     my $file = dircat $root, $_;
     $current{$_} = 1 if -e $file;
+    if (! -d dirname($file)) {
+      mkdir dirname($file);
+      push @added_dirs, dirname($file);
+    }
     system "git diff --ext-diff $commit -- $file >/dev/null &";
 }
 close FILES;
@@ -106,7 +112,7 @@ system 'meld', "$dirname/old", "$dirname/new";
 # Take care of added/deleted files if we said to clobber
 if ($clobber) {
     # did we add any files?
-    open NEW, "find $dirname/new/ -type f |";
+    open NEW, "find $dirname/new/ -type l |";
     while (<NEW>) {
         chomp $_;
         my $tmp = $_;
@@ -133,6 +139,10 @@ if ($clobber) {
         print "rm -f '$repo'\n";
         unlink $repo;
     }
+}
+
+foreach (@added_dirs) {
+  system "rmdir '$_' 2> /dev/null";
 }
 
 # clean up

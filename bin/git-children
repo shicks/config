@@ -1,15 +1,47 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ $# -ne 1 ]; then
-  echo 'Usage: git children COMMIT-LIKE' >&2
+if [ $# -lt 1 ]; then
+  echo 'Usage: git children COMMIT-LIKE...' >&2
+  echo '  (Negative parents may be specified with a trailing minus)' >&2
   exit 1
 fi  
 
-ref=$(git rev-parse $1)
+parents=()
+nonparents=()
+
+function check_parents {
+  if [ $# -eq 1 ]; then return 0; fi
+  local commit=$1
+  local parent=$2
+  shift 2
+  #if [ "$commit" = "$parent" ]; then return 1; fi
+  if [ "$(git merge-base "$commit" "$parent")" != "$parent" ]; then return 1; fi
+  check_parents "$commit" "$@"
+}
+
+function check_nonparents {
+  if [ $# -eq 1 ]; then return 0; fi
+  local commit=$1
+  local parent=$2
+  shift 2
+  if [ "$(git merge-base "$commit" "$parent")" = "$parent" ]; then return 1; fi
+  check_parents "$commit" "$@"
+}
+
+while [ $# -gt 0 ]; do
+  if [ -z "${1##-*}" ]; then
+    nonparents=("${nonparents[@]}" "$(git rev-parse "${1#-}")")
+  else
+    parents=("${parents[@]}" "$(git rev-parse "$1")")
+  fi
+  shift
+done
+
 space=''
-for b in $(git branch | grep -v 'detached from HEAD' | sed s/^..//); do
-  if [ "$(git rev-parse "$b")" = "$ref" ]; then continue; fi
-  if [ "$(git merge-base "$b" "$ref")" = "$ref" ]; then
+for b in $(git branch | grep -v '(detached from' | sed s/^..//); do
+  commit="$(git rev-parse "$b")"
+  if check_parents "$commit" "${parents[@]}" &&
+      check_nonparents "$commit" "${nonparents[@]}"; then
     echo -n "$space$b"
     space=' '
   fi
