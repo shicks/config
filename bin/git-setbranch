@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+
+# Shoves a commit to another branch
+# Usage: git setbranch <branch>
+
+use strict;
+
+my $branch = shift;
+die "Usage: git setbranch <branch>" unless $branch;
+
+my $top = `git rev-parse --show-toplevel`; chomp $top;
+my $cur = `cat $top/.git/HEAD`; chomp $cur;
+
+unless ($cur =~ s|^ref: refs/heads/||) {
+  $cur = `git rev-parse HEAD`; chomp $cur;
+}
+
+system "git checkout $target" and die "Couldn't check out $target";
+system "git reset --hard $cur" and die "Reset failed";
+system "git checkout $cur" and die "Couldn't re-checkout $cur";
