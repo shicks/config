@@ -12,6 +12,6 @@
       (require 'ledger)
       (custom-set-faces
        '(ledger-font-xact-highlight-face ((((class color)) (:background "brightblack"))))
-       ))
+       )))
 
 (provide 'sdh-ledger)
