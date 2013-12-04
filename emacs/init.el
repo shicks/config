@@ -18,7 +18,8 @@
 (require 'closure-template-html-mode)
 
 (if (string= system-name "daneel")
-    (load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
+    ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
+    (require 'sdh-ledger)
 )
 
 ;; Custom configuration settings go in their own file.
