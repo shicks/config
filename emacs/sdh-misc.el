@@ -298,16 +298,23 @@
   (interactive "p")
   (other-window (- win)))
 
+(defvar sdh-dynamic-frame-width 100
+  "*The target width for frames.")
+
 ;; For use in slightly-cramped screens
 ;; We could consider making the size variable, depending on file type?
 (defun enlarge-window-to-100 ()
   "Enlarges the given window to 100 columns under certain circumstances."
   (interactive)
-  (if (and (not (one-window-p))
-           (< (frame-width) 203)
-           (> (frame-width) 163)
-           (< (window-width) 101))
-      (enlarge-window-horizontally (- 101 (window-width)))))
+  (if sdh-dynamic-frame-width
+      (let* ((upper (+ 3 (* 2 sdh-dynamic-frame-width)))
+             (lower (+ 3 (* 2 (- sdh-dynamic-frame-width 20))))
+             (target (+ 1 sdh-dynamic-frame-width)))
+        (if (and (not (one-window-p))
+                 (< (frame-width) upper)
+                 (> (frame-width) lower)
+                 (< (window-width) target))
+            (enlarge-window-horizontally (- target (window-width)))))))
 
 (defun sdh-other-window (win)
   "Move to next window and maybe enlarge it"
