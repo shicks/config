@@ -13,3 +13,5 @@ export PATH=$HOME/local/bin:$PATH
 export LESSPIPE="$HOME/local/bin/lesspipe %s"
 export LESSOPEN="|$HOME/local/bin/lesspipe %s"
 export LESS=' -R '
+
+export GOROOT=$HOME/local/opt/go
