@@ -12,5 +12,6 @@
  ((fboundp 'flymake-cursor-show-errors-at-point-now)
   (global-set-key "\C-c\C-e" 'flymake-cursor-show-errors-at-point-now))
 )
+(global-set-key "\C-Cq" 'flymake-stop-all-syntax-checks)
 
 (provide 'sdh-flymake)

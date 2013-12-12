@@ -11,6 +11,7 @@
 ;; Change some defaults
 (add-hook 'cperl-mode-hook 'n-cperl-mode-hook t)
 (defun n-cperl-mode-hook ()
+  (interactive)
   (setq cperl-indent-level 2)
   (setq cperl-invalid-face nil) ;; Turn off the trailing whitespace indicator
   (setq cperl-hairy nil)

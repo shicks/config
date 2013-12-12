@@ -20,6 +20,25 @@ sub dircat {
     return $b if $b =~ m|^/|;
     return "$a/$b";
 }
+sub copy_if_exists {
+    my ($a, $b) = @_;
+    system "$ENV{'COPY'} '$a' '$b'" if $a ne "/dev/null" and -e $a;
+}
+
+if (@ARGV == 7 and $ENV{'COPY'} and $ENV{'ROOT'} and $ENV{'DIRNAME'}
+    and $ENV{'PIDFILE'} and $ARGV[2] =~ /^[0-9a-f]+|\.$/i and $ARGV[3] =~ /^\d+|\.$/
+    and $ARGV[5] =~ /^[0-9a-f]+|\.$/i and $ARGV[6] =~ /^\d+|\.$/) {
+  # We're being used as the difftool
+  my ($path, $oldfile, $a, $b, $newfile, $c, $d) = @ARGV;
+  my $dirname = $ENV{'DIRNAME'};
+  my $root = $ENV{'ROOT'};
+  mkpath(dirname("$dirname/old/$path"));
+  mkpath(dirname("$dirname/new/$path"));
+  copy_if_exists(dircat($root, $oldfile), "$dirname/old/$path");
+  copy_if_exists(dircat($root, $newfile), "$dirname/new/$path");
+  while (-e $ENV{'PIDFILE'}) { sleep 1; }
+  exit 0;
+}
 
 my $clobber = 0;
 $ENV{'COPY'} = "cp"; # changed to "ln -s" for clobber
@@ -39,6 +58,7 @@ close $fh;
 $ENV{'PIDFILE'} = $pidfile;
 
 # make a tempdir for root of symlink tree
+my @added_dirs = ();
 my $dirname = tempdir();
 $ENV{'DIRNAME'} = $dirname;
 mkdir "$dirname/old";
@@ -48,6 +68,8 @@ mkdir "$dirname/new";
 my $commit = "HEAD";
 foreach (@ARGV) {
     if (/^-i$/) {
+        # TODO(sdh): what the heck does this flag do?
+        #     It looks like it iterates over commits to find the diff target
         # my @prevs = (); # later we'll store/retrieve w/ jk (?)
         open LOG, "git log|";
         my $info = <LOG>;
@@ -89,12 +111,16 @@ foreach (@ARGV) {
 my %current = ();
 
 # spawn diff children
-$ENV{'GIT_EXTERNAL_DIFF'} = "diffall-helper";
+$ENV{'GIT_EXTERNAL_DIFF'} = "$0";
 open FILES, "git diff --name-only $commit -- |";
 while (<FILES>) {
     chomp $_;
     my $file = dircat $root, $_;
     $current{$_} = 1 if -e $file;
+    if (! -d dirname($file)) {
+      mkdir dirname($file);
+      push @added_dirs, dirname($file);
+    }
     system "git diff --ext-diff $commit -- $file >/dev/null &";
 }
 close FILES;
@@ -106,7 +132,7 @@ system 'meld', "$dirname/old", "$dirname/new";
 # Take care of added/deleted files if we said to clobber
 if ($clobber) {
     # did we add any files?
-    open NEW, "find $dirname/new/ -type f |";
+    open NEW, "find $dirname/new/ -type l |";
     while (<NEW>) {
         chomp $_;
         my $tmp = $_;
@@ -133,6 +159,10 @@ if ($clobber) {
         print "rm -f '$repo'\n";
         unlink $repo;
     }
+}
+
+foreach (@added_dirs) {
+  system "rmdir '$_' 2> /dev/null";
 }
 
 # clean up

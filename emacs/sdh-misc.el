@@ -298,16 +298,23 @@
   (interactive "p")
   (other-window (- win)))
 
+(defvar sdh-dynamic-frame-width 100
+  "*The target width for frames.")
+
 ;; For use in slightly-cramped screens
 ;; We could consider making the size variable, depending on file type?
 (defun enlarge-window-to-100 ()
   "Enlarges the given window to 100 columns under certain circumstances."
   (interactive)
-  (if (and (not (one-window-p))
-           (< (frame-width) 203)
-           (> (frame-width) 163)
-           (< (window-width) 101))
-      (enlarge-window-horizontally (- 101 (window-width)))))
+  (if sdh-dynamic-frame-width
+      (let* ((upper (+ 3 (* 2 sdh-dynamic-frame-width)))
+             (lower (+ 3 (* 2 (- sdh-dynamic-frame-width 20))))
+             (target (+ 1 sdh-dynamic-frame-width)))
+        (if (and (not (one-window-p))
+                 (< (frame-width) upper)
+                 (> (frame-width) lower)
+                 (< (window-width) target))
+            (enlarge-window-horizontally (- target (window-width)))))))
 
 (defun sdh-other-window (win)
   "Move to next window and maybe enlarge it"
@@ -341,11 +348,36 @@ the prefix argument in transient mark mode (unless the mark is active)."
   (exchange-point-and-mark
    (if (and transient-mark-mode (not mark-active)) (not arg) arg)))
 
+;; wraps a (require) in a catch block.
 (defun sdh-try-require (arg)
   "Tries to require a file, returns t if successful, nil otherwise"
   (condition-case nil
       (require arg)
     (error nil)))
+
+;;;;;;;;;;;;;;;;
+;; Backup files
+
+(setq backup-directory-alist `(("." . "~/.emacs_backups")))
+(setq delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+
+(defun sdh-delete-old-backup-files ()
+  "Deletes old backup files."
+  (interactive)
+  (message "Deleting old backup files...")
+  (let ((week (* 60 60 24 7))
+        (current (float-time (current-time))))
+    (dolist (file (directory-files "~/.emacs_backups" t))
+      (when (and (backup-file-name-p file)
+                 (> (- current (float-time (nth 5 (file-attributes file))))
+                    week))
+        (message "%s" file)
+        (delete-file file))))
+)
+(sdh-delete-old-backup-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

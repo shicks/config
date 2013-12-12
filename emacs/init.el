@@ -16,7 +16,11 @@
 (require 'sdh-perl)
 (require 'sdh-git)
 (require 'closure-template-html-mode)
-  ; TODO(sdh): ledger
+
+(if (string= system-name "daneel")
+    ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
+    (require 'sdh-ledger)
+)
 
 (require 'sdh-flymake)
 (require 'sdh-go)

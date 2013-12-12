@@ -2,7 +2,7 @@
 
 ### TODO - emacsclient?  switch on TERM?
 case "$(hostname -s)" in
-  baley) export EDITOR=quickemacs ;;
+  dors) export EDITOR=quickemacs ;;
   *) export EDITOR='emacs -q' ;;
 esac
 
@@ -10,8 +10,8 @@ export PATH=$HOME/local/bin:$PATH
 
 # Use our custom lesspipe, with syntax highlighting
 # See http://linux-tips.org/article/78/syntax-highlighting-in-less
-export LESSPIPE="$HOME/local/bin/lesspipe %s"
-export LESSOPEN="|$HOME/local/bin/lesspipe %s"
-export LESS=' -R '
+export LESSPIPE="$(which lesspipe) %s"
+export LESSOPEN="|$LESSPIPE"
+export LESS='-R -F -X'  # allow ANSI colors, exit if <1 page, disable ti/te
 
 export GOROOT=$HOME/local/opt/go

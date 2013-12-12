@@ -8,6 +8,14 @@
   (interactive)
   (git-add-file (buffer-file-name)))
 
+(defun git-rm-file (file)
+  (interactive "F")
+  (shell-command (concat "git rm " file)))
+
+(defun git-rm ()
+  (interactive)
+  (git-rm-file (buffer-file-name)))
+
 (defun save-git-add-and-next-error ()
   (interactive)
   (save-buffer) (git-add) (next-error))
@@ -39,6 +47,7 @@
 
 ; <C-c g> is prefix keymap for git commands
 (global-set-key (kbd "C-c g a") 'git-add)
+(global-set-key (kbd "C-c g r") 'git-rm)
 (global-set-key (kbd "C-c <down>") 'save-git-add-and-next-error)
 
 (global-set-key (kbd "C-c g f") 'git-open-file-from-branch)

@@ -116,12 +116,14 @@ case "$(basename $SHELL)" in
       if [ -n "$LAST_START_SECONDS" ]; then
         local diff=$((SECONDS - LAST_START_SECONDS))
         if [ $diff -gt ${REPORTTIME:-5} ]; then
-          local hours=$((diff / 3600))
+          local days=$((diff /  86400))
+          local hours=$((diff / 3600 % 24))
           local mins=$((diff / 60 % 60))
           local secs=$((diff % 60))
+          days=${days#0}
           hours=${hours#0}
           mins=${mins#0}
-          time="${hours:+${hours}h}${mins:+${mins}m}${secs}s"
+          time="${days:+${days}d}${hours:+${hours}h}${mins:+${mins}m}${secs}s"
           echo "$time wallclock"
           case $TERM in # only send BEL if we're in tmux
             (tmux*) echo -e '\007' ;;

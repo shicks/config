@@ -147,6 +147,7 @@ function install_files {
 
   # Make sure history dir exists
   mkdir -p $home/history
+  mkdir -p $home/.emacs_backups
 
   # Install urxvt extensions
   install_urxvt
