@@ -12,7 +12,6 @@
 (global-set-key "\C-C " 'goto-line)
 (global-set-key "\C-Ca" 'goto-char)
 (global-set-key "\C-Cf" 'font-lock-fontify-buffer)
-(global-set-key "\C-ce" 'flyc/show-fly-error-at-point-now)
 (global-set-key "\M-p" 'backward-paragraph)
 (global-set-key "\M-n" 'forward-paragraph)
 (global-set-key "\C-c\C-xr" 'revert-buffer)

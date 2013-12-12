@@ -18,6 +18,12 @@
 (require 'closure-template-html-mode)
   ; TODO(sdh): ledger
 
+(require 'sdh-flymake)
+(require 'sdh-go)
+
+(if (file-exists-p (expand-file-name "~/local/opt/emacs"))
+    (setq load-path (cons (expand-file-name "~/local/opt/emacs") load-path)))
+
 ;; Custom configuration settings go in their own file.
 (setq custom-file "~/config/emacs/custom.el")
 (load custom-file)
