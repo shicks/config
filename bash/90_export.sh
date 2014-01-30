@@ -8,6 +8,10 @@ esac
 
 export PATH=$HOME/local/bin:$PATH
 
+if [ -d $HOME/local/opt/haskell-platform/bin ]; then
+  PATH=$HOME/local/opt/haskell-platform/bin:$PATH
+fi
+
 # Use our custom lesspipe, with syntax highlighting
 # See http://linux-tips.org/article/78/syntax-highlighting-in-less
 export LESSPIPE="$(which lesspipe) %s"

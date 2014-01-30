@@ -22,6 +22,11 @@
     (require 'sdh-ledger)
 )
 
+(if (string= system-name "sdh-glaptop")
+    ; TODO(sdh): figure out how to do this mor consistently.
+    (set-default-font "DejaVu Sans Mono-8")
+)
+
 (require 'sdh-flymake)
 (require 'sdh-go)
 
