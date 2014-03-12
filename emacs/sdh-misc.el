@@ -348,6 +348,13 @@ the prefix argument in transient mark mode (unless the mark is active)."
   (exchange-point-and-mark
    (if (and transient-mark-mode (not mark-active)) (not arg) arg)))
 
+;; wraps a (require) in a catch block.
+(defun sdh-try-require (arg)
+  "Tries to require a file, returns t if successful, nil otherwise"
+  (condition-case nil
+      (require arg)
+    (error nil)))
+
 ;;;;;;;;;;;;;;;;
 ;; Backup files
 
