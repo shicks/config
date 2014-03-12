@@ -7,7 +7,7 @@ chdir $root;
 open GIT, "git status |";
 while (<GIT>) {
   chomp;
-  s/^#\s*//;
+  s/^#?\s*//;
   if (s/^((?:added|deleted) by (?:them|us)):\s*// or s/^(both (?:added|modified)):\s*//) {
     my $found = 0;
     if ($1 eq 'both modified') {
