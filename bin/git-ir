@@ -170,6 +170,9 @@ if ($ENV{'EDITOR'} =~ /^$0 /) {
 }
 
 # Handle the main rebase command.
+system 'EDITOR=: git rebase --edit-todo 2> /dev/null'
+  or barf 'A rebase is already in progress.';
+
 my @rebase_args = ();
 my @branches = ();
 my $onto = '';
@@ -224,16 +227,17 @@ foreach (@branches) {
   next if $branches{$_};
   my $commit = get_hash $_;
   my $relative = $from ? $from : $onto;
-  my $base = out "git merge-base $relative $commit";
-  if ($base eq $commit) {
-    debug "Skipping commit $commit (cf base=$base relative=$relative)", 1;
+  my $ontobase = out "git merge-base $onto $commit";
+  my $frombase = $from && out "git merge-base $from $commit";
+  if ($ontobase eq $commit or $frombase eq $commit or $frombase ne $from) {
+    debug "Skipping commit $commit", 1;
     next;
   }
   push @scan, $commit;
   push @branches, $_;
   $branches{$_} = $commit;
   $names{$commit} = $_;
-  $bases{$base} = 1;
+  $bases{$frombase || $ontobase} = 1;
 }
 
 my @bases = keys %bases;
@@ -246,7 +250,7 @@ barf 'Nothing to do' unless @bases;
 my %parents = ();
 my %children = ();
 while (my $commit = pop @scan) {
-  debug "Checking $commit", 1;
+  print "Checking ", `git show --oneline -s --decorate $commit` if $verbose > 0;
   next if $bases{$commit} or exists $parents{$commit};
   my $parent = get_hash "$commit^";
   barf "Commit has multiple parents: " . `git show --oneline --decorate -s $commit`
