@@ -17,7 +17,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
- '(cperl-array-face ((((class color)) (:background "color-94" :foreground "yellow" :weight bold))))
+ '(cperl-array-face ((t (:background "wheat" :foreground "yellow" :weight normal))))
  '(ediff-current-diff-A ((((class color)) (:background "tomato" :foreground "black"))))
  '(ediff-current-diff-B ((((class color)) (:background "pale green" :foreground "black"))))
  '(ediff-even-diff-A ((((class color)) (:background "skyblue" :foreground "black"))))

@@ -142,6 +142,12 @@ function install_files {
     safe_link $a local/$a
   done
 
+  # Perl lib dir - will link entire dirs
+  mkdir -p $home/local/lib/perl
+  for a in perl/*; do
+    safe_link $a local/lib/$a
+  done
+
   # Make bash completion dir so somebody doesn't complain
   mkdir -p $home/.bash.d/completion
 

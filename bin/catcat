@@ -17,11 +17,11 @@ while (@data < 2 * $lines) {
 
 for (my $i = 0; $i < $lines; $i++) {
   my $left = $data[$i];
-  $left =~ s/(?:(?:\e\[[^m]*m)?.){0,$target}\K.*//;
+  $left =~ s/(?:(?:\e\[[^m]*m)*[^\e]?+){0,$target}\K.*//;
   my $stripped = $left;
   $stripped =~ s/\e\[[^m]*m//g;
   $left .= ' ' x ($cols - $target - length($stripped));
   my $right = $data[$i + $lines];
-  $right =~ s/(?:(?:\e[^m]*m)?.){0,$target}\K.*//;
+  $right =~ s/(?:(?:\e[^m]*m)*[^\e]?+){0,$target}\K.*//;
   print "$left\e[m$right\n";
 }

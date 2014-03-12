@@ -7,6 +7,8 @@ case "$(hostname -s)" in
 esac
 
 export PATH=$HOME/local/bin:$PATH
+export PERL5LIB=$HOME/local/lib/perl:$PERL5LIB
+PERL5LIB=${PERL5LIB%:} # strip trailing colon if there is one
 
 if [ -d $HOME/local/opt/haskell-platform/bin ]; then
   PATH=$HOME/local/opt/haskell-platform/bin:$PATH
