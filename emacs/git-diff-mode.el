@@ -463,8 +463,10 @@ to change individual files."
 )
 
 ; We need to append so it comes after ediff-cleanup-mess
-(nconc ediff-quit-hook '(git-diff-ediff-quit-action))
-(remove-duplicates ediff-quit-hook)
+(if (boundp 'ediff-quit-hook) (progn
+  (nconc ediff-quit-hook '(git-diff-ediff-quit-action))
+  (remove-duplicates ediff-quit-hook)
+))
 
 (define-key git-diff-mode-map (kbd "RET") 'git-diff-act-on-line)
 (define-key git-diff-mode-map (kbd "x") 'git-diff-toggle-dir-visibility)
