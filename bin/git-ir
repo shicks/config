@@ -150,6 +150,7 @@ if ($ENV{'EDITOR'} =~ /^$0 /) {
     close F;
     # Invoke the normal editor only if interactive
     system $ENV{'OLDEDITOR'}, $file;
+    my $result = ($? == -1) || ($? & 255) ? 255 : ($? >> 8);
     # Post-process the file
     open F, $file;
     my @lines = <F>;
@@ -163,6 +164,8 @@ if ($ENV{'EDITOR'} =~ /^$0 /) {
       print F $_;
       chomp $_; debug $_, 1;
     }
+    close F;
+    exit $result;
   } else {
     barf "Error: unknown editor command: $cmd";
   }
@@ -225,19 +228,25 @@ my %names = ();
 my @scan = ();
 foreach (@branches) {
   next if $branches{$_};
+  debug "Checking branch $_", 1;
   my $commit = get_hash $_;
   my $relative = $from ? $from : $onto;
   my $ontobase = out "git merge-base $onto $commit";
   my $frombase = $from && out "git merge-base $from $commit";
+  my $basebase = $from && out "git merge-base $frombase $ontobase";
+  # There are a lot of cases to consider here...
   if ($ontobase eq $commit or $frombase eq $commit or $frombase ne $from) {
-    debug "Skipping commit $commit", 1;
+     #or ($onto eq $ontobase and $from eq $basebase)) {
+    debug "Skipping branch $_", 1;
     next;
   }
+  my $base = $basebase ne $ontobase ? $ontobase : $frombase;
+
   push @scan, $commit;
   push @branches, $_;
   $branches{$_} = $commit;
   $names{$commit} = $_;
-  $bases{$frombase || $ontobase} = 1;
+  $bases{$base} = 1;
 }
 
 my @bases = keys %bases;
@@ -269,11 +278,15 @@ sub pushC { add '('; $indent = "$indent  "; }
 sub popC { $indent =~ s/..//; add ')'; }
 sub rebase {
   my $base = $_[0];
+  my $summarize = $_[1];
   debug "Rebasing children of $base", 1;
   my @children = split /,/, $children{$base};
+  my $sum = '';
+  $sum = out("git show --color=never --oneline -s $base") if $summarize or @children > 1;
   foreach my $commit (@children) {
     pushC if @children > 1;
     my $pick = out "git show --color=never --oneline -s $commit";
+    add "# $sum" if $sum;
     add "pick $pick";
     add "branch $names{$commit}" if $names{$commit};
     rebase($commit);
@@ -283,7 +296,7 @@ sub rebase {
 
 foreach my $commit (@bases) {
   pushC if @bases > 1;
-  rebase $commit;
+  rebase $commit, 1;
   popC if @bases > 1;
 }
 
