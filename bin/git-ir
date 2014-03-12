@@ -311,7 +311,7 @@ $spec .= <<EOF;
 # f, fixup  = like "squash", but discard this commit's log message
 # x, exec   = run command (the rest of the line) using shell
 #
-# Extendd Commands:
+# Extended Commands:
 # !, exec!  = mandatory command (the rest of the line), reinserted on failure
 # b, branch = sets the named branch to the current commit
 # (, push   = pushes the current commit onto the stack
