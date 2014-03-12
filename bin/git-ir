@@ -7,6 +7,11 @@
 #   git ir [--push|--pop]
 #   git ir --branch BRANCH
 
+############################################################
+# KNOWN ISSUES
+# 1. multiple branches on the same commit aren't both moved
+############################################################
+
 use strict;
 
 my $verbose = int($ENV{'VERBOSE'});
