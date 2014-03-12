@@ -39,16 +39,28 @@ case "$(basename $SHELL)" in
       case $TERM in
         (tmux*)
           local cmd="$1"
-          cmd=${cmd/git /git-}
-          cmd=${cmd%% *}
-          cmd=${cmd##*/}
-          # TODO(sdh): record ports, working dirs, etc?
-          if [ -z "${cmd%%emacs*}" ]; then
-            cmd=+
-          elif [ "${#cmd}" -gt 10 ]; then
-            cmd=...
+          cmd=$(echo $cmd |
+                perl -ne 'if (/--port[= ](\d+)/) { print "port=$1" } else { print; exit 1 }')
+          if [ -z "${cmd##port=*}" ]; then
+            cmd=${cmd#port=}
+            if [ -n "$GIT_BRANCH" ]; then
+              cmd="${GIT_BRANCH%%:*}::$cmd"
+            else
+              cmd=":$cmd:"
+            fi
+          else
+            cmd=${cmd/git /git-}
+            cmd=${cmd%% *}
+            cmd=${cmd##*/}
+            # TODO(sdh): record ports, working dirs, etc?
+            if [ -z "${cmd%%emacs*}" ]; then
+              cmd=+
+            elif [ "${#cmd}" -gt 10 ]; then
+              cmd=...
+            fi
+            cmd="[$cmd]"
           fi
-          set_title_term "[$cmd]"
+          set_title_term "$cmd"
           ;;
       esac
       start_timer
