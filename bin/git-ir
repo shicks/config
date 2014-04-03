@@ -250,7 +250,7 @@ foreach (@branches) {
   push @scan, $commit;
   push @branches, $_;
   $branches{$_} = $commit;
-  $names{$commit} = $_;
+  $names{$commit} = append $names{$commit}, $_;
   $bases{$base} = 1;
 }
 
@@ -293,7 +293,11 @@ sub rebase {
     my $pick = out "git show --color=never --oneline -s $commit";
     add "# $sum" if $sum;
     add "pick $pick";
-    add "branch $names{$commit}" if $names{$commit};
+    if ($names{$commit}) {
+      foreach my $branch (split /,/, $names{$commit}) {
+        add "branch $branch";
+      }
+    }
     rebase($commit);
     popC if @children > 1;
   }
