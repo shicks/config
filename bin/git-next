@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Usage: git next <branch>
+#
+# Git helper to rebase one change at a time.  Assumes a 'next' tag is
+# defined and is not a parent of 'master'.  Rebases from next to the
+# specified branch onto master.
+
+die () {
+  echo "$@"
+  exit 1
+}
+
+if [ "$EDITOR" == "$0" ]; then
+  {
+    echo "x git tag -d next"
+    echo "x git tag next $BRANCH"
+  } >> $1
+  exit
+fi
+
+# Quick sanity checks
+git rev-parse master &> /dev/null || die "No 'master' branch"
+
+if git rev-parse next &> /dev/null &&
+    [ $(git rev-parse next) == $(git merge-base master next) ]; then
+  git tag -d next
+fi
+
+if ! git rev-parse next &> /dev/null; then
+  git tag next master
+fi
+
+BRANCH=$1 EDITOR=$0 git rebase -i --onto master next $1
