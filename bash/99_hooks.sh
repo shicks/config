@@ -30,7 +30,6 @@ case "$(basename $SHELL)" in
       drawlinebreak
     }
     function chpwd {
-      save_dir
       google_cd_hook
     }
     function preexec {

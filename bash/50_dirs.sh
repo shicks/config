@@ -8,7 +8,9 @@ function check_slice {
   [ "${a[@]:1:3}" "${a[@]:5}" ] 
 }
 
-if check_slice &> /dev/null; then
+#if check_slice &> /dev/null; then
+case "$(basename $SHELL)" in
+ (bash)
 
   ## We have a variety of code to override the "cd" command,
   ## both to add a few arguments (cd -l, cd -#, etc) and to
@@ -181,4 +183,5 @@ if check_slice &> /dev/null; then
     run_cd_hook
   }
 
-fi
+esac
+## fi
