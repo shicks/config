@@ -3,7 +3,7 @@
 # git ir - Interactive Rebase
 # Usage:
 #   git ir [rebase options, other options]
-#   git ir --must COMMAND...
+#   git ir --must           Note: must be used in pairs.
 #   git ir [--push|--pop]
 #   git ir --branch BRANCH
 
@@ -23,6 +23,7 @@ Options:
   --from COMMIT    Sets the a common base commit
   --all            Rebases all branches (that are descended from --from)
   --nohooks        Don't run post-rebase-tree hooks
+  --rewrite        Rewrites the TODO, expanding extended commands
   --               All following args are passed directly to rebase
 EOF
     exit $_[0];
@@ -65,14 +66,38 @@ sub append {
     return $_[0] ? "$_[0],$_[1]" : $_[1];
 }
 
+sub post_process {
+  my $file = shift;
+  open F, $file;
+  my @lines = <F>;
+  close F;
+  open F, ">$file";
+  foreach (@lines) {
+    if (/^(\s*)(?:!|exec!) (.*)$/) {
+      # need to escape single quotes in cmd
+      my ($spaces, $cmd) = ($1, $2);
+      $cmd =~ s/'/'\\''/g;
+      $_ = "${spaces}x git ir --must '$cmd'\n";
+    }
+    s/^(\s*)(?:b|branch) /$1x git ir --branch$ENV{'NOHOOKS'} /;
+    s/^(\s*)(?:\(|push)(?!>\S)/$1x git ir --push/;
+    s/^(\s*)(?:\)|pop)(?!>\S)/$1x git ir --pop/;
+    print F $_;
+    chomp $_; debug $_, 1;
+  }
+  close F;
+}
+
 # Handle special commands, regardless of EDITOR.
 if ($ARGV[0] eq '--must') {
-  shift;
-  system @ARGV;
+  run "$ARGV[1]";
   my $result = ($? == -1) || ($? & 255) ? 255 : ($? >> 8);
   if ($result) {
-    $ENV{'PREPEND'} = "x git ir --must @ARGV";
-    $ENV{'EDITOR'} = "$0 __PREPEND__";
+    my $cmd = $ARGV[1]; $cmd =~ s/'/'\\''/g;
+    #$ENV{'PREPEND'} = "x git ir --must '$cmd'";
+    #$ENV{'EDITOR'} = "$0 __PREPEND__";
+    $ENV{'EDITOR'} = "sed -i '1i x git ir --must '\\''$cmd'\\'";
+    #print STDERR "FAIL: $ENV{'EDITOR'} $ENV{'PREPEND'}\n";
     system 'git', 'rebase', '--edit-todo';
   }
   exit $result;
@@ -101,6 +126,12 @@ if ($ARGV[0] eq '--push') {
 
 if ($ARGV[0] eq '--pop') {
   $ENV{'EDITOR'} = "$0 __POP__";
+  system 'git', 'rebase', '--edit-todo';
+  exit;
+}
+
+if ($ARGV[0] eq '--rewrite') {
+  $ENV{'EDITOR'} = "$0 __REWRITE__";
   system 'git', 'rebase', '--edit-todo';
   exit;
 }
@@ -157,20 +188,10 @@ if ($ENV{'EDITOR'} =~ /^$0 /) {
     system $ENV{'OLDEDITOR'}, $file;
     my $result = ($? == -1) || ($? & 255) ? 255 : ($? >> 8);
     # Post-process the file
-    open F, $file;
-    my @lines = <F>;
-    close F;
-    open F, ">$file";
-    foreach (@lines) {
-      s/^(\s*)(?:!|exec!) /$1 x git ir --must /;
-      s/^(\s*)(?:b|branch) /$1 x git ir --branch$ENV{'NOHOOKS'} /;
-      s/^(\s*)(?:\(|push)(?!>\S)/$1 x git ir --push/;
-      s/^(\s*)(?:\)|pop)(?!>\S)/$1 x git ir --pop/;
-      print F $_;
-      chomp $_; debug $_, 1;
-    }
-    close F;
+    post_process $file;
     exit $result;
+  } elsif ($cmd eq '__REWRITE__') {
+    post_process $file;
   } else {
     barf "Error: unknown editor command: $cmd";
   }
