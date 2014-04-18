@@ -27,6 +27,10 @@
     (set-default-font "DejaVu Sans Mono-8")
 )
 
+(if (boundp 'mac-command-modifier)
+    (require 'sdh-mac)
+)
+
 (require 'sdh-flymake)
 (require 'sdh-go)
 
