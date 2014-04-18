@@ -24,6 +24,7 @@
 ;(setq debugger 'edebug-debug)  ; Use edebug for emacs lisp
 
 (require 'savehist) ;; this was history.el but it led to circular dep
+(setq savehist-file "~/.emacs_history")
 (savehist-mode 1)
 
 
