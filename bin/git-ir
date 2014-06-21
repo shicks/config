@@ -20,11 +20,18 @@ sub usage {
     print STDERR <<EOF;
 Usage: git ir --onto COMMIT [OPTIONS...] --all|COMMIT...
 Options:
+  --onto COMMIT    The new base for the tree
   --from COMMIT    Sets the a common base commit
   --all            Rebases all branches (that are descended from --from)
   --nohooks        Don't run post-rebase-tree hooks
-  --rewrite        Rewrites the TODO, expanding extended commands
   --               All following args are passed directly to rebase
+
+Plumbing commands:
+  --rewrite        Rewrites the TODO, expanding extended commands
+  --must COMMAND   Attempts to run COMMAND, rewriting to TODO if it fails
+  --branch BRANCH  Appends a command to TODO to set BRANCH to the current commit
+  --push           Pushes the current commit to the commit stack in TODO
+  --pop            Pops the commit from the commit stack in TODO
 EOF
     exit $_[0];
 }
@@ -93,10 +100,14 @@ if ($ARGV[0] eq '--must') {
   run "$ARGV[1]";
   my $result = ($? == -1) || ($? & 255) ? 255 : ($? >> 8);
   if ($result) {
-    my $cmd = $ARGV[1]; $cmd =~ s/'/'\\''/g;
+    my $cmd = $ARGV[1]; $cmd =~ s/[$`"\n\\]/\\\\\\$&/g;
     #$ENV{'PREPEND'} = "x git ir --must '$cmd'";
     #$ENV{'EDITOR'} = "$0 __PREPEND__";
-    $ENV{'EDITOR'} = "sed -i '1i x git ir --must '\\''$cmd'\\'";
+    $ENV{'GIT_EDITOR'} = "sed -i \"1i x git ir --must \\\"$cmd\\\"\"";
+    #   escaping: cmd = ["foo"\] -> [\\\"foo\\\"\\\\]
+    #   editor = [sed -i "1i x git ir --must \"\\\"foo\\\"\\\\\""]
+    #   sed arg = [1i x git ir --must "\"foo\"\\"]
+    #   git ir arg = ["foo"\]
     #print STDERR "FAIL: $ENV{'EDITOR'} $ENV{'PREPEND'}\n";
     system 'git', 'rebase', '--edit-todo';
   }
@@ -111,7 +122,7 @@ if ($ARGV[0] eq '--branch') {
   $ENV{'APPEND'} = "x git checkout $branch; git reset --hard $cur";
   my $hook = (out 'git rev-parse --show-toplevel') . '/.git/hooks/post-rebase-tree';
   $ENV{'APPEND'} .= "; $hook $branch" if $hooks and -e $hook;
-  $ENV{'EDITOR'} = "$0 __APPEND__";
+  $ENV{'GIT_EDITOR'} = "$0 __APPEND__";
   system 'git', 'rebase', '--edit-todo';
   exit;
 }
@@ -119,25 +130,25 @@ if ($ARGV[0] eq '--branch') {
 if ($ARGV[0] eq '--push') {
   my $cur = out 'git rev-parse HEAD';
   $ENV{'APPEND'} = "STACK $cur";
-  $ENV{'EDITOR'} = "$0 __APPEND__";
+  $ENV{'GIT_EDITOR'} = "$0 __APPEND__";
   system 'git', 'rebase', '--edit-todo';
   exit;
 }
 
 if ($ARGV[0] eq '--pop') {
-  $ENV{'EDITOR'} = "$0 __POP__";
+  $ENV{'GIT_EDITOR'} = "$0 __POP__";
   system 'git', 'rebase', '--edit-todo';
   exit;
 }
 
 if ($ARGV[0] eq '--rewrite') {
-  $ENV{'EDITOR'} = "$0 __REWRITE__";
+  $ENV{'GIT_EDITOR'} = "$0 __REWRITE__";
   system 'git', 'rebase', '--edit-todo';
   exit;
 }
 
 # Handle EDITOR commands.
-if ($ENV{'EDITOR'} =~ /^$0 /) {
+if ($ENV{'GIT_EDITOR'} =~ /^$0 /) {
   my $cmd = shift;
   my $file = shift;
   if ($cmd eq '__PREPEND__') {
@@ -199,7 +210,7 @@ if ($ENV{'EDITOR'} =~ /^$0 /) {
 }
 
 # Handle the main rebase command.
-system 'EDITOR=: git rebase --edit-todo 2> /dev/null'
+system 'GIT_EDITOR=: git rebase --edit-todo 2> /dev/null'
   or barf 'A rebase is already in progress.';
 
 my @rebase_args = ();
@@ -357,8 +368,9 @@ $spec .= <<EOF;
 EOF
 
 # Finally do the actual rebase.
-$ENV{'OLDEDITOR'} = $ENV{'EDITOR'};
-$ENV{'EDITOR'} = "$0 __INIT__";
+$ENV{'OLDEDITOR'} = defined $ENV{'GIT_EDITOR'} ? $ENV{'GIT_EDITOR'}
+                  : defined $ENV{'VISUAL'} ? $ENV{'VISUAL'} : $ENV{'EDITOR'};
+$ENV{'GIT_EDITOR'} = "$0 __INIT__";
 $ENV{'INIT'} = $spec;
 $ENV{'VERBOSE'} = $verbose;
 run "git rebase -i --onto $onto $onto^ $onto"; # irrelevant which branch
