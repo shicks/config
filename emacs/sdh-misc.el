@@ -349,6 +349,11 @@ the prefix argument in transient mark mode (unless the mark is active)."
   (exchange-point-and-mark
    (if (and transient-mark-mode (not mark-active)) (not arg) arg)))
 
+(defun sdh-move-point-to-mark ()
+  "Moves point to mark"
+  (interactive)
+  (set-window-point nil (mark)))
+
 ;; wraps a (require) in a catch block.
 (defun sdh-try-require (arg)
   "Tries to require a file, returns t if successful, nil otherwise"

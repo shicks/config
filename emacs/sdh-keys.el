@@ -31,6 +31,7 @@
 (global-set-key '[?\C-x down] 'bury-buffer)
 (global-set-key (kbd "C-x M-b") 'other-buffer-other-window)
 (global-set-key (kbd "C-x C-x") 'sdh-exchange-point-and-mark)
+(global-set-key (kbd "C-x x") 'sdh-move-point-to-mark)
 
 ;; TODO(sdh): C-M-y and C-M-c should call xclip (or use urxvt mycopy)
 ;; (global-set-key (kbd "C-M-y") 'clipboard-yank)
@@ -42,6 +43,7 @@
 
 ;; This used to be automatic, but something changed.
 (global-set-key [(control backspace)] 'backward-kill-word)
+(global-set-key [(super backspace)] 'backward-kill-word)
 
 
 
