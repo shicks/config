@@ -13,6 +13,7 @@
 ############################################################
 
 use strict;
+use File::Temp qw/tempfile/;
 
 my $verbose = int($ENV{'VERBOSE'});
 
@@ -191,10 +192,11 @@ if ($ENV{'GIT_EDITOR'} =~ /^$0 /) {
     }
     close F;
   } elsif ($cmd eq '__INIT__') {
-    # Overwrite the file
-    open F, ">$file";
-    print F $ENV{'INIT'};
-    close F;
+    # Overwrite the file (only if it's the first time around).
+    if (-s $ENV{'INIT'}) {
+      system "cp $ENV{'INIT'} $file";
+      unlink $ENV{'INIT'};
+    }
     # Invoke the normal editor only if interactive
     system $ENV{'OLDEDITOR'}, $file;
     my $result = ($? == -1) || ($? & 255) ? 255 : ($? >> 8);
@@ -371,6 +373,9 @@ EOF
 $ENV{'OLDEDITOR'} = defined $ENV{'GIT_EDITOR'} ? $ENV{'GIT_EDITOR'}
                   : defined $ENV{'VISUAL'} ? $ENV{'VISUAL'} : $ENV{'EDITOR'};
 $ENV{'GIT_EDITOR'} = "$0 __INIT__";
-$ENV{'INIT'} = $spec;
+my ($specfile, $specname) = tempfile();
+print $specfile $spec;
+close $specfile;
+$ENV{'INIT'} = $specname;
 $ENV{'VERBOSE'} = $verbose;
 run "git rebase -i --onto $onto $onto^ $onto"; # irrelevant which branch
