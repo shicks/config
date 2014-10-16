@@ -387,4 +387,30 @@ the prefix argument in transient mark mode (unless the mark is active)."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun xah-copy-to-register-1 ()
+  "Copy current line or text selection to register 1.
+See also: `xah-paste-from-register-1', `copy-to-register'."
+  (interactive)
+  (let (p1 p2)
+    (if (region-active-p)
+        (progn (setq p1 (region-beginning))
+               (setq p2 (region-end)))
+      (progn (setq p1 (line-beginning-position))
+             (setq p2 (line-end-position))))
+    (copy-to-register ?1 p1 p2)
+    (message "copied to register 1: 「%s」." (buffer-substring-no-properties p1 p2))))
+(defun xah-paste-from-register-1 ()
+  "Paste text from register 1.
+See also: `xah-copy-to-register-1', `insert-register'."
+  (interactive)
+  ;(when (use-region-p)   ;; Don't bother with this
+  ;  (delete-region (region-beginning) (region-end) )
+  ;  )
+  (insert-register ?1 t))
+
+(defun sdh-copy-or-insert-register (arg)
+  "Copies or inserts the contents of the '1' register: basically C-x r [si] 1"
+  (interactive "P")
+  (if arg (xah-copy-to-register-1) (xah-paste-from-register-1)))
+
 (provide 'sdh-misc)

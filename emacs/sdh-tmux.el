@@ -16,9 +16,16 @@
 ;(global-set-key (kbd "M-[ 3 4 ~") 'duplicate-line)
 ;(global-set-key (kbd "M-[ 3 5 ~") 'scroll-other-window-down)
 
+; ^[[36~ is prefix for shift if non-printable
 (global-set-key (kbd "M-[ 3 6 ~ C-k") 'duplicate-line)
 (global-set-key (kbd "M-[ 3 6 ~ C-t") 'transpose-chars-backwards)
 (global-set-key (kbd "M-[ 3 6 ~ C-M-v") 'scroll-other-window-down)
+; ^[[36~ is prefix for ctrl if printable
+(global-set-key (kbd "M-[ 3 6 ~ 0") 'sdh-copy-or-insert-register)
+
+; ^[[37~ is prefix for super
+; ^[ is prefix for meta (will come immediately before last item)
+
 (global-set-key (kbd "ESC <up>") 'move-line-or-region-up)
 (global-set-key (kbd "ESC <down>") 'move-line-or-region-down)
 
