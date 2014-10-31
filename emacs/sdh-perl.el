@@ -13,7 +13,7 @@
 (defun n-cperl-mode-hook ()
   (interactive)
   (setq cperl-indent-level 2)
-  (setq cperl-invalid-face nil) ;; Turn off the trailing whitespace indicator
+;  (setq cperl-invalid-face nil) ;; Turn off the trailing whitespace indicator
   (setq cperl-hairy nil)
 ;  (setq cperl-hairy t) ;; Turns on most of the CPerlMode options
 ;  (setq cperl-continued-statement-offset 0)
@@ -24,5 +24,17 @@
   (cperl-init-faces)
 )
 ;; (cperl-init-faces) ;; Do we need this? - it seems to do something...
+
+(defface cperl-my-trailing-spaces-face
+  '((((class color))
+     (
+      :background "color-234" ; mostly gray
+      ; :underline "grey"
+      )
+     ))
+  "My face for trailing spaces in cperl mode"
+  :group 'cperl-mode)
+
+(set-default 'cperl-invalid-face 'cperl-my-trailing-spaces-face)
 
 (provide 'sdh-perl)
