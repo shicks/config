@@ -12,6 +12,10 @@
   (interactive "F")
   (shell-command (concat "git rm " file)))
 
+(defun git-checkout (branch file)
+  (interactive "sBranch: \nF")
+  (shell-command (concat "git checkout " branch " -- " file)))
+
 (defun git-rm ()
   (interactive)
   (git-rm-file (buffer-file-name)))
@@ -52,6 +56,7 @@
 
 (global-set-key (kbd "C-c g f") 'git-open-file-from-branch)
 (global-set-key (kbd "C-c g d") 'git-diff-file-against-branch)
+(global-set-key (kbd "C-c g c") 'git-checkout)
 
 
 ;(add-to-list 'load-path "~/local/opt/emacs/egg")

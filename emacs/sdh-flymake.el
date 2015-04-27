@@ -4,7 +4,7 @@
 ;    https://github.com/illusori/emacs-flymake-cursor
 ; For now, this code will work either way.
 
-(sdh-try-require 'flymake-cursor)
+;(sdh-try-require 'flymake-cursor)
 
 (cond
  ((fboundp 'flyc/show-fly-error-at-point-now)
@@ -12,6 +12,7 @@
  ((fboundp 'flymake-cursor-show-errors-at-point-now)
   (global-set-key "\C-c\C-e" 'flymake-cursor-show-errors-at-point-now))
 )
+(global-set-key (kbd "C-c `") 'flymake-goto-next-error)
 (global-set-key "\C-Cq" 'flymake-stop-all-syntax-checks)
 
 (provide 'sdh-flymake)

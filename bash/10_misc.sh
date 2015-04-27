@@ -175,3 +175,7 @@ case "$(basename $SHELL)" in
 
     ;;
 esac
+
+if [ -e "$HOME/local/bin/prll.sh" ]; then
+  . $HOME/local/bin/prll.sh
+fi

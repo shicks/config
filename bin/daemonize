@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Runs a process as a daemon.
+# TODO(sdh): add -f to force kill/restart
+
+dir=$LOGDIR
+if [ ! -d "$dir" ]; then
+  dir=/tmp
+fi
+
+if ! pidof $1 &> /dev/null; then
+  nohup "$@" > $dir/$1.OUT 2> $dir/$1.LOG &
+fi

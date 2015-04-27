@@ -205,10 +205,33 @@
   (let ((file (buffer-file-name (get-buffer arg))))
     (if (stringp file)
         (progn  ;; TODO(sdh): at some point we should just use file-name-history
-          (set-variable 'file-name-history (cons file file-name-history))))))
+          (set-variable 'file-name-history (cons file file-name-history))
+          (sdh-filter-file-name-history)))))
+
+(defadvice save-buffer (after remove-boring-files-from-history)
+  "Removes certain files from file-name-history."
+  (sdh-filter-file-name-history))
+
+(defvar sdh-file-name-filter '()
+  "Regexes of file names to exclude from history.")
+
+(defun sdh-filter-file-name-history ()
+  "Filters file name history."
+  (if (and file-name-history
+           ;; TODO(sdh): consider checking the first N>1 files
+           (sdh-filter-individual-file (car file-name-history)))
+      (progn
+        (message "Filtering file form history: %s" (car file-name-history))
+        (set-variable 'file-name-history (cdr file-name-history)))))
+
+(defun sdh-filter-individual-file (file)
+  "Returns t if any of the file name filters matches."
+  (delq nil (mapcar (lambda (r) (string-match r file)) sdh-file-name-filter)))
 
 (ad-activate 'kill-buffer)
+(ad-activate 'save-buffer)
 (set-variable 'history-length 1000)
+
 
 
 ;;;;;;;;;;;;;;;;
@@ -413,4 +436,107 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (interactive "P")
   (if arg (xah-copy-to-register-1) (xah-paste-from-register-1)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Compilation buffer navigation
+
+(defun next-error-new-file ()
+  (interactive)
+  (with-current-buffer next-error-last-buffer
+    (compilation-next-file 1)
+    (compile-goto-error)))
+
+(defun sdh-is-flymake ()
+  (interactive)
+  (and (bound-and-true-p flymake-mode) (not (get-buffer-window "*compilation*"))))
+
+(defun sdh-next-error-new-file () (interactive) (next-error-new-file))
+
+(defun sdh-next-error () (interactive)
+  (if (sdh-is-flymake) (flymake-goto-next-error) (next-error)))
+(defun sdh-previous-error () (interactive)
+  (if (sdh-is-flymake) (flymake-goto-prev-error) (previous-error)))
+
 (provide 'sdh-misc)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Conflict resolution
+
+(defun sdh-pick-top-version (&optional arg)
+  "Run from the '========' line of a marked conflict.  Deletes the >>> version and keeps the <<< version."
+  (interactive "p")
+  (kmacro-exec-ring-item (quote (" >>>>>>>OC<<<<<<<" 0 "%d")) arg))
+
+(defun sdh-pick-bottom-version (&optional arg)
+  "Run from the '========' line of a marked conflict.  Deletes the <<< version and keeps the >>> version."
+  (interactive "p")
+  (kmacro-exec-ring-item (quote ("OB <<<<<<<>>>>>>>" 0 "%d")) arg))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Line handling
+
+(defun sdh-beginning-of-line ()
+  "Modification of (beginning-of-line) that jumps back and forth between the indent and the actual beginning-of-line."
+  (interactive)
+  (if (and (eq last-command 'sdh-beginning-of-line)
+           (= (point-at-bol) (point)))
+      (progn (end-of-line) (back-to-indentation))
+    (beginning-of-line)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Indenting
+
+;; TODO - these are only really useful until 24.4 when 'C-x TAB'
+;; is updated to use a transient mode, allowing left/right to
+;; "just work".
+
+(defun sdh-indent-rigidly (n)
+  "Indent region or otherwise current line"
+  (let* ((use-region (and transient-mark-mode mark-active))
+         (rstart (if use-region (region-beginning) (point-at-bol)))
+         (rend   (if use-region (region-end)       (point-at-eol)))
+         (deactivate-mark "irrelevant")) ; avoid deactivating mark
+    (indent-rigidly rstart rend n)))
+
+(defun sdh-rigid-right (num)
+  "Indents the region rigidly by 1 character [bound to C-)]"
+  (interactive "P")
+  (sdh-indent-rigidly (prefix-numeric-value num)))
+
+(defun sdh-rigid-left (num)
+  "Indents the region rigidly by -1 character [bound to C-(]"
+  (interactive "P")
+  (sdh-indent-rigidly (- (prefix-numeric-value num))))
+
+;; Transient indent mode: C-x TAB, then < or >
+(define-minor-mode sdh-transient-indent-mode
+  "Transiently indents a region"
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "<") 'sdh-rigid-left)
+            (define-key map (kbd "[") 'sdh-rigid-left)
+            (define-key map (kbd "<backtab>") 'sdh-rigid-left)
+            (define-key map (kbd "<left>") 'sdh-rigid-left)
+            (define-key map (kbd ">") 'sdh-rigid-right)
+            (define-key map (kbd "]") 'sdh-rigid-right)
+            (define-key map (kbd "TAB") 'sdh-rigid-right)
+            (define-key map (kbd "<right>") 'sdh-rigid-right)
+            map)
+  (if sdh-transient-indent-mode
+      (add-hook 'pre-command-hook 'sdh-transient-indent-mode-quit)))
+(defun sdh-transient-indent-mode-quit ()
+  "Quits transient indent mode unless this-command is sdh-rigid-*"
+  (interactive)
+  (when (not (member this-command '(sdh-rigid-left
+                                    sdh-rigid-right
+                                    universal-argument
+                                    universal-argument-other-key
+                                    universal-argument-more
+                                    digit-argument
+                                    negative-argument)))
+    (remove-hook 'pre-command-hook 'sdh-transient-indent-mode-quit)
+    (sdh-transient-indent-mode -1)))
+(defun sdh-maybe-start-transient-indent-mode (arg)
+  "Starts transient indent mode unless there's a prefix argument, in which case it falls back on simply indent-rigidly."
+  (interactive "P")
+  (if arg
+      (sdh-indent-rigidly (prefix-numeric-value arg))
+    (sdh-transient-indent-mode)))

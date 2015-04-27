@@ -60,8 +60,8 @@ sub barf {
 }
 
 sub get_hash {
-    my $hash = out "git rev-parse $_[0]";
-    barf "Unable to parse commit $_[0]" if $?;
+    my $hash = out "git rev-parse --revs-only $_[0]";
+    barf "Unable to parse commit $_[0]" if $? or not $hash;
     return $hash;
 }
 
@@ -96,26 +96,60 @@ sub post_process {
   close F;
 }
 
+sub esc {
+  my $cmd = $_[0];
+  $cmd =~ s/[$`"\n\\]/\\$&/g;
+  return $cmd;
+}
+
+sub prepend {
+  my $cmd = esc($_[0]);
+  $ENV{'GIT_EDITOR'} = "sed -i \"1i x $cmd\"";
+  #   escaping: cmd = ["foo"\] -> [\\\"foo\\\"\\\\]
+  #   editor = [sed -i "1i x git ir --must \"\\\"foo\\\"\\\\\""]
+  #   sed arg = [1i x git ir --must "\"foo\"\\"]
+  #   git ir arg = ["foo"\]
+  #print STDERR "FAIL: $ENV{'EDITOR'} $ENV{'PREPEND'}\n";
+  system 'git', 'rebase', '--edit-todo';
+}
+
+sub require_pristine {
+  my $diff = `git diff`;
+  chomp $diff;
+  if ($diff) {
+    my $cmd = "git ir";
+    foreach (@ARGV) {
+      $cmd = $cmd . " \"" . esc($_) . "\"";
+    }
+    prepend $cmd;
+    exit 1;
+  }
+}
+
 # Handle special commands, regardless of EDITOR.
 if ($ARGV[0] eq '--must') {
   run "$ARGV[1]";
   my $result = ($? == -1) || ($? & 255) ? 255 : ($? >> 8);
   if ($result) {
-    my $cmd = $ARGV[1]; $cmd =~ s/[$`"\n\\]/\\\\\\$&/g;
-    #$ENV{'PREPEND'} = "x git ir --must '$cmd'";
-    #$ENV{'EDITOR'} = "$0 __PREPEND__";
-    $ENV{'GIT_EDITOR'} = "sed -i \"1i x git ir --must \\\"$cmd\\\"\"";
-    #   escaping: cmd = ["foo"\] -> [\\\"foo\\\"\\\\]
-    #   editor = [sed -i "1i x git ir --must \"\\\"foo\\\"\\\\\""]
-    #   sed arg = [1i x git ir --must "\"foo\"\\"]
-    #   git ir arg = ["foo"\]
-    #print STDERR "FAIL: $ENV{'EDITOR'} $ENV{'PREPEND'}\n";
-    system 'git', 'rebase', '--edit-todo';
+    my $cmd = esc($ARGV[1]);
+    prepend("git ir --must \"$cmd\"");
+
+    #my $cmd = $ARGV[1]; $cmd =~ s/[$`"\n\\]/\\\\\\$&/g;
+    ##$ENV{'PREPEND'} = "x git ir --must '$cmd'";
+    ##$ENV{'EDITOR'} = "$0 __PREPEND__";
+    #$ENV{'GIT_EDITOR'} = "sed -i \"1i x git ir --must \\\"$cmd\\\"\"";
+    ##   escaping: cmd = ["foo"\] -> [\\\"foo\\\"\\\\]
+    ##   editor = [sed -i "1i x git ir --must \"\\\"foo\\\"\\\\\""]
+    ##   sed arg = [1i x git ir --must "\"foo\"\\"]
+    ##   git ir arg = ["foo"\]
+    ##print STDERR "FAIL: $ENV{'EDITOR'} $ENV{'PREPEND'}\n";
+    #system 'git', 'rebase', '--edit-todo';
   }
   exit $result;
 }
 
 if ($ARGV[0] eq '--branch') {
+  require_pristine();
   my $hooks = $ARGV[1] ne '--nohooks';
   shift unless $hooks;
   shift; my $branch = shift;
@@ -129,6 +163,7 @@ if ($ARGV[0] eq '--branch') {
 }
 
 if ($ARGV[0] eq '--push') {
+  require_pristine();
   my $cur = out 'git rev-parse HEAD';
   $ENV{'APPEND'} = "STACK $cur";
   $ENV{'GIT_EDITOR'} = "$0 __APPEND__";
@@ -137,6 +172,7 @@ if ($ARGV[0] eq '--push') {
 }
 
 if ($ARGV[0] eq '--pop') {
+  require_pristine();
   $ENV{'GIT_EDITOR'} = "$0 __POP__";
   system 'git', 'rebase', '--edit-todo';
   exit;
@@ -226,8 +262,10 @@ while (@ARGV) {
   $_ = shift;
   if ($_ eq '--from') {
     $from = shift;
+    get_hash $from;
   } elsif ($_ eq '--onto') {
     $onto = shift;
+    get_hash $onto;
   } elsif ($_ eq '--all') {
     $all = 1;
   } elsif ($_ eq '--nohooks') {
@@ -241,6 +279,7 @@ while (@ARGV) {
     @rebase_args = @ARGV;
     @ARGV = ();
   } elsif (/^[^-]/) {
+    get_hash $_;
     push @branches, $_;
   } else {
     usage 1;

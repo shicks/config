@@ -40,3 +40,9 @@
 ;; Custom configuration settings go in their own file.
 (setq custom-file "~/config/emacs/custom.el")
 (load custom-file)
+
+;; kmacro-decision beefs up (C-x q), allowing custom conditional branches
+;;;;;;  - consider fixing this up a bit more, or else binding it to C-x M-q
+;;;;;;    so that we don't lose the normal kbd-macro-query
+;(add-to-list 'load-path "~/config/emacs/kmacro-decision")
+;(require 'kmacro-decision)

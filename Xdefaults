@@ -162,19 +162,38 @@ URxvt.keysym.Control-6: \033[36~6
 URxvt.keysym.Control-7: \033[36~7
 URxvt.keysym.Control-8: \033[36~8
 URxvt.keysym.Control-9: \033[36~9
-URxvt.keysym.Control-Slash: \033[36~\057
+URxvt.keysym.Control-comma: \033[36~\054
+URxvt.keysym.Control-period: \033[36~\056
+URxvt.keysym.Control-slash: \033[36~\057
+URxvt.keysym.Control-less: \033[36~\074
+URxvt.keysym.Control-greater: \033[36~\076
+URxvt.keysym.Control-question: \033[36~\077
+! Note: don't map underscore because \x1f used for undo in emacs
+URxvt.keysym.Control-minus: \033[36~\055
+URxvt.keysym.Control-equal: \033[36~\075
+URxvt.keysym.Control-plus: \033[36~\053
 
-URxvt.keysym.Control-Shift-0: \033[36~\051
-URxvt.keysym.Control-Shift-1: \033[36~\041
-URxvt.keysym.Control-Shift-2: \033[36~\100
-URxvt.keysym.Control-Shift-3: \033[36~\043
-URxvt.keysym.Control-Shift-4: \033[36~\044
-URxvt.keysym.Control-Shift-5: \033[36~\045
-URxvt.keysym.Control-Shift-6: \033[36~\136
-URxvt.keysym.Control-Shift-7: \033[36~\046
-URxvt.keysym.Control-Shift-8: \033[36~\052
-URxvt.keysym.Control-Shift-9: \033[36~\050
-URxvt.keysym.Control-Shift-Slash: \033[36~\077
+URxvt.keysym.Control-parenright: \033[36~\051
+URxvt.keysym.Control-exclam: \033[36~\041
+URxvt.keysym.Control-at: \033[36~\100
+URxvt.keysym.Control-numbersign: \033[36~\043
+URxvt.keysym.Control-dollar: \033[36~\044
+URxvt.keysym.Control-percent: \033[36~\045
+URxvt.keysym.Control-asciicircum: \033[36~\136
+URxvt.keysym.Control-ampersand: \033[36~\046
+URxvt.keysym.Control-asterisk: \033[36~\052
+URxvt.keysym.Control-parenleft: \033[36~\050
+URxvt.keysym.Control-Return: \033[36~\015
+URxvt.keysym.Control-semicolon: \033[36~\073
+URxvt.keysym.Control-apostrophe: \033[36~\047
+URxvt.keysym.Control-colon: \033[36~\072
+URxvt.keysym.Control-quotedbl: \033[36~\042
+! Note: don't map curlies/pipe: they still go to \x1b, \x1c, and \x1d
+URxvt.keysym.Control-bracketleft: \033[36~\133
+URxvt.keysym.Control-bracketright: \033[36~\135
+URxvt.keysym.Control-backslash: \033[36~\134
+URxvt.keysym.Control-grave: \033[36~\140
+
 
 URxvt.keysym.Control-Meta-0: \033[36~\0330
 URxvt.keysym.Control-Meta-1: \033[36~\0331
@@ -186,19 +205,19 @@ URxvt.keysym.Control-Meta-6: \033[36~\0336
 URxvt.keysym.Control-Meta-7: \033[36~\0337
 URxvt.keysym.Control-Meta-8: \033[36~\0338
 URxvt.keysym.Control-Meta-9: \033[36~\0339
-URxvt.keysym.Control-Meta-Slash: \033[36~\033\057
+URxvt.keysym.Control-Meta-slash: \033[36~\033\057
 
-URxvt.keysym.Control-Meta-Shift-0: \033[36~\033\051
-URxvt.keysym.Control-Meta-Shift-1: \033[36~\033\041
-URxvt.keysym.Control-Meta-Shift-2: \033[36~\033\100
-URxvt.keysym.Control-Meta-Shift-3: \033[36~\033\043
-URxvt.keysym.Control-Meta-Shift-4: \033[36~\033\044
-URxvt.keysym.Control-Meta-Shift-5: \033[36~\033\045
-URxvt.keysym.Control-Meta-Shift-6: \033[36~\033\136
-URxvt.keysym.Control-Meta-Shift-7: \033[36~\033\046
-URxvt.keysym.Control-Meta-Shift-8: \033[36~\033\052
-URxvt.keysym.Control-Meta-Shift-9: \033[36~\033\050
-URxvt.keysym.Control-Meta-Shift-Slash: \033[36~\033\077
+URxvt.keysym.Control-Meta-parenright: \033[36~\033\051
+URxvt.keysym.Control-Meta-exclam: \033[36~\033\041
+URxvt.keysym.Control-Meta-at: \033[36~\033\100
+URxvt.keysym.Control-Meta-numbersign: \033[36~\033\043
+URxvt.keysym.Control-Meta-dollar: \033[36~\033\044
+URxvt.keysym.Control-Meta-percent: \033[36~\033\045
+URxvt.keysym.Control-Meta-asciicircum: \033[36~\033\136
+URxvt.keysym.Control-Meta-ampersand: \033[36~\033\046
+URxvt.keysym.Control-Meta-asterisk: \033[36~\033\052
+URxvt.keysym.Control-Meta-parenleft: \033[36~\033\050
+URxvt.keysym.Control-Meta-question: \033[36~\033\077
 
 ! Define keys using super
 URxvt.keysym.Mod4-A: \033[37~A

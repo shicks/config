@@ -28,7 +28,7 @@
 (defface cperl-my-trailing-spaces-face
   '((((class color))
      (
-      :background "color-234" ; mostly gray
+      :background "color-236" ; grey
       ; :underline "grey"
       )
      ))

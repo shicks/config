@@ -32,6 +32,23 @@
 (global-set-key (kbd "C-x M-b") 'other-buffer-other-window)
 (global-set-key (kbd "C-x C-x") 'sdh-exchange-point-and-mark)
 (global-set-key (kbd "C-x x") 'sdh-move-point-to-mark)
+(global-set-key "\C-a" 'sdh-beginning-of-line)
+
+(global-set-key (kbd "M-[ 36~\\") 'toggle-input-method)
+(global-set-key (kbd "M-[ 36~,") 'sdh-previous-error)
+(global-set-key (kbd "M-[ 36~.") 'sdh-next-error)
+(global-set-key (kbd "M-[ 36~/") 'sdh-next-error-new-file)
+
+(global-set-key (kbd "M-[ 36~<") 'sdh-pick-top-version)
+(global-set-key (kbd "M-[ 36~>") 'sdh-pick-bottom-version)
+
+(global-set-key (kbd "C-x TAB") 'sdh-maybe-start-transient-indent-mode)
+
+
+; C-x C-m C-m -> enable xterm-mouse-mode
+(defun sdh-xterm-mouse-mode-t () "" (interactive) (xterm-mouse-mode t))
+(global-set-key (kbd "C-x RET RET") 'sdh-xterm-mouse-mode-t)
+
 
 ;; TODO(sdh): C-M-y and C-M-c should call xclip (or use urxvt mycopy)
 ;; (global-set-key (kbd "C-M-y") 'clipboard-yank)
@@ -49,7 +66,7 @@
 
 ;; perforce keybindings are a pain, and seem to keep overriding me.
 (defun set-prev-window-key () "" (interactive) (global-set-key "\C-xp" 'sdh-prev-window))
-(global-set-key "\C-xp\C-xp" 'set-prev-window-key)
+(global-set-key "\C-xp\C-xp" 'set-prev-window-key) ;; get rid of perforce bindings...
 (global-set-key "\C-xp" 'sdh-prev-window)
 (global-set-key "\C-xo" 'sdh-other-window)
 
@@ -75,6 +92,26 @@
 ;  (define-key map (kbd "M-c") 'subword-capitalize)
 ;  (define-key map (kbd "M-u") 'subword-upcase)
 ;  (define-key map (kbd "M-l") 'subword-downcase))
+
+
+;; rect-mark bindings
+(define-key ctl-x-map "r\C-@" 'rm-set-mark)
+(define-key ctl-x-map [?r ?\C-\ ] 'rm-set-mark)
+(define-key ctl-x-map "r\C-x" 'rm-exchange-point-and-mark)
+(define-key ctl-x-map "r\C-w" 'rm-kill-region)
+(define-key ctl-x-map "r\M-w" 'rm-kill-ring-save)
+(define-key global-map [S-down-mouse-1] 'rm-mouse-drag-region)
+(autoload 'rm-set-mark "rect-mark"
+  "Set mark for rectangle." t)
+(autoload 'rm-exchange-point-and-mark "rect-mark"
+  "Exchange point and mark for rectangle." t)
+(autoload 'rm-kill-region "rect-mark"
+  "Kill a rectangular region and save it in the kill ring." t)
+(autoload 'rm-kill-ring-save "rect-mark"
+  "Copy a rectangular region to the kill ring." t)
+(autoload 'rm-mouse-drag-region "rect-mark"
+  "Drag out a rectangular region with the mouse." t)
+
 
 
 (provide 'sdh-keys)
