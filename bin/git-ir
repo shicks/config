@@ -73,10 +73,12 @@ sub hash_exists {
     return not $?;
 }
 
+# Appends a string to a comma-separated "poor man's list".
 sub append {
     return $_[0] ? "$_[0],$_[1]" : $_[1];
 }
 
+# Rewrite the interactive EDITOR output to something `git rebase -i` understands
 sub post_process {
   my $file = shift;
   open F, $file;
@@ -90,7 +92,7 @@ sub post_process {
       $cmd =~ s/'/'\\''/g;
       $_ = "${spaces}x git ir --must '$cmd'\n";
     }
-    s/^\s+//;
+    s/^\s+//; # Remove all leading spaces (since git chokes on spaces before #)
     s/^(?:b|branch) /x git ir --branch$ENV{'NOHOOKS'} /;
     s/^(?:\(|push)(?!>\S)/x git ir --push/;
     s/^(?:\)|pop)(?!>\S)/x git ir --pop/;
@@ -101,12 +103,14 @@ sub post_process {
   close F;
 }
 
+# Escape a command so that it can be passed as an argument to another command
 sub esc {
   my $cmd = $_[0];
   $cmd =~ s/[$`"\n\\]/\\$&/g;
   return $cmd;
 }
 
+# Prepends a command to the rebase-todo: input is a single string of shell code
 sub prepend {
   my $cmd = esc($_[0]);
   $ENV{'GIT_EDITOR'} = "sed -i \"1i x $cmd\"";
@@ -387,7 +391,7 @@ while (my $commit = pop @scan) {
   push @scan, $parent unless $bases{$parent};
 }
 
-# Build up the interactive input.
+# Generate the interactive EDITOR input: this is consumed by post_process()
 my $spec = '';
 my $indent = '';
 my %rebased = ();
