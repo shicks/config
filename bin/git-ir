@@ -59,9 +59,12 @@ sub barf {
   exit 1;
 }
 
+my %hashes = ();
 sub get_hash {
+    return $hashes{$_[0]} if $hashes{$_[0]};
     my $hash = out "git rev-parse --revs-only $_[0]";
     barf "Unable to parse commit $_[0]" if $? or not $hash;
+    $hashes{$_[0]} = $hash;
     return $hash;
 }
 
@@ -87,9 +90,11 @@ sub post_process {
       $cmd =~ s/'/'\\''/g;
       $_ = "${spaces}x git ir --must '$cmd'\n";
     }
-    s/^(\s*)(?:b|branch) /$1x git ir --branch$ENV{'NOHOOKS'} /;
-    s/^(\s*)(?:\(|push)(?!>\S)/$1x git ir --push/;
-    s/^(\s*)(?:\)|pop)(?!>\S)/$1x git ir --pop/;
+    s/^\s+//;
+    s/^(?:b|branch) /x git ir --branch$ENV{'NOHOOKS'} /;
+    s/^(?:\(|push)(?!>\S)/x git ir --push/;
+    s/^(?:\)|pop)(?!>\S)/x git ir --pop/;
+    # TODO(sdh): add some way to pre-squash a bunch of commits
     print F $_;
     chomp $_; debug $_, 1;
   }
@@ -254,15 +259,14 @@ system 'GIT_EDITOR=: git rebase --edit-todo 2> /dev/null'
 my @rebase_args = ();
 my @branches = ();
 my $onto = '';
-my $from = '';
+my %from = ();
 my $all = 0;
 delete $ENV{'NOHOOKS'};
 
 while (@ARGV) {
   $_ = shift;
   if ($_ eq '--from') {
-    $from = shift;
-    get_hash $from;
+    $from{get_hash(shift)} = 1;
   } elsif ($_ eq '--onto') {
     $onto = shift;
     get_hash $onto;
@@ -287,47 +291,83 @@ while (@ARGV) {
 }
 usage 1 unless (@branches or $all) and $onto;
 
-$onto = get_hash $onto;
-$from = get_hash $from if $from;
-if ($all) {
-  open BRANCHES, "git branch|";
-  while (<BRANCHES>) {
-    chomp $_;
-    s/^[* ].//;
-    next if /[\(\)]/;
-    push @branches, $_;
-  }
-}
+my @froms = keys %from;
+debug "\@froms = @froms", 1;
 
 # Map out the commits: hash <--> branch name
 my %branches = ();
 my %bases = ();
 my %names = ();
 my @scan = ();
+
+sub base {
+  my ($a, $b) = @_;
+  return out "git merge-base $a $b";
+}
+
+sub is_parent_of {
+  my ($parent, $child) = @_;
+  return base($parent, $child) eq $parent;
+}
+
+# Adds a branch to the queue.
+sub add_branch {
+  my ($name, $base) = @_;
+  return unless $base;
+  my $hash = get_hash $name;
+  $bases{$base} = 1;
+  $branches{$name} = $hash;
+  $names{$hash} = append $names{$hash}, $name;
+  push @scan, $hash;
+}
+
+# Iterates over %from to find a potential base, or returns ''.
+sub find_base {
+  my ($branch, $force) = @_;  # if !force then we MUST be a child of a from
+  my $commit = get_hash $branch;
+  my $ontobase = base $onto, $commit;
+  if ($commit eq $ontobase) {
+    debug "Skipping branch $branch which is below --onto", 1;
+    return '';
+  }
+  my $base = $ontobase;
+  foreach my $from (keys %from) {
+    debug "  checking from=$from", 1;
+    next if $from eq $commit;
+    my $frombase = base $from, $commit;
+    # if $from isn't actually a parent of commit, then it's not a base.
+    next if $frombase ne $from;
+    $force = 1;
+    debug "  => [$frombase] vs previous [$base]", 1;
+    # also, if we've already found a *closer* parent, then skip that, too.
+    $base = $frombase unless is_parent_of($frombase, $base);
+  }
+  return $force ? $base : '';
+}
+
+$onto = get_hash $onto;
+if ($all) {
+  open BRANCHES, "git branch|";
+  while (<BRANCHES>) {
+    chomp $_;
+    s/^[* ].//;
+    next if /[\(\)]/;
+    debug "Checking branch $_", 1;
+    my $base = find_base $_;
+    debug "  base=$base", 1;
+    add_branch($_, $base);
+  }
+}
+
+# Handle any explicit branches
 foreach (@branches) {
   next if $branches{$_};
   debug "Checking branch $_", 1;
-  my $commit = get_hash $_;
-  my $relative = $from ? $from : $onto;
-  my $ontobase = out "git merge-base $onto $commit";
-  my $frombase = $from && out "git merge-base $from $commit";
-  my $basebase = $from && out "git merge-base $frombase $ontobase";
-  # There are a lot of cases to consider here...
-  if ($ontobase eq $commit or $frombase eq $commit or $frombase ne $from) {
-     #or ($onto eq $ontobase and $from eq $basebase)) {
-    debug "Skipping branch $_", 1;
-    next;
-  }
-  my $base = $basebase ne $ontobase ? $ontobase : $frombase;
-
-  push @scan, $commit;
-  push @branches, $_;
-  $branches{$_} = $commit;
-  $names{$commit} = append $names{$commit}, $_;
-  $bases{$base} = 1;
+  add_branch($_, find_base($_, 1));
 }
 
 my @bases = keys %bases;
+@branches = keys %branches;
 debug "\@bases = @bases", 1;
 debug "\@branches = @branches", 1;
 debug "\$onto = $onto", 1;
