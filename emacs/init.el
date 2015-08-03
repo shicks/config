@@ -33,6 +33,7 @@
 
 (require 'sdh-flymake)
 (require 'sdh-go)
+(require 'fill-column-indicator)
 
 (if (file-exists-p (expand-file-name "~/local/opt/emacs"))
     (setq load-path (cons (expand-file-name "~/local/opt/emacs") load-path)))
