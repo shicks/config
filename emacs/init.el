@@ -20,6 +20,7 @@
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
     (require 'sdh-ledger)
+    (require 'sdh-js)
 )
 
 ;; Custom configuration settings go in their own file.

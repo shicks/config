@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Simple wrapper around EncFs.
+# Assumes a single encrypted filesystem in ~/encrypted which will be
+# mounted in ~/crypt.
+# Usage:
+#   crypt start   - mount volume
+#   crypt stop    - unmount volume
+#   crypt setup   - change password
+#   crypt status  - print status
+
+usage () {
+  echo <<EOF
+Usage:
+  crypt start   - mount volume
+  crypt stop    - unmount volume
+  crypt setup   - change password
+  crypt status  - print status
+EOF
+}
+
+enc=$HOME/encrypted
+dec=$HOME/crypt
+
+case "$1" in
+  (start)
+    mkdir -p $enc $dec
+    encfs $enc $dec
+    ;;
+  (stop)
+    fusermount -u $dec
+    ;;
+  (setup)
+    encfsctl passwd $enc
+    ;;
+  (status)
+    if mount | grep -q $dec; then
+      echo "crypt is currently running"
+    else
+      echo "crypt is not currently running"
+    fi
+    ;;
+  (help)
+    usage
+    ;;
+  (*)
+    usage
+    exit 1
+    ;;
+esac
