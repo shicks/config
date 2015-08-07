@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+my $modified = 0;
+my $root = `realpath \$(git rev-parse --git-dir)/..`;
+chomp $root;
+chdir $root;
+open GIT, "git status |";
+while (<GIT>) {
+  print;
+  chomp;
+  s/^#?\s*//;
+  if (s/^modified:\s*//) {
+    my $found = 0;
+    print "$root/$_:1: $1\n" unless $found;
+    $modified = 1;
+  }
+}
+exit $modified;

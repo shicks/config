@@ -1,6 +1,11 @@
 
 case "$(basename $SHELL)" in
   (bash)
+    # get rid of stupid error message..
+    function update_git_branch {
+      :
+    }
+
     ## don't put duplicate lines in the history. See bash(1) for more options
     #export HISTCONTROL=ignoredups
     ## ... and ignore same sucessive entries.
@@ -34,24 +39,20 @@ case "$(basename $SHELL)" in
     function zle-line-init() { echoti rmkx; }
     zle -N zle-line-init
 
-    # Configuration copied from zsh-newuser-install
-
     HISTFILE=~/.histfile
     HISTSIZE=1000
     SAVEHIST=1000
     setopt hist_ignore_dups
-    setopt SH_WORD_SPLIT
+    setopt sh_word_split
+    setopt pushd_minus
     setopt no_nomatch
-    setopt interactivecomments
-    setopt autopushd
+    setopt interactive_comments
+    setopt auto_pushd
     bindkey -e
-    # End of lines configured by zsh-newuser-install
-    # The following lines were added by compinstall
-    zstyle :compinstall filename '/usr/local/google/home/sdh/.zshrc'
 
+    zstyle :compinstall filename $HOME/.zshrc
     autoload -Uz compinit
     compinit
-    # End of lines added by compinstall
 
     zstyle ':completion:*' completer _complete _ignored _files
 
@@ -141,6 +142,7 @@ case "$(basename $SHELL)" in
     # Make word operations work like bash, but with subword mode
     autoload -U select-word-style
     select-word-style Bash
+
     # This is a slight change from /usr/share/zsh/functions/Zle,
     # taken from http://stackoverflow.com/questions/10847255
     function forward-word-match {
@@ -171,42 +173,9 @@ case "$(basename $SHELL)" in
       return 0
     }
 
-
-    ################################################################
-    # This should go in 50_dirs but it doesn't work...?
-
-    function lsd {
-      popd -l | perl -ne '
-        my $i = 0;
-        my $prev = "";
-        while (s/(\S+) ?//) {
-          next if $1 eq $prev;
-          printf "%3d   %s\n", $i, $1 if $i;
-          $i++; $prev = $1;
-          last if $i == 30;
-        }'
-    }
-
-    function cd {
-      if [ "$1" == "-l" ]; then
-        lsd
-        return
-      elif [ "${1#-?}" != "$1" ]; then
-        dir=${1#-}
-        dir="$(lsd | perl -ne '
-          while (<>) {
-            if (/^\s*'"$dir"'\s+(.*)/) {
-              print $1;
-              exit;
-            }
-          }
-          print STDERR "No dir found for '"$dir"'.";')"
-        echo "cd $dir"
-        builtin cd "$(echo $dir | perl -pe 's+~(/|$)+$ENV{'HOME'}$1+g')"
-      else
-        builtin cd "$@"
-      fi
-    }
-
     ;;
 esac
+
+if [ -e "$HOME/local/bin/prll.sh" ]; then
+  . $HOME/local/bin/prll.sh
+fi

@@ -65,6 +65,9 @@
  (defvar git-diff-dirs nil
    "A hash from line numbers to directory data."))
 
+(defvar git-diff-window nil
+  "The window currently displaying the git-diff buffer.")
+
 (defun git-diff-get-target (file)
   "Returns the target file for a move/copy, or the original file name"
   (if (string-match "{[^{}=[:space:]]* => \\([^{}[:space:]]*\\)}" file)
@@ -225,7 +228,7 @@ a list of changes, using the structure specified above."
   (setq git-diff-files (make-hash-table))
   (setq git-diff-dirs (make-hash-table))
   (let ((changes '())
-        (re1 "^\\([0-9]*\\)\t\\([0-9]*\\)\t\\([^\n]*\\)")
+        (re1 "^\\([-0-9]*\\)\t\\([-0-9]*\\)\t\\([^\n]*\\)")
         (re2 (concat
              "^ \\([a-z]*\\) "           ; $1: create|delete|rename|copy
              "\\(mode [0-9]\\{6\\} \\)?" ; $2: mode missing in rename/copy
@@ -353,6 +356,7 @@ to change individual files."
       ;(set-visited-file-name (concat "/tmp" rhs-file))
       ;(not-modified)
       ;(eval (list (intern-soft (with-current-buffer rhs major-mode)))))
+    (setq git-diff-window (frame-selected-window))
     (with-current-buffer (ediff-files lhs-file rhs-file)
       (ediff-update-diffs)
       (ediff-toggle-read-only ediff-buffer-A))
@@ -435,16 +439,41 @@ to change individual files."
     (delete-file rhs-file)
 ))
 
+(defun git-diff-next-diff ()
+  (interactive) ; TODO(sdh): prefix/count argument?
+  (next-line) ; TODO(sdh): make this skip dirs
+)
+(defun git-diff-prev-diff ()
+  (interactive) ; TODO(sdh): prefix/count argument?
+  (previous-line) ; TODO(sdh): make this skip dirs
+)
+; TODO(sdh): UPDATE DIFF AS THINGS CHANGE!
+; TODO(sdh): automatically create dir in revert-deleted-file
+
+
+(defun git-diff-ediff-quit-action ()
+  (if git-diff-window (progn
+    (select-window git-diff-window)
+    (setq git-diff-window nil))))
+
 (define-derived-mode git-diff-mode
   special-mode "Git Diff"
   "Major mode for directory-recursive git diffs.
 \\{git-diff-mode-map}"
 )
 
+; We need to append so it comes after ediff-cleanup-mess
+(if (boundp 'ediff-quit-hook) (progn
+  (nconc ediff-quit-hook '(git-diff-ediff-quit-action))
+  (remove-duplicates ediff-quit-hook)
+))
+
 (define-key git-diff-mode-map (kbd "RET") 'git-diff-act-on-line)
 (define-key git-diff-mode-map (kbd "x") 'git-diff-toggle-dir-visibility)
 (define-key git-diff-mode-map (kbd "d") 'git-diff-open-diff)
 (define-key git-diff-mode-map (kbd "a") 'git-diff-revert-deleted-file)
 (define-key git-diff-mode-map (kbd "r") 'git-diff-revert-added-file)
+(define-key git-diff-mode-map (kbd "n") 'git-diff-next-diff)
+(define-key git-diff-mode-map (kbd "p") 'git-diff-prev-diff)
 
 (provide 'git-diff-mode)
