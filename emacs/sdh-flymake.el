@@ -15,4 +15,6 @@
 (global-set-key (kbd "C-c `") 'flymake-goto-next-error)
 (global-set-key "\C-Cq" 'flymake-stop-all-syntax-checks)
 
+
+
 (provide 'sdh-flymake)

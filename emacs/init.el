@@ -16,24 +16,24 @@
 ;; Language-specific settings
 (require 'sdh-perl)
 (require 'sdh-git)
-(require 'closure-template-html-mode)
 
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
-    (require 'sdh-ledger)
-    (require 'sdh-js)
-)
+    (progn (require 'sdh-ledger)
+           (require 'sdh-js)))
 
-(if (string= system-name "sdh-glaptop")
-    ; TODO(sdh): figure out how to do this mor consistently.
-    (set-default-font "DejaVu Sans Mono-8")
-)
+(if (string= system-type "darwin")
+    ; TODO(sdh): figure out how to do this more consistently.
+    (progn (require 'sdh-mac)))
 
-(if (boundp 'mac-command-modifier)
-    (require 'sdh-mac)
-)
+;;This was useful for ubuntu laptop...
+;(set-default-font "DejaVu Sans Mono-8")
 
-;(require 'sdh-flymake)
+(if (not (string= system-type "darwin"))
+    ;; NOTE: These don't currently work on mac.
+    (progn (require 'closure-template-html-mode)
+           (require 'sdh-flymake)))
+
 (require 'sdh-go)
 (require 'fill-column-indicator)
 
