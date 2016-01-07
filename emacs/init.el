@@ -9,6 +9,7 @@
 ;; My own settings
 (require 'sdh-misc)
 (require 'sdh-keys)
+(require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
 

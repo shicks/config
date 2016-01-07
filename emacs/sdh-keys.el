@@ -3,6 +3,12 @@
 
 (require 'sdh-misc) ;; many of these functions are defined in sdh-misc
 
+;; TODO(sdh): make a function that applies my own keybindings so that
+;; I can simply write (sdh-kbd "C-M-,") instead of (kbd "ESC M-[ 36~,")
+
+;; We would need to find an automated way to generate and maintain
+;; all the .Xdefaults and ITerm2 config files.
+
 ;; Basic key Bindings
 (global-set-key "\C-Cc" 'compile)
 (global-set-key "\C-Cr" 'recompile)
@@ -34,13 +40,28 @@
 (global-set-key (kbd "C-x x") 'sdh-move-point-to-mark)
 (global-set-key "\C-a" 'sdh-beginning-of-line)
 
-(global-set-key (kbd "M-[ 36~\\") 'toggle-input-method)
-(global-set-key (kbd "M-[ 36~,") 'sdh-previous-error)
-(global-set-key (kbd "M-[ 36~.") 'sdh-next-error)
-(global-set-key (kbd "M-[ 36~/") 'sdh-next-error-new-file)
+(global-set-key (kbd "M-[ 36~\\") 'toggle-input-method) ; C-\
+(global-set-key (kbd "M-[ 36~,") 'sdh-previous-error)   ; C-,
+(global-set-key (kbd "M-[ 36~.") 'sdh-next-error)       ; C-.
+(global-set-key (kbd "ESC M-[ 36~,") 'sdh-pick-top-version) ; C-M-,
+(global-set-key (kbd "ESC M-[ 36~.") 'sdh-pick-bottom-version) ; C-M-.
+(global-set-key (kbd "M-[ 36~/ M-[ 36~,") 'sdh-pick-top-version) ; C-/ C-,
+(global-set-key (kbd "M-[ 36~/ M-[ 36~.") 'sdh-pick-bottom-version) ; C-/ C-.
+;(global-set-key (kbd "M-[ 36~/") 'sdh-next-error-new-file) ; never used this...
+;(key-binding (kbd "M-[ 36~/M-[ 36~"))
+(global-set-key (kbd "M-[ 36~/,") 'sdh-pick-top-version) ; C-/ ,
+(global-set-key (kbd "M-[ 36~/.") 'sdh-pick-bottom-version) ; C-/ .
 
-(global-set-key (kbd "M-[ 36~<") 'sdh-pick-top-version)
-(global-set-key (kbd "M-[ 36~>") 'sdh-pick-bottom-version)
+;; multiple-cursors mode
+(global-set-key (kbd "M-[ 36~<") 'mc/mark-previous-like-this)  ; C-<
+(global-set-key (kbd "M-[ 36~>") 'mc/mark-next-like-this)      ; C->
+(global-set-key (kbd "C-c M-[ 36~>") 'mc/mark-more-like-this-extended) ; C-c C->
+(global-set-key (kbd "C-c M-[ 36~< M-[ 36~<") 'mc/edit-lines)   ; C-c C-< C-<
+
+;; visual-regexp
+(global-set-key (kbd "C-c v m") 'vr/mc-mark)
+(global-set-key (kbd "C-c v q") 'vr/query-replace)
+(global-set-key (kbd "C-c v r") 'vr/replace)
 
 (global-set-key (kbd "C-x TAB") 'sdh-maybe-start-transient-indent-mode)
 
@@ -48,6 +69,10 @@
 ; C-x C-m C-m -> enable xterm-mouse-mode
 (defun sdh-xterm-mouse-mode-t () "" (interactive) (xterm-mouse-mode t))
 (global-set-key (kbd "C-x RET RET") 'sdh-xterm-mouse-mode-t)
+
+;; Mouse wheel scrolling (this used to just work automatically...)
+(global-set-key [mouse-4] 'sdh-mwheel-scroll)
+(global-set-key [mouse-5] 'sdh-mwheel-scroll)
 
 
 ;; TODO(sdh): C-M-y and C-M-c should call xclip (or use urxvt mycopy)

@@ -22,6 +22,8 @@
   (set-face-background 'cperl-hash-face "wheat")
   (cperl-define-key "}" 'cperl-electric-terminator)
   (cperl-init-faces)
+  ;; don't align parens!
+  (custom-set-variables '(cperl-indent-parens-as-block t))
 )
 ;; (cperl-init-faces) ;; Do we need this? - it seems to do something...
 

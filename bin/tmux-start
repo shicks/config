@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# use strict;
+
+# TMUX LAUNCHER
+# - provides a menu for how to launch a new tmux window
+# - general tmux structure
+#   - groups
+
+# Get the tmux sessions
+
+#tmux list-sessions || tmux start-server > /dev/null 2> /dev/null
+
+#open SESSIONS, "tmux list-sessions|";
+#
+#my @groups = ();
+#my @gsess = ();
+#
+#while (<SESSIONS>) {
+#  /([^:]+): .*(?:\(group ([^)]*)\))?/;
+#  my $session = $1;
+#  my $group = $2 or 0;
+#  $groups[$group] = $session;
+#  $gsess[$group] = '' unless $gsess[$group];
+#  $gsess[$group] .= "\n  $session";
+#}
+
+tmux attach || tmux

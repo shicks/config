@@ -6,6 +6,16 @@
 (setq require-final-newline t)  ; always end a file with a newline
 
 ;;;;;;;;;;;;;;;;
+;; Use MELPA
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (add-to-list
+   'package-archives
+   '("melpa" . "http://melpa.org/packages/")
+   t)
+  (package-initialize))
+
+;;;;;;;;;;;;;;;;
 ;; Misc global config
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'post-forward)
@@ -202,11 +212,12 @@
 
 (defadvice kill-buffer (before save-killed-buffer (arg))
   "Saves the file visited by the most-recently-killed buffer."
-  (let ((file (buffer-file-name (get-buffer arg))))
-    (if (stringp file)
-        (progn  ;; TODO(sdh): at some point we should just use file-name-history
-          (set-variable 'file-name-history (cons file file-name-history))
-          (sdh-filter-file-name-history)))))
+  (if arg
+      (let ((file (buffer-file-name (get-buffer arg))))
+        (if (stringp file)
+            (progn  ;; TODO(sdh): at some point we should just use file-name-history
+              (set-variable 'file-name-history (cons file file-name-history))
+              (sdh-filter-file-name-history))))))
 
 (defadvice save-buffer (after remove-boring-files-from-history)
   "Removes certain files from file-name-history."
@@ -232,14 +243,17 @@
 (ad-activate 'save-buffer)
 (set-variable 'history-length 1000)
 
-
-
 ;;;;;;;;;;;;;;;;
 ;; UI elements
 
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
+(defmacro sdh-call-if-bound (&rest forms)
+  "Calls the top-level forms only if their functions are bound."
+  (cons 'progn (mapcar (lambda (form) `(if (fboundp (car ',form)) ,form)) forms)))
+
+(sdh-call-if-bound
+ (menu-bar-mode -1)
+ (tool-bar-mode -1)
+ (scroll-bar-mode -1))
 
 
 ;;;;;;;;;;;;;;;;
@@ -540,3 +554,25 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (if arg
       (sdh-indent-rigidly (prefix-numeric-value arg))
     (sdh-transient-indent-mode)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mouse wheel handling (this used to "just work")
+
+(defun sdh-event-window (event)
+  (posn-window (event-start event)))
+(defun sdh-event-button (event)
+  (let ((x (symbol-name (event-basic-type event))))
+    (if (not (string-match "^mouse-\\([0-9]+\\)" x))
+        (error "Not a button event: %S" event))
+    (string-to-int (substring x (match-beginning 1) (match-end 1)))))
+
+(defun sdh-mwheel-scroll (event)
+  (interactive "e")
+  (let ((curwin (prog1 (selected-window) (select-window (sdh-event-window event))))
+        (button (sdh-event-button event)))
+    (unwind-protect
+        (cond ((= button 4) (scroll-down 10))
+              ((= button 5) (scroll-up 10))
+              (t (error "Bad binding")))
+      (if curwin (select-window curwin)))))

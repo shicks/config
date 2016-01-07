@@ -44,11 +44,14 @@ URxvt.color15 : #FFFFFF
 
 !URxvt.font: xft:bitstream vera sans mono:size=9:antialias=true
 !URxvt.font: xft:bitstream vera sans mono:pixelsize=11
+!! latin modern px=15 is nice, but too tall
 !URxvt.font: xft:latin modern mono:pixelsize=15
 !Xft.dpi: 92
 
+
 ! Current favorite fonts:
-URxvt.font: xft:Inconsolata:pixelsize=15
+URxvt.font: xft:monofur:pixelsize=14;antialias=true
+!URxvt.font: xft:Inconsolata:pixelsize=15
 !URxvt.font: xft:bitstream vera sans mono:pixelsize=13
 
 !,tabbedex
@@ -77,6 +80,8 @@ URxvt.scrollBar: false
 !URxvt.keysym.C-Down: \033[1;5B
 !URxvt.keysym.C-Right: \033[1;5C
 !URxvt.keysym.C-Left: \033[1;5D
+
+! Note: C-S-{Left,Right} sends \e [ 1 ; 6 {D,C} in the mac
 
 ! Just send M-BackSpace for C-BackSpace
 URxvt.keysym.C-BackSpace: \033\177

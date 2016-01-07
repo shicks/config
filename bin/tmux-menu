@@ -1,0 +1,1 @@
+tmux choose-list -l new-group,new-session-in-group -t `tmux last-window`
