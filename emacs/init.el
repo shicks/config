@@ -33,7 +33,7 @@
     (require 'sdh-mac)
 )
 
-(require 'sdh-flymake)
+;(require 'sdh-flymake)
 (require 'sdh-go)
 (require 'fill-column-indicator)
 
