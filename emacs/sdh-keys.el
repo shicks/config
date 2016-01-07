@@ -42,6 +42,7 @@
 
 ;; This used to be automatic, but something changed.
 (global-set-key [(control backspace)] 'backward-kill-word)
+(global-set-key [(super backspace)] 'backward-kill-word)
 
 
 

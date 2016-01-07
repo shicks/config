@@ -22,14 +22,13 @@
     (require 'sdh-ledger)
 )
 
-(if (string= system-name "sdh-glaptop")
-    ; TODO(sdh): figure out how to do this mor consistently.
-    (set-default-font "DejaVu Sans Mono-8")
-)
-
-(if (boundp 'mac-command-modifier)
+(if (string= system-type "darwin")
+    ; TODO(sdh): figure out how to do this more consistently.
     (require 'sdh-mac)
 )
+
+;;This was useful for ubuntu laptop...
+;(set-default-font "DejaVu Sans Mono-8")
 
 (require 'sdh-flymake)
 (require 'sdh-go)
@@ -40,3 +39,4 @@
 ;; Custom configuration settings go in their own file.
 (setq custom-file "~/config/emacs/custom.el")
 (load custom-file)
+
