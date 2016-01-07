@@ -69,7 +69,6 @@ case "$(basename $SHELL)" in
 esac
 
 
-#eval $CD_HOOK
 
 # no more hgit...
 #alias hgit='git home'

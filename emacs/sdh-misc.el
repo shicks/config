@@ -422,6 +422,14 @@ the prefix argument in transient mark mode (unless the mark is active)."
 )
 (sdh-delete-old-backup-files)
 
+
+;;; 2-character tabs in go mode
+(defun sdh-go-mode-hook ()
+  (add-hook 'before-save-hook 'gofmt-before-save)
+  (setq tab-width 2 indent-tabs-mode 1))
+(add-hook 'go-mode-hook 'sdh-go-mode-hook)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun xah-copy-to-register-1 ()

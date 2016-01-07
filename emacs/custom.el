@@ -13,13 +13,15 @@
  '(p4-global-key-prefix "p")
  '(savehist-additional-variables (cons (quote gud-gdb-history) savehist-additional-variables)))
 
+;;; NOTE: '(cperl-array-face ((t (:background "wheat" :foreground "yellow" :weight normal))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
- '(cperl-array-face ((((class color)) (:background "wheat" :foreground "yellow" :weight normal))))
+ '(cperl-array-face ((t (:background "wheat" :foreground "OrangeRed4" :weight normal))))
  '(ediff-current-diff-A ((((class color)) (:background "tomato" :foreground "black"))))
  '(ediff-current-diff-B ((((class color)) (:background "pale green" :foreground "black"))))
  '(ediff-even-diff-A ((((class color)) (:background "skyblue" :foreground "black"))))

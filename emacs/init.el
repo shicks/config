@@ -21,6 +21,7 @@
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
     (require 'sdh-ledger)
+    (require 'sdh-js)
 )
 
 (if (string= system-name "sdh-glaptop")
