@@ -1,6 +1,11 @@
 
 case "$(basename $SHELL)" in
   (bash)
+    # get rid of stupid error message..
+    function update_git_branch {
+      :
+    }
+
     ## don't put duplicate lines in the history. See bash(1) for more options
     #export HISTCONTROL=ignoredups
     ## ... and ignore same sucessive entries.
@@ -34,8 +39,6 @@ case "$(basename $SHELL)" in
     function zle-line-init() { echoti rmkx; }
     zle -N zle-line-init
 
-    # Configuration copied from zsh-newuser-install
-
     HISTFILE=~/.histfile
     HISTSIZE=1000
     SAVEHIST=1000
@@ -47,13 +50,9 @@ case "$(basename $SHELL)" in
     setopt auto_pushd
     bindkey -e
 
-    # End of lines configured by zsh-newuser-install
-    # The following lines were added by compinstall
-    zstyle :compinstall filename '/usr/local/google/home/sdh/.zshrc'
-
+    zstyle :compinstall filename $HOME/.zshrc
     autoload -Uz compinit
     compinit
-    # End of lines added by compinstall
 
     zstyle ':completion:*' completer _complete _ignored _files
 
@@ -176,3 +175,7 @@ case "$(basename $SHELL)" in
 
     ;;
 esac
+
+if [ -e "$HOME/local/bin/prll.sh" ]; then
+  . $HOME/local/bin/prll.sh
+fi

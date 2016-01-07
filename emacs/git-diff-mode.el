@@ -228,7 +228,7 @@ a list of changes, using the structure specified above."
   (setq git-diff-files (make-hash-table))
   (setq git-diff-dirs (make-hash-table))
   (let ((changes '())
-        (re1 "^\\([0-9]*\\)\t\\([0-9]*\\)\t\\([^\n]*\\)")
+        (re1 "^\\([-0-9]*\\)\t\\([-0-9]*\\)\t\\([^\n]*\\)")
         (re2 (concat
              "^ \\([a-z]*\\) "           ; $1: create|delete|rename|copy
              "\\(mode [0-9]\\{6\\} \\)?" ; $2: mode missing in rename/copy

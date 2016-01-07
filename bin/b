@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+# b
+# joins/splits lines into delimited chunks
+
+use strict;
+
+sub arg {
+  return '' if -e $ARGV[0];
+  return shift(@ARGV);
+}
+
+my $start_delim = arg();
+my $end_delim = arg() or $start_delim;
+
+sub chunk {
+  my $outputting = 1;
+  my $buffer = '';
+  while (<>) {
+    chomp $_;
+    if (/$end_delim/) {
+      print "$buffer\n" if $buffer;
+      $buffer = $outputting = '';
+    }
+    if ($outputting) {
+      s/\\/\\\\/g;
+      $buffer = "$buffer\\n" if $buffer;
+      $buffer = "$buffer$_";
+    }
+    if (/$start_delim/) {
+      $outputting = 1;
+    }      
+  }
+  print "$buffer\n" if $buffer;
+}
+
+sub unchunk {
+  while (<>) {
+    s/\\n/\n/g;
+    s/\\\\/\\/g;
+    print "$_\n";
+  }
+}
+
+if ($start_delim) { # Lines -> chunks
+  chunk();
+} else {
+  unchunk();
+}

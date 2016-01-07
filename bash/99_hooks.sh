@@ -21,7 +21,7 @@ case "$(basename $SHELL)" in
 
   (zsh)
     function precmd {
-      LASTSTATUS=$?
+      LASTSTATUS=$? # TODO(sdh): print -P '%?'
       shift_in
       set_prompt
       end_timer # TODO(sdh): record time in history?
@@ -69,7 +69,6 @@ case "$(basename $SHELL)" in
 esac
 
 
-#eval $CD_HOOK
 
 # no more hgit...
 #alias hgit='git home'

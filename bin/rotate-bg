@@ -1,0 +1,7 @@
+#!/bin/sh
+
+date >| /tmp/rotate-bg
+
+feh --bg-scale $HOME/bg/0/$(ls $HOME/bg/0 | shuf | head -1)
+
+# Used to use awsetbg -r
