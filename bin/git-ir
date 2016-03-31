@@ -13,9 +13,10 @@
 ############################################################
 
 use strict;
+use warnings;
 use File::Temp qw/tempfile/;
 
-my $verbose = int($ENV{'VERBOSE'});
+my $verbose = int($ENV{'VERBOSE'} or '0');
 
 sub usage {
     print STDERR <<EOF;
@@ -93,7 +94,8 @@ sub post_process {
       $_ = "${spaces}x git ir --must '$cmd'\n";
     }
     s/^\s+//; # Remove all leading spaces (since git chokes on spaces before #)
-    s/^(?:b|branch) /x git ir --branch$ENV{'NOHOOKS'} /;
+    my $nohooks = $ENV{'NOHOOKS'} || '';
+    s/^(?:b|branch) /x git ir --branch$nohooks /;
     s/^(?:\(|push)(?!>\S)/x git ir --push/;
     s/^(?:\)|pop)(?!>\S)/x git ir --pop/;
     # TODO(sdh): add some way to pre-squash a bunch of commits
@@ -304,6 +306,7 @@ my %bases = ();
 my %names = ();
 my @scan = ();
 
+# Note: this can return an empty string if the commits are in different trees
 sub base {
   my ($a, $b) = @_;
   return out "git merge-base $a $b";
@@ -329,22 +332,21 @@ sub add_branch {
 sub find_base {
   my ($branch, $force) = @_;  # if !force then we MUST be a child of a from
   my $commit = get_hash $branch;
-  my $ontobase = base $onto, $commit;
-  if ($commit eq $ontobase) {
+  my $base = base($onto, $commit);
+  if ($commit eq $base) {
     debug "Skipping branch $branch which is below --onto", 1;
     return '';
   }
-  my $base = $ontobase;
   foreach my $from (keys %from) {
     debug "  checking from=$from", 1;
     next if $from eq $commit;
-    my $frombase = base $from, $commit;
+    my $frombase = base($from, $commit);
     # if $from isn't actually a parent of commit, then it's not a base.
     next if $frombase ne $from;
     $force = 1;
     debug "  => [$frombase] vs previous [$base]", 1;
     # also, if we've already found a *closer* parent, then skip that, too.
-    $base = $frombase unless is_parent_of($frombase, $base);
+    $base = $frombase unless $base and is_parent_of($frombase, $base);
   }
   return $force ? $base : '';
 }
@@ -396,23 +398,23 @@ my $spec = '';
 my $indent = '';
 my %rebased = ();
 sub add { $spec .= "$indent@_\n"; }
-sub pushC { add '('; $indent = "$indent  "; }
-sub popC { $indent =~ s/..//; add ')'; }
+sub pushC { add('('); $indent = "$indent  "; }
+sub popC { $indent =~ s/..//; add(')'); }
 sub rebase {
   my $base = $_[0];
   my $summarize = $_[1];
   debug "Rebasing children of $base", 1;
-  my @children = split /,/, $children{$base};
+  my @children = $children{$base} ? split /,/, $children{$base} : ();
   my $sum = '';
   $sum = out("git show --color=never --oneline -s $base") if $summarize or @children > 1;
   foreach my $commit (@children) {
     pushC if @children > 1;
     my $pick = out "git show --color=never --oneline -s $commit";
-    add "# $sum" if $sum;
-    add "pick $pick";
+    add("# $sum") if $sum;
+    add("pick $pick");
     if ($names{$commit}) {
       foreach my $branch (split /,/, $names{$commit}) {
-        add "branch $branch";
+        add("branch $branch");
       }
     }
     rebase($commit);

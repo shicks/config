@@ -56,7 +56,7 @@ URxvt.font: xft:monofur:pixelsize=14;antialias=true
 
 !,tabbedex
 URxvt.perl-ext-common : default,matcher,mycopy-osc,set-option-osc
-URxvt.url-launcher    : google-chrome
+URxvt.url-launcher    : google-chrome-beta
 URxvt.matcher.button  : 1
 
 ! prevents man/less from disappearing from scrollback
