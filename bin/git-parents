@@ -1,0 +1,133 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use feature 'state';
+
+use Getopt::Long;
+use Pod::Usage;
+
+my $commits = 0;
+my $proper = 0;
+my $related = 0;
+
+GetOptions(
+  'commits' => \$commits,
+  'proper' => \$proper,
+  'related' => \$related,
+  'help' => sub { pod2usage(-verbose => 2); },
+) or pod2usage("$0: Failed to parse arguments");
+
+sub revparse {
+  chomp(my $hash = `git rev-parse $_[0]`);
+  $hash = '' if $hash eq $_[0] and $hash !~ /^[0-9a-f]+$/i;
+  return $hash;
+}
+
+sub mergebase {
+  chomp(my $base = `git merge-base @_`);
+  return $base;
+}
+
+my $root = shift or pod2usage("$0: No root commit given");
+my $start = shift || 'HEAD';
+my $top = $proper ? "$start^" : $start;
+my $base = mergebase($root, $top) or die "Could not find merge base";
+chomp(my $git = `git rev-parse --git-dir`);
+
+sub branches {
+  state $allbranches = undef;
+  return @$allbranches if $allbranches;
+  $allbranches = [];
+  opendir HEADS, "$git/refs/heads";
+  while (my $branch = readdir HEADS) {
+    next if $branch =~ /^\.\.?$/;
+    push $allbranches, $branch;
+  }
+  closedir HEADS;
+  return @$allbranches;
+}
+
+my $map;
+if ($commits) {
+  # no mapping
+  $map = undef;
+} else {
+  # branches
+  $map = {};
+  # Build a multimap of commit to branch
+  for my $branch (branches()) {
+    my $hash = revparse $branch;
+    $map->{$hash} ||= [];
+    push $map->{$hash}, $branch;
+  }
+}
+
+my @results = ();
+my %seen = ();
+while (1) {
+  my $commit = revparse($top) or die "Not found: $top";
+  last if $commit eq $base;
+  $seen{$commit} = 1;
+  push @results, @{$map->{$commit} || []};
+  $top = "$commit^";
+}
+
+if ($related) {
+  for my $branch (branches()) {
+    next if mergebase($branch, $root) ne $base
+            or ($proper and $branch eq $start);
+    $top = $branch;
+    my @found = ();
+    while (1) {
+      my $commit = revparse($top) or die "Not found: $top";
+      last if $commit eq $base;
+      (push @results, @found), last if $seen{$commit};
+      $seen{$commit} = 1;
+      push @found, @{$map->{$commit} || []};
+      $top = "$commit^";
+    }
+  }
+}
+
+print "@results\n";
+
+__END__
+
+=head1 NAME
+
+git parents - Lists parents of a commit, up to a given root.
+
+=head1 SYNOPSIS
+
+git parents [OPTIONS...] ROOT [BRANCH]
+
+ Options:
+   --commits    show commits rather than branches
+   --proper     do not include the top commit
+   --related    include other related commits
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--commits>
+
+Print commit IDs instead of branch names.
+
+=item B<--proper>
+
+Omit BRANCH from the results (i.e. "proper" parents).
+
+=item B<--related>
+
+Also include "aunts/uncles" and "cousins" that share at
+least one ancestor other than the root.
+
+=item B<BRANCH>
+
+Provides a branch to start from.  If this is omitted, HEAD is used.
+
+=back
+
+=cut

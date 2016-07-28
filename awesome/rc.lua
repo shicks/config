@@ -21,6 +21,7 @@ require("vicious")
 -- Load Debian menu entries
 require("debian.menu")
 
+laptop = (awful.util.pread("hostname -a") ~= "dors\n")
 
 function run_once(prg, args)
   if not prg then
@@ -108,19 +109,20 @@ end
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 myawesomemenu = {
-   { "manual", terminal .. " -e man awesome" },
-   { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "restart", awesome.restart },
-   { "quit", awesome.quit }
+  { "manual", terminal .. " -e man awesome" },
+  { "edit config", editor_cmd .. " " .. awesome.conffile },
+  { "restart", awesome.restart },
+  { "quit", awesome.quit }
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "Debian", debian.menu.Debian_menu.Debian },
-                                    { "open terminal", terminal },
-                                    { "chrome", "google-chrome-beta" },
-                                    { "lock", "xflock4" }
-                                  }
-                        })
+mymainmenu = awful.menu({
+  items = {
+    { "awesome", myawesomemenu, beautiful.awesome_icon },
+    { "Debian", debian.menu.Debian_menu.Debian },
+    { "open terminal", terminal },
+    { "chrome", "google-chrome-beta --high-dpi-support=1 --force-device-scale-factor=1" },
+    { "lock", "xflock4" }
+  }})
 
 mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
                                      menu = mymainmenu })
@@ -130,17 +132,19 @@ mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
 -- Create a textclock widget
 mytextclock = awful.widget.textclock({ align = "right" })
 
--- Register the wireless widget
-mywifi = widget({type = "textbox"})
-vicious.register(mywifi, vicious.widgets.wifi, " ${ssid}:${link}", 5, "wlan0")
-mywifi:buttons(awful.util.table.join(
-               awful.button({ }, 3, function () awful.util.spawn(terminal .. " -e wicd-curses") end)))
+if laptop then
+  -- Register the wireless widget
+  mywifi = widget({type = "textbox"})
+  vicious.register(mywifi, vicious.widgets.wifi, " ${ssid}:${link}", 5, "wlan0")
+  mywifi:buttons(awful.util.table.join(
+                 awful.button({ }, 3, function () awful.util.spawn(terminal .. " -e wicd-curses") end)))
 
--- Register the battery widget
-mybat0 = widget({type = "textbox"})
-mybat1 = widget({type = "textbox"})
-vicious.register(mybat0, vicious.widgets.bat, " $1:$3", 5, "BAT0")
-vicious.register(mybat1, vicious.widgets.bat, " $1:$3", 5, "BAT1")
+  -- Register the battery widget
+  mybat0 = widget({type = "textbox"})
+  mybat1 = widget({type = "textbox"})
+  vicious.register(mybat0, vicious.widgets.bat, " $1:$3", 5, "BAT0")
+  vicious.register(mybat1, vicious.widgets.bat, " $1:$3", 5, "BAT1")
+end
 
 -- Volume widget
 myvol = widget({type = "textbox"})
@@ -307,7 +311,9 @@ globalkeys = awful.util.table.join(
 
     -- sdh bindings
     -- TODO(sdh): add naughty notifications with volume levels
+    -- ,awful.key({ modkey }, "F12", function () awful.util.spawn("fnome-screensaver-command -l") end)
     ,awful.key({ modkey }, "F12", function () awful.util.spawn("xflock4") end)
+    ,awful.key({ }, "XF86Favorites", function () awful.util.spawn("xterm -name prodaccess -e 'prodaccess; updatecert'") end)
     ,awful.key({ modkey, "Control" }, "F12",
         function ()
             awful.util.spawn(os.getenv("HOME") .. "/local/bin/suspend.sh") end)
@@ -331,24 +337,7 @@ globalkeys = awful.util.table.join(
         function ()
             awful.util.spawn(os.getenv("HOME") .. "/local/bin/volume toggle")
         end)
-    -- TODO(sdh): consider binding to Super+F11 and Super+F10?
-    ,awful.key({                  }, "XF86Launch5",
-        function ()
-            awful.util.spawn("fetchotp -x")
-        end)
-    ,awful.key({ modkey,          }, "F5",
-        function ()
-            awful.util.spawn("fetchotp -x")
-        end)
-    ,awful.key({                  }, "XF86Launch6",
-        function ()
-            awful.util.spawn("fetchotp -x --account=stephenhicks@gmail.com")
-        end)
-    ,awful.key({ modkey,          }, "F6",
-        function ()
-            awful.util.spawn("fetchotp -x --account=stephenhicks@gmail.com")
-        end)
--- See if we can make Super+Shift+Left/right work
+    -- See if we can make Super+Shift+Left/right work
     ,awful.key({ modkey, "Shift"  }, "Left",
       function (c)
         if client.focus then
@@ -374,6 +363,22 @@ globalkeys = awful.util.table.join(
         end
       end)
     ,awful.key({ modkey }, "F7", switch) -- has the laptop icon on it
+    -- SDH: play around with preset tmux layouts?
+    ,awful.key({ modkey, "Shift" }, "Return",
+        function ()
+            -- awful.util.spawn(terminal .. " -e " .. os.getenv("HOME") .. "/local/bin/tmux-start")
+	    -- TODO(sdh): why doesn't this work?!?!?
+            awful.util.spawn(terminal .. " -e " .. "tmux-start")
+        end)
+    ,awful.key({ modkey }, "b",
+        function () awful.util.spawn(os.getenv("HOME") .. "/local/bin/rotate-bg") end)
+    ,awful.key({ modkey, "Shift" }, "z",
+        function () -- SDH: Set up a new three-window layout
+	  -- awful.layout.set(awful.layout.suit.tile.left)
+          -- awful.util.spawn(terminal .. " -e " .. os.getenv("HOME") .. "/local/bin/tmux-start")
+          -- awful.util.spawn(terminal .. " -e " .. os.getenv("HOME") .. "/local/bin/tmux-start")
+          -- awful.util.spawn(terminal .. " -e " .. os.getenv("HOME") .. "/local/bin/tmux-start")
+	end)
 )
 
 clientkeys = awful.util.table.join(
@@ -454,12 +459,15 @@ awful.rules.rules = {
                      focus = true,
                      keys = clientkeys,
                      buttons = clientbuttons } },
-    { rule = { class = "MPlayer" },
-      properties = { floating = true } },
-    { rule = { class = "pinentry" },
-      properties = { floating = true } },
-    { rule = { class = "gimp" },
-      properties = { floating = true } },
+    { rule = { class = "MPlayer" }, properties = { floating = true } },
+    { rule = { class = "pinentry" }, properties = { floating = true } },
+    { rule = { class = "gimp" }, properties = { floating = true } },
+    -- sdh: this should make `xterm -name prodaccess` always float...
+    { rule = { instance = "prodaccess" },
+      properties = { floating = true },
+      -- TODO(sdh): why does this callback not work?!?
+      callback = function(c) awful.placement.under_mouse(c) end
+    }
     -- Set Firefox to always map on tags number 2 of screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
@@ -499,3 +507,4 @@ client.add_signal("unfocus", function(c) c.border_color = beautiful.border_norma
 
 -- TODO(sdh): only for dors
 -- run_once("xrandr", '--output', 'DP-0', '--rotate', 'left')
+-- awful.util.spawn("$HOME/local/bin/fix-dors-screen")

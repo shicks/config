@@ -20,3 +20,12 @@
 
 [init]
   templatedir = ~/.gitconfig.d/templates
+
+[rerere]
+  # TODO(sdh): figure out if/how we want to use this...
+  enabled = true
+  autoupdate = true
+
+[merge "keep"]
+  # Custom merge tool allowing to tag lines with MERGE:preserve
+  driver = git-merge-keep "%A" "%O" "%B"

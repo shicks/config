@@ -52,6 +52,10 @@
 (global-set-key (kbd "M-[ 36~/,") 'sdh-pick-top-version) ; C-/ ,
 (global-set-key (kbd "M-[ 36~/.") 'sdh-pick-bottom-version) ; C-/ .
 
+(global-set-key (kbd "M-[ 36~-") 'sdh-prev-window) ; C--
+(global-set-key (kbd "M-[ 36~=") 'sdh-other-window) ; C-=
+
+
 ;; multiple-cursors mode
 (global-set-key (kbd "M-[ 36~<") 'mc/mark-previous-like-this)  ; C-<
 (global-set-key (kbd "M-[ 36~>") 'mc/mark-next-like-this)      ; C->
@@ -64,6 +68,8 @@
 (global-set-key (kbd "C-c v r") 'vr/replace)
 
 (global-set-key (kbd "C-x TAB") 'sdh-maybe-start-transient-indent-mode)
+;; TODO - see if we actually like this?
+(global-set-key (kbd "<backtab>") 'sdh-unindent-region)
 
 
 ; C-x C-m C-m -> enable xterm-mouse-mode

@@ -169,10 +169,14 @@ Returns t if the line is indeed a file."
         ;; Add the change stats
         ;(if (member face '(git-diff-rename git-diff-copy git-diff-change))
             (progn
-              (if (> added 0)
+              ; TODO(sdh): for some reason "mode change 100755 => 100644 path/to/file"
+              ; lines are breaking this by making added/deleted be nil.  For now we
+              ; just bypass these lines, but better would be to handle them correctly
+              ; and display the change in the diff view.
+              (if (and (numberp added) (> added 0))
                   (insert (propertize (concat "  +" (number-to-string added))
                                       'face 'git-diff-create)))
-              (if (> deleted 0)
+              (if (and (numberp deleted) (> deleted 0))
                   (insert (propertize (concat "  -" (number-to-string deleted))
                                       'face 'git-diff-delete)))
               )
@@ -230,7 +234,7 @@ a list of changes, using the structure specified above."
   (let ((changes '())
         (re1 "^\\([-0-9]*\\)\t\\([-0-9]*\\)\t\\([^\n]*\\)")
         (re2 (concat
-             "^ \\([a-z]*\\) "           ; $1: create|delete|rename|copy
+             "^ \\([a-z]+\\) "           ; $1: create|delete|rename|copy
              "\\(mode [0-9]\\{6\\} \\)?" ; $2: mode missing in rename/copy
              "\\([^{[:space:]]*"         ; $3: arbitrary non-braces
              "\\({[^ ]* => [^}]*}"       ;     possible {foo => bar}
@@ -340,8 +344,11 @@ to change individual files."
   (interactive "d")
   (let* ((change (gethash (line-number-at-pos pos) git-diff-files))
          (root (git-diff-get-root-dir))
-         (rhs-file (concat root "/" (git-diff-change-file change)))
-         (lhs-file (concat "/tmp" root "/" (git-diff-change-source change)))
+         (rhs-file (concat (file-name-as-directory root)
+                           (git-diff-change-file change)))
+         (lhs-file (concat "/tmp"
+                           (file-name-as-directory root)
+                           (git-diff-change-source change)))
          (source-rev (concat git-diff-against ":"
                              (git-diff-change-source change)))
          ;(rhs (find-file rhs-file))
@@ -404,11 +411,15 @@ to change individual files."
                          0 0 "change"
                          (git-diff-change-source change)))
          (root (or git-diff-git-root (git-diff-get-root-dir)))
-         (rhs-file (concat root "/" (git-diff-change-file change)))
+         (rhs-file (concat (file-name-as-directory root)
+                           (git-diff-change-file change)))
          (source-rev (concat git-diff-against ":"
                              (git-diff-change-source change)))
          ;; changes current buffer
-         (rhs (find-file rhs-file))
+         (rhs (progn
+                (if (not (file-writable-p rhs-file))
+                    (make-directory (file-name-directory rhs-file) t))
+                (find-file rhs-file)))
          )
     (with-current-buffer "*git-diff*"
       (puthash line aschange git-diff-files)
@@ -426,7 +437,8 @@ to change individual files."
   (let* ((line (line-number-at-pos pos))
          (change (gethash line git-diff-files))
          (root (or git-diff-git-root (git-diff-get-root-dir)))
-         (rhs-file (concat root "/" (git-diff-change-file change)))
+         (rhs-file (concat (file-name-as-directory root)
+                           (git-diff-change-file change)))
          )
     (if (string= (git-diff-change-type change) "create") nil
       (error "Can only delete adds"))

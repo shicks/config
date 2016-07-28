@@ -529,6 +529,11 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (interactive "P")
   (sdh-indent-rigidly (- (prefix-numeric-value num))))
 
+(defun sdh-unindent-region ()
+  "Unindents by two."
+  (interactive)
+  (sdh-rigid-left 2))
+
 ;; Transient indent mode: C-x TAB, then < or >
 (define-minor-mode sdh-transient-indent-mode
   "Transiently indents a region"
