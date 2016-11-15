@@ -11,6 +11,8 @@
 ;; plan: --numstat and --summary - go thru numstat first, assume copies
 ;; then go in and amend it with summary
 
+(require 'cl-lib)
+
 (setq ediff-split-window-function 'split-window-horizontally)
 (setq ediff-keep-variants nil)
 
@@ -85,12 +87,11 @@
 (defun git-diff-change-added (change)
   (cadr change))
 (defun git-diff-change-deleted (change)
-  (caddr change))
+  (cl-caddr change))
 (defun git-diff-change-type (change)
-  (cadddr change))
+  (cl-cadddr change))
 (defun git-diff-change-source (change)
-  (cadddr (cdr change)))
-
+  (cl-cadddr (cdr change)))
 
 ;; data structure for hierarchy:
 ;; (("com"
@@ -155,9 +156,9 @@ The key should be a list of strings."
 (defun git-diff-print-file (changes depth)
   "Prints a single file line and updates the map.
 Returns t if the line is indeed a file."
-  (if (and (listp (cdar changes)) (eq 'leaf (caadar changes)))
+  (if (and (listp (cdar changes)) (eq 'leaf (cl-caadar changes)))
       (let* ((file (caar changes))
-             (change (cdadar changes))
+             (change (cl-cdadar changes))
              (type (git-diff-change-type change))
              (face (intern-soft (concat "git-diff-" type)))
              (added (git-diff-change-added change))
