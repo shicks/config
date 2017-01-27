@@ -113,6 +113,8 @@
          (start (if mark-active (min (point) (mark)) (point-at-bol)))
          (end (if mark-active (max (point) (mark)) (+ 1 (point-at-eol))))
          (active mark-active))
+    ; figure out what's at end of both lines - is it end of buffer at either?
+    ;(describe-char end)
     (goto-char (move-region start end n))
     (if active (set-mark (+ (point) mark-index)))))
 
@@ -126,6 +128,9 @@
          (rest-of-target (buffer-substring target-line
                           (progn (goto-char target-line) (point-at-eol))))
          (missing-spaces (string-repeat " " (max 0 (- start-col (length rest-of-target))))))
+    ;; TODO(sdh): either line is missing a newline at end, then add it
+
+
     ;; first trim any extra added spaces
     ;; NOTE: problem - the delete-region throws off the other counts!
     ;;       -> need to use markers instead of indexes
