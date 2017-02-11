@@ -83,9 +83,6 @@ URxvt.scrollBar: false
 
 ! Note: C-S-{Left,Right} sends \e [ 1 ; 6 {D,C} in the mac
 
-! Just send M-BackSpace for C-BackSpace
-URxvt.keysym.C-BackSpace: \033\177
-
 ! These seem to work better - M-Od for backwards-word
 !URxvt.keysym.C-Up: \033OA
 !URxvt.keysym.C-Down: \033OB
@@ -113,7 +110,143 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !URxvt.colorIT: #ff0000
 
 
-! TODO(sdh): why does list: not work?
+!! REMAP KEYS
+!!
+!! The basic strategy here is to use an F-key prefix.  Note that rxvt
+!! sends << ESC [ %02d ~ >> for F keys, where the placeholder increases
+!! with the F-number (F1-F5 send 11-15, F6-F10 send 17-21, F11-F12 send
+!! 23-24).  Interestingly, shifted F-keys continue the sequence, more
+!! or less, with (shift+F1-F4 sending 23-26, shift+F5-F6 sending 28-29,
+!! shift+F7-F10 sending 31-34, and shift+F11-F12 breaking the pattern
+!! entirely by using 33 and 34 again, but with a $ at the end instead of
+!! a ~).  Ctrl sends ^ at the end instead of ~ (except for C-Shift-F11/12
+!! which send @ instead of $).
+!!
+!! We therefore pick 36 as our special prefix, sending << ESC [ 3 6 ~ >>,
+!! which we will call @36 below.
+!!
+!! At one point we played with using << ESC [ 3 7 ~ >> as a prefix for
+!! mod4 (super), but as far as I can tell we don't actually use it (and
+!! it clobbers AwesomeWM keybindings anyway).
+!!
+!! List of all keys (note: xev shows keysym)
+!!   * letters
+!!   * numbers (exclam, at, numbersign, dollar, percent, ampersand, asterisk,
+!!              paren{left,right})
+!!   * 11 unshifted symbols
+!!      - grave (asciitilde), minus (underscore), equal (plus)
+!!      - bracket{left,right} (brace{left,right}), backslash (bar)
+!!      - semicolon (colon), apostrophe (quotedbl)
+!!      - comma (less), period (greater), slash (question)
+!!   * escape, F-keys
+!!   * navigation (ins/del, hom/end, pup/pdn, arrows)
+!!   * backspace, tab, enter, space
+!!
+!! Survey of various modifier combinations that need addressing:
+!!   (none) -
+!!     * Letters, numbers, unshifted symbols all send themselves
+!!     * Arrow keys send << ESC [ %c >>, with A/B/C/D for up/down/right/left.
+!!     * INS, DEL, PUP, PDN, HOM, END: send F-sequence with 2, 3, 5, 6, 7, 8.
+!!     * BACKSPACE: \x7f,   TAB: \x09,   ENTER: \x0a,   SPACE: \x20
+!!   Meta - prefixes the no-modifier case with ESC, even if there was
+!!          one there already (e.g. M-INS sends << ESC ESC [ 2 ~ >>).
+!!   Control -
+!!     * Letters x <- ['A'..'Z'], sends a single byte, ord(x)-0x40,
+!!       regardless of whether shift is pressed.  Meta prefixes with ESC.
+!!     * BACKSPACE: \x08.
+!!       -> [1] actually just remap to ESC BACKSPACE
+!!     * SPACE: I believe this becomes NUL (\x00), but hard to verify.
+!!     * INS, HOME, PGUP, DEL, END, PGDN: act like F-keys with numbers
+!!       2, 7, 5, 3, 8, 6, respectively, and thus send ^ instead of ~.
+!!     * [, \, and ]: also subtracts 0x40, for \x1b (ESC), \x1c (FILE
+!!       SEPARATOR), and \x1d (GROUP SEPARATOR).  \x1c can cause problems.
+!!       -> [2] remap with other symbols to << @36 sym >> since more useful
+!!     * TAB, ENTER, and all other digits/symbols simply ignore the modifier.
+!!       -> don't remap Ctrl-Tab for now
+!!       -> [2] remap Ctrl-all others to @36 prefix plus unmodified sequence
+!!          (includes digits, backtick, hyphen, equals, brackets, backslash,
+!!          semicolon, comma, period, slash)
+!!       -> [3] remap Ctrl-Enter to same as Ctrl-Shift-J
+!!   Shift -
+!!     * Printable chars are obvious.
+!!     * TAB: << ESC [ Z >> ("backtab").
+!!     * INS: unknown, the window manager pastes before I see it.
+!!     * HOME, PGUP, DEL, END, PGDN: send $ instead of ~
+!!     * BACKSPACE, SPACE, ENTER: ignores the shift.
+!!       -> don't remap for now
+!!   Control-Shift -
+!!     * INS/HOM/PUP/DEL/END/PDN: @ suffix - no problem
+!!     * F-keys - sends ^ (ctrl) suffix with shifted number
+!!     * Letters ignore the shift.
+!!       -> [4] remap to @36 prefix plus the normal control character
+!!     * TILDE, UNDERSCORE, QUESTION - send \x1e, \x1f, \x7f
+!!       -> [5] only remap question mark (since \x7f is backspace), others okay
+!!     * Digits and other symbols ignore the control
+!!       -> [5] remap to @36 prefix plus the normal shifted character
+!!     * BACKSPACE, SPACE: ignores the shift
+!!       -> don't remap for now
+!!     * ENTER: ignores both
+!!       -> don't remap for now
+!!   Control-Meta -
+!!     * Letters - send ESC prefix to Ctrl-letter
+!!     * Numbers, unshifted symbols - ignore control
+!!       -> [6] remap same as Ctrl only [2], but add ESC after @36
+!!   Control-Meta-Shift -
+!!     * Letters - ignores shift (I think?)
+!!       -> [7] remap to << @36 ESC control-char >> (cf. [4])
+!!     * Numbers and symbols - ignores control
+!!       -> [8] remap to << @36 ESC shifted-symbol >> (cf. [5])
+!!          includes braces and pipe this time
+
+!! TODO(sdh): Fill out a few more Meta combinations
+!! TODO(sdh): Consider remapping modifiers w/ KP_* (where * is 0-9, decimal,
+!!            multiply, add, divide, subtract, enter, equal - use @37 ??
+!!            - use some other char after @36 ??
+!!            - teach sdh-kbd to support KP_ prefixes (but use normal name)
+!! TODO(sdh): Consider being more consistent with modifiers - maybe use a
+!!            bitmask?  \e[4x~ where x is 1..7 for diff modifiers?
+
+!! [1] Convert C-Backspace to M-Backspace
+!!   - This is a weird one to remap in emacs/zsh, so we just remap it here.
+
+URxvt.keysym.C-BackSpace: \033\177
+
+
+!! [2] Convert C-? (for ? digits or symbols) to << @36 ? >>
+
+URxvt.keysym.Control-0: \033[36~0
+URxvt.keysym.Control-1: \033[36~1
+URxvt.keysym.Control-2: \033[36~2
+URxvt.keysym.Control-3: \033[36~3
+URxvt.keysym.Control-4: \033[36~4
+URxvt.keysym.Control-5: \033[36~5
+URxvt.keysym.Control-6: \033[36~6
+URxvt.keysym.Control-7: \033[36~7
+URxvt.keysym.Control-8: \033[36~8
+URxvt.keysym.Control-9: \033[36~9
+
+URxvt.keysym.Control-grave: \033[36~\140
+URxvt.keysym.Control-minus: \033[36~\055
+URxvt.keysym.Control-equal: \033[36~\075
+URxvt.keysym.Control-bracketleft: \033[36~\133
+URxvt.keysym.Control-bracketright: \033[36~\135
+URxvt.keysym.Control-backslash: \033[36~\134
+URxvt.keysym.Control-semicolon: \033[36~\073
+URxvt.keysym.Control-apostrophe: \033[36~\047
+URxvt.keysym.Control-comma: \033[36~\054
+URxvt.keysym.Control-period: \033[36~\056
+URxvt.keysym.Control-slash: \033[36~\057
+
+
+!! [3] Convert C-Enter to C-Shift-J
+!!   - I don't remember why we did this...
+
+URxvt.keysym.Control-Return: \033[36~\015
+
+
+!! [4] Convert C-Shift-Letter to << @36 control-code >>
+!    - TODO(sdh): why does the "list:" operator not work for this?
+
 URxvt.keysym.Control-Shift-A: \033[36~\001
 URxvt.keysym.Control-Shift-B: \033[36~\002
 URxvt.keysym.Control-Shift-C: \033[36~\003
@@ -140,6 +273,58 @@ URxvt.keysym.Control-Shift-W: \033[36~\027
 URxvt.keysym.Control-Shift-X: \033[36~\030
 URxvt.keysym.Control-Shift-Y: \033[36~\031
 URxvt.keysym.Control-Shift-Z: \033[36~\032
+
+
+!! [5] Convert C-Shift-? (for ? digit or symbol) to << @36 shifted-symbol >>
+
+URxvt.keysym.Control-exclam: \033[36~\041
+URxvt.keysym.Control-at: \033[36~\100
+URxvt.keysym.Control-numbersign: \033[36~\043
+URxvt.keysym.Control-dollar: \033[36~\044
+URxvt.keysym.Control-percent: \033[36~\045
+URxvt.keysym.Control-asciicircum: \033[36~\136
+URxvt.keysym.Control-ampersand: \033[36~\046
+URxvt.keysym.Control-asterisk: \033[36~\052
+URxvt.keysym.Control-parenleft: \033[36~\050
+URxvt.keysym.Control-parenright: \033[36~\051
+
+! skip tilde and underscore since they have dedicated sequences
+URxvt.keysym.Control-plus: \033[36~\053
+! skip curlies and pipe to just send \x1[bdc] since these are sometimes useful??
+URxvt.keysym.Control-colon: \033[36~\072
+URxvt.keysym.Control-quotedbl: \033[36~\042
+URxvt.keysym.Control-less: \033[36~\074
+URxvt.keysym.Control-greater: \033[36~\076
+URxvt.keysym.Control-question: \033[36~\077
+
+
+!! [6] Convert C-M-? to insert ESC after C-?'s @36 (cf. [2])
+
+URxvt.keysym.Control-Meta-0: \033[36~\0330
+URxvt.keysym.Control-Meta-1: \033[36~\0331
+URxvt.keysym.Control-Meta-2: \033[36~\0332
+URxvt.keysym.Control-Meta-3: \033[36~\0333
+URxvt.keysym.Control-Meta-4: \033[36~\0334
+URxvt.keysym.Control-Meta-5: \033[36~\0335
+URxvt.keysym.Control-Meta-6: \033[36~\0336
+URxvt.keysym.Control-Meta-7: \033[36~\0337
+URxvt.keysym.Control-Meta-8: \033[36~\0338
+URxvt.keysym.Control-Meta-9: \033[36~\0339
+
+URxvt.keysym.Control-Meta-grave: \033[36~\033\140
+URxvt.keysym.Control-Meta-minus: \033[36~\033\055
+URxvt.keysym.Control-Meta-equal: \033[36~\033\075
+URxvt.keysym.Control-Meta-bracketleft: \033[36~\033\133
+URxvt.keysym.Control-Meta-bracketright: \033[36~\033\135
+URxvt.keysym.Control-Meta-backslash: \033[36~\033\134
+URxvt.keysym.Control-Meta-semicolon: \033[36~\033\073
+URxvt.keysym.Control-Meta-apostrophe: \033[36~\033\047
+URxvt.keysym.Control-Meta-comma: \033[36~\033\054
+URxvt.keysym.Control-Meta-period: \033[36~\033\056
+URxvt.keysym.Control-Meta-slash: \033[36~\033\057
+
+
+!! [7] Convert C-M-Shift-Letter to insert ESC after C-Shift-Letter's @36
 
 URxvt.keysym.Control-Meta-Shift-A: \033[36~\033\001
 URxvt.keysym.Control-Meta-Shift-B: \033[36~\033\002
@@ -168,63 +353,10 @@ URxvt.keysym.Control-Meta-Shift-X: \033[36~\033\030
 URxvt.keysym.Control-Meta-Shift-Y: \033[36~\033\031
 URxvt.keysym.Control-Meta-Shift-Z: \033[36~\033\032
 
-! Use the same \033[36~ prefix for ctrl for non-letters
-URxvt.keysym.Control-0: \033[36~0
-URxvt.keysym.Control-1: \033[36~1
-URxvt.keysym.Control-2: \033[36~2
-URxvt.keysym.Control-3: \033[36~3
-URxvt.keysym.Control-4: \033[36~4
-URxvt.keysym.Control-5: \033[36~5
-URxvt.keysym.Control-6: \033[36~6
-URxvt.keysym.Control-7: \033[36~7
-URxvt.keysym.Control-8: \033[36~8
-URxvt.keysym.Control-9: \033[36~9
-URxvt.keysym.Control-comma: \033[36~\054
-URxvt.keysym.Control-period: \033[36~\056
-URxvt.keysym.Control-slash: \033[36~\057
-URxvt.keysym.Control-less: \033[36~\074
-URxvt.keysym.Control-greater: \033[36~\076
-URxvt.keysym.Control-question: \033[36~\077
-! Note: don't map underscore because \x1f used for undo in emacs
-URxvt.keysym.Control-minus: \033[36~\055
-URxvt.keysym.Control-equal: \033[36~\075
-URxvt.keysym.Control-plus: \033[36~\053
 
-URxvt.keysym.Control-parenright: \033[36~\051
-URxvt.keysym.Control-exclam: \033[36~\041
-URxvt.keysym.Control-at: \033[36~\100
-URxvt.keysym.Control-numbersign: \033[36~\043
-URxvt.keysym.Control-dollar: \033[36~\044
-URxvt.keysym.Control-percent: \033[36~\045
-URxvt.keysym.Control-asciicircum: \033[36~\136
-URxvt.keysym.Control-ampersand: \033[36~\046
-URxvt.keysym.Control-asterisk: \033[36~\052
-URxvt.keysym.Control-parenleft: \033[36~\050
-URxvt.keysym.Control-Return: \033[36~\015
-URxvt.keysym.Control-semicolon: \033[36~\073
-URxvt.keysym.Control-apostrophe: \033[36~\047
-URxvt.keysym.Control-colon: \033[36~\072
-URxvt.keysym.Control-quotedbl: \033[36~\042
-! Note: don't map curlies/pipe: they still go to \x1b, \x1c, and \x1d
-URxvt.keysym.Control-bracketleft: \033[36~\133
-URxvt.keysym.Control-bracketright: \033[36~\135
-URxvt.keysym.Control-backslash: \033[36~\134
-URxvt.keysym.Control-grave: \033[36~\140
+!! [8] Convert C-M-Shift-? (for ? digit or symbol) to [5] w/ extra ESC
+! TODO(sdh): add remaining C-M-S keys?
 
-
-URxvt.keysym.Control-Meta-0: \033[36~\0330
-URxvt.keysym.Control-Meta-1: \033[36~\0331
-URxvt.keysym.Control-Meta-2: \033[36~\0332
-URxvt.keysym.Control-Meta-3: \033[36~\0333
-URxvt.keysym.Control-Meta-4: \033[36~\0334
-URxvt.keysym.Control-Meta-5: \033[36~\0335
-URxvt.keysym.Control-Meta-6: \033[36~\0336
-URxvt.keysym.Control-Meta-7: \033[36~\0337
-URxvt.keysym.Control-Meta-8: \033[36~\0338
-URxvt.keysym.Control-Meta-9: \033[36~\0339
-URxvt.keysym.Control-Meta-slash: \033[36~\033\057
-
-URxvt.keysym.Control-Meta-parenright: \033[36~\033\051
 URxvt.keysym.Control-Meta-exclam: \033[36~\033\041
 URxvt.keysym.Control-Meta-at: \033[36~\033\100
 URxvt.keysym.Control-Meta-numbersign: \033[36~\033\043
@@ -234,99 +366,15 @@ URxvt.keysym.Control-Meta-asciicircum: \033[36~\033\136
 URxvt.keysym.Control-Meta-ampersand: \033[36~\033\046
 URxvt.keysym.Control-Meta-asterisk: \033[36~\033\052
 URxvt.keysym.Control-Meta-parenleft: \033[36~\033\050
+URxvt.keysym.Control-Meta-parenright: \033[36~\033\051
+
+! skip tilde and underscore since they have dedicated sequences
+URxvt.keysym.Control-Meta-plus: \033[36~\033\053
+URxvt.keysym.Control-Meta-braceleft: \033[36~\033\173
+URxvt.keysym.Control-Meta-braceright: \033[36~\033\175
+URxvt.keysym.Control-Meta-bar: \033[36~\033\175
+URxvt.keysym.Control-Meta-colon: \033[36~\033\072
+URxvt.keysym.Control-Meta-quotedbl: \033[36~\033\042
+URxvt.keysym.Control-Meta-less: \033[36~\033\074
+URxvt.keysym.Control-Meta-greater: \033[36~\033\076
 URxvt.keysym.Control-Meta-question: \033[36~\033\077
-
-! Define keys using super
-URxvt.keysym.Mod4-A: \033[37~A
-URxvt.keysym.Mod4-B: \033[37~B
-URxvt.keysym.Mod4-C: \033[37~C
-URxvt.keysym.Mod4-D: \033[37~D
-URxvt.keysym.Mod4-E: \033[37~E
-URxvt.keysym.Mod4-F: \033[37~F
-URxvt.keysym.Mod4-G: \033[37~G
-URxvt.keysym.Mod4-H: \033[37~H
-URxvt.keysym.Mod4-I: \033[37~I
-URxvt.keysym.Mod4-J: \033[37~J
-URxvt.keysym.Mod4-K: \033[37~K
-URxvt.keysym.Mod4-L: \033[37~L
-URxvt.keysym.Mod4-M: \033[37~M
-URxvt.keysym.Mod4-N: \033[37~N
-URxvt.keysym.Mod4-O: \033[37~O
-URxvt.keysym.Mod4-P: \033[37~P
-URxvt.keysym.Mod4-Q: \033[37~Q
-URxvt.keysym.Mod4-R: \033[37~R
-URxvt.keysym.Mod4-S: \033[37~S
-URxvt.keysym.Mod4-T: \033[37~T
-URxvt.keysym.Mod4-U: \033[37~U
-URxvt.keysym.Mod4-V: \033[37~V
-URxvt.keysym.Mod4-W: \033[37~W
-URxvt.keysym.Mod4-X: \033[37~X
-URxvt.keysym.Mod4-Y: \033[37~Y
-URxvt.keysym.Mod4-Z: \033[37~Z
-
-URxvt.keysym.Mod4-a: \033[37~a
-URxvt.keysym.Mod4-b: \033[37~b
-URxvt.keysym.Mod4-c: \033[37~c
-URxvt.keysym.Mod4-d: \033[37~d
-URxvt.keysym.Mod4-e: \033[37~e
-URxvt.keysym.Mod4-f: \033[37~f
-URxvt.keysym.Mod4-g: \033[37~g
-URxvt.keysym.Mod4-h: \033[37~h
-URxvt.keysym.Mod4-i: \033[37~i
-URxvt.keysym.Mod4-j: \033[37~j
-URxvt.keysym.Mod4-k: \033[37~k
-URxvt.keysym.Mod4-l: \033[37~l
-URxvt.keysym.Mod4-m: \033[37~m
-URxvt.keysym.Mod4-n: \033[37~n
-URxvt.keysym.Mod4-o: \033[37~o
-URxvt.keysym.Mod4-p: \033[37~p
-URxvt.keysym.Mod4-q: \033[37~q
-URxvt.keysym.Mod4-r: \033[37~r
-URxvt.keysym.Mod4-s: \033[37~s
-URxvt.keysym.Mod4-t: \033[37~t
-URxvt.keysym.Mod4-u: \033[37~u
-URxvt.keysym.Mod4-v: \033[37~v
-URxvt.keysym.Mod4-w: \033[37~w
-URxvt.keysym.Mod4-x: \033[37~x
-URxvt.keysym.Mod4-y: \033[37~y
-URxvt.keysym.Mod4-z: \033[37~z
-
-! URxvt.keysym.Control-Mod4-A: \033[37~\001
-! URxvt.keysym.Control-Mod4-B: \033[37~\002
-! URxvt.keysym.Control-Mod4-C: \033[37~\003
-! URxvt.keysym.Control-Mod4-D: \033[37~\004
-! URxvt.keysym.Control-Mod4-E: \033[37~\005
-! URxvt.keysym.Control-Mod4-F: \033[37~\006
-! URxvt.keysym.Control-Mod4-G: \033[37~\007
-! URxvt.keysym.Control-Mod4-H: \033[37~\010
-! URxvt.keysym.Control-Mod4-I: \033[37~\011
-! URxvt.keysym.Control-Mod4-J: \033[37~\012
-! URxvt.keysym.Control-Mod4-K: \033[37~\013
-! URxvt.keysym.Control-Mod4-L: \033[37~\014
-! URxvt.keysym.Control-Mod4-M: \033[37~\015
-! URxvt.keysym.Control-Mod4-N: \033[37~\016
-! URxvt.keysym.Control-Mod4-O: \033[37~\017
-! URxvt.keysym.Control-Mod4-P: \033[37~\020
-! URxvt.keysym.Control-Mod4-Q: \033[37~\021
-! URxvt.keysym.Control-Mod4-R: \033[37~\022
-! URxvt.keysym.Control-Mod4-S: \033[37~\023
-! URxvt.keysym.Control-Mod4-T: \033[37~\024
-! URxvt.keysym.Control-Mod4-U: \033[37~\025
-! URxvt.keysym.Control-Mod4-V: \033[37~\026
-! URxvt.keysym.Control-Mod4-W: \033[37~\027
-! URxvt.keysym.Control-Mod4-X: \033[37~\030
-! URxvt.keysym.Control-Mod4-Y: \033[37~\031
-! URxvt.keysym.Control-Mod4-Z: \033[37~\032
-
-!URxvt.keysym.Control-Meta-Shift-V: \033[33~\e\026
-
-! use random F-keys for these - we can bind them in bash/emacs
-!!!! note: previously this was \033xduplicate-line\015
-!URxvt.keysym.Control-Shift-K: \033[34~
-!URxvt.keysym.Control-Meta-Shift-V: \033[35~
-!URxvt.keysym.Control-Shift-O: \033[36~
-
-!URxvt.keysym.Meta-Shift-Comma: \033\074
-!URxvt.keysym.Meta-Less: \033\074
-!URxvt.keysym.Meta-Shift-Period: \033\076
-!URxvt.keysym.Meta-Greater: \033\076

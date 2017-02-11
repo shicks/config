@@ -7,6 +7,9 @@
 ;(sdh-try-require 'flymake-cursor)
 
 (cond
+ ((fboundp 'flycheck-display-error-at-point)
+  (global-set-key "\C-c\C-e" 'flycheck-display-error-at-point))
+ ;; TODO(sdh): eliminate flymake...!
  ((fboundp 'flyc/show-fly-error-at-point-now)
   (global-set-key "\C-c\C-e" 'flyc/show-fly-error-at-point-now))
  ((fboundp 'flymake-cursor-show-errors-at-point-now)

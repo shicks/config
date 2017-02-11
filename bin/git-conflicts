@@ -1,7 +1,16 @@
 #!/usr/bin/perl
 
+my $gitdir = `git rev-parse --git-dir`;
+chomp $gitdir;
+
+if (-e "$gitdir/rebase-merge/done") {
+  # Show some context.
+  system('tail', '-1', "$gitdir/rebase-merge/done");
+  print "\n";
+}
+
 my $conflicts = 0;
-my $root = `realpath \$(git rev-parse --git-dir)/..`;
+my $root = `realpath $gitdir/..`;
 chomp $root;
 chdir $root;
 open GIT, "git status |";

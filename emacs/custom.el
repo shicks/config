@@ -22,6 +22,7 @@
  '(js2-skip-preprocessor-directives t)
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "p")
+ '(perl6-indent-offset 2)
  '(savehist-additional-variables
    (cons
     (quote gud-gdb-history)
