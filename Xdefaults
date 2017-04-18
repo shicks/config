@@ -159,7 +159,8 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !!     * INS, HOME, PGUP, DEL, END, PGDN: act like F-keys with numbers
 !!       2, 7, 5, 3, 8, 6, respectively, and thus send ^ instead of ~.
 !!     * [, \, and ]: also subtracts 0x40, for \x1b (ESC), \x1c (FILE
-!!       SEPARATOR), and \x1d (GROUP SEPARATOR).  \x1c can cause problems.
+!!       SEPARATOR), and \x1d (GROUP SEPARATOR).  \x1c can cause problems,
+!!       but emacs handles C-\ correctly, so don't remap this one.
 !!       -> [2] remap with other symbols to << @36 sym >> since more useful
 !!     * TAB, ENTER, and all other digits/symbols simply ignore the modifier.
 !!       -> don't remap Ctrl-Tab for now

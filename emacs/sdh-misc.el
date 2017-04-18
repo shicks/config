@@ -51,6 +51,15 @@
   "Returns true if the input char is a space"
   (member x '(10 13 32)))
 
+(defun sdh-find-file-as-root (file)
+  "Finds a file and uses tramp to open it as root"
+  (interactive "FFind file (root): ")
+  (find-file (concat "/sudo:root@localhost:" file)))
+
+(defun sdh-reopen-file-as-root (file)
+  "Reopens the current file with tramp to open it as root"
+  (interactive)
+  (find-file (concat "/sudo:root@localhost:" file)))
 
 ;;;;;;;;;;;;;;;;
 ;; Clipboard handling
@@ -613,7 +622,7 @@ See also: `xah-copy-to-register-1', `insert-register'."
       (| (group-n 4 letter)
          ; TODO(sdh): match uppercase/lowercase separately?
          (group-n 5 digit)
-         (group-n 6 (any "`~-_=+[{]}\|;:'\",<.>/?!@#$%^&*()"))
+         (group-n 6 (any "\\`~-_=+[{]}\|;:'\",<.>/?!@#$%^&*()"))
          ; TODO(sdh): F-keys, navigation keys, tab/etc
          (group-n 7 (+ anything)))
       string-end)
@@ -626,36 +635,35 @@ See also: `xah-copy-to-register-1', `insert-register'."
 (defun sdh-kbd (spec)
   "Parses an extended keysequence specification."
   (kbd
-   (string-join
-    (mapcar
-     (lambda (term)
-       (if (and (not window-system) (string-match sdh-kbd-re term))
-           (let* ((shift  (match-string 1 term))
-                  (ctrl   (match-string 3 term))
-                  (meta   (match-string 2 term))
-                  (esc    (if meta " ESC " " "))
-                  (letter (match-string 4 term))
-                  (digit  (match-string 5 term))
-                  (symbol (match-string 6 term))
-                  (ds     (or digit symbol))
-                  (rest   (match-string 7 term))
-                  ; Error cases, fall back on (kbd term)
-                  (err    (or
-                           rest ; unknown final key
-                           (and shift ds)))) ; use correct symbol
-             (cond
-              ;; 1. error cases (or just don't match them?)
-              (err term)
-              ;; 2. ctrl-shift-letter
-              ((and ctrl shift letter)
-               (format "M-[ 3 6 ~ %s C-%s" esc letter))
-              ;; 3. ctrl-digit, ctrl-symbol
-              ((and ctrl ds)
-               (format "M-[ 3 6 ~ %s %s" esc ds))
-              ;; 4. all other cases are trivial, just forward as-is
-              (t term)))
-         term))
-     (split-string spec))
+   (mapconcat
+    (lambda (term)
+      (if (and (not window-system) (string-match sdh-kbd-re term))
+          (let* ((shift  (match-string 1 term))
+                 (ctrl   (match-string 3 term))
+                 (meta   (match-string 2 term))
+                 (esc    (if meta " ESC " " "))
+                 (letter (match-string 4 term))
+                 (digit  (match-string 5 term))
+                 (symbol (match-string 6 term))
+                 (ds     (or digit symbol))
+                 (rest   (match-string 7 term))
+                 ; Error cases, fall back on (kbd term)
+               (err    (or
+                          rest ; unknown final key
+                          (and shift ds)))) ; use correct symbol
+            (cond
+            ;; 1. error cases (or just don't match them?)
+             (err term)
+             ;; 2. ctrl-shift-letter
+             ((and ctrl shift letter)
+              (format "M-[ 3 6 ~ %s C-%s" esc letter))
+             ;; 3. ctrl-digit, ctrl-symbol
+             ((and ctrl ds)
+              (format "M-[ 3 6 ~ %s %s" esc ds))
+             ;; 4. all other cases are trivial, just forward as-is
+             (t term)))
+       term))
+    (split-string spec)
     " ")))
 
 (provide 'sdh-misc)

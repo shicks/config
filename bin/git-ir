@@ -109,7 +109,7 @@ sub post_process {
 # Escape a command so that it can be passed as an argument to another command
 sub esc {
   my $cmd = $_[0];
-  $cmd =~ s/[$`"\n\\]/\\$&/g;
+  $cmd =~ s/[\$`"\n\\]/\\$&/g;
   return $cmd;
 }
 
@@ -170,8 +170,7 @@ if ($ARGV[0] eq '--branch') {
   my $hook = (out 'git rev-parse --show-toplevel') . '/.git/hooks/post-rebase-tree';
   $ENV{'APPEND'} .= "; $hook $branch" if $hooks and -e $hook;
   $ENV{'GIT_EDITOR'} = "$0 __APPEND__";
-  system 'git', 'rebase', '--edit-todo';
-  exit;
+  exec 'git', 'rebase', '--edit-todo';
 }
 
 if ($ARGV[0] eq '--push') {
@@ -179,21 +178,18 @@ if ($ARGV[0] eq '--push') {
   my $cur = out 'git rev-parse HEAD';
   $ENV{'APPEND'} = "STACK $cur";
   $ENV{'GIT_EDITOR'} = "$0 __APPEND__";
-  system 'git', 'rebase', '--edit-todo';
-  exit;
+  exec 'git', 'rebase', '--edit-todo';
 }
 
 if ($ARGV[0] eq '--pop') {
   require_pristine();
   $ENV{'GIT_EDITOR'} = "$0 __POP__";
-  system 'git', 'rebase', '--edit-todo';
-  exit;
+  exec 'git', 'rebase', '--edit-todo';
 }
 
 if ($ARGV[0] eq '--rewrite') {
   $ENV{'GIT_EDITOR'} = "$0 __REWRITE__";
-  system 'git', 'rebase', '--edit-todo';
-  exit;
+  exec 'git', 'rebase', '--edit-todo';
 }
 
 # Handle EDITOR commands.

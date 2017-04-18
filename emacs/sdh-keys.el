@@ -15,7 +15,7 @@
 (global-set-key (kbd "C-c k") 'kill-compilation)
 (global-set-key (kbd "C-c ;") 'comment-region)
 (global-set-key (kbd "C-c :") 'uncomment-region)
-(global-set-key (kbd "C-c SPC" 'goto-line)
+(global-set-key (kbd "C-c SPC") 'goto-line)
 (global-set-key (kbd "C-c a") 'goto-char)
 (global-set-key (kbd "C-c f") 'font-lock-fontify-buffer)
 (global-set-key (kbd "M-p") 'backward-paragraph)
@@ -38,7 +38,9 @@
 (global-set-key (kbd "C-x M-b") 'other-buffer-other-window)
 (global-set-key (kbd "C-x C-x") 'sdh-exchange-point-and-mark)
 (global-set-key (kbd "C-x x") 'sdh-move-point-to-mark)
+(global-set-key (kbd "C-x w") 'delete-region)
 (global-set-key (kbd "C-a") 'sdh-beginning-of-line)
+(global-set-key (sdh-kbd "C-x S-C-f") 'sdh-find-file-as-root)
 
 (global-set-key (sdh-kbd "C-\\") 'toggle-input-method)
 (global-set-key (sdh-kbd "C-,") 'sdh-previous-error)
@@ -57,31 +59,50 @@
 (global-set-key (sdh-kbd "C-=") 'sdh-other-window)
 (global-set-key (sdh-kbd "C-+") 'mode-line-other-buffer)
 
-;; multiple-cursors mode
-(global-set-key (sdh-kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (sdh-kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (sdh-kbd "C-M-<") 'mc/skip-to-previous-like-this)
-(global-set-key (sdh-kbd "C-M->") 'mc/skip-to-next-like-this)
-;(global-set-key (sdh-kbd "C-? C-<") 'mc/skip-to-previous-like-this)
-;(global-set-key (sdh-kbd "C-? C->") 'mc/skip-to-next-like-this)
-;(global-set-key (sdh-kbd "C-c C->") 'mc/mark-more-like-this-extended)
-;(global-set-key (sdh-kbd "C-c C-<") 'mc/edit-lines)
-
 ;; visual-regexp
-(global-set-key (kbd "C-c v m") 'vr/mc-mark)
-(global-set-key (kbd "C-c v q") 'vr/query-replace)
-(global-set-key (kbd "C-c v r") 'vr/replace)
+(if (sdh-try-require 'visual-regexp)
+    (progn
+      (global-set-key (kbd "C-c v m") 'vr/mc-mark)
+      (global-set-key (kbd "C-c v q") 'vr/query-replace)
+      (global-set-key (kbd "C-c v r") 'vr/replace)))
 
 ;;; phi-search works better with multiple-cursors
-(if (sdh-tre-require 'phi-search)
+(if (sdh-try-require 'phi-search)
     (progn
       ; TODO(sdh): consider using C-/ C-s or C-? C-s
-      (global-set-key (sdh-kbd "S-C-s") 'phi-search)
-      (global-set-key (sdh-kbd "S-C-r") 'phi-search-backward)))
+      (global-set-key (sdh-kbd "C-/ C-s") 'phi-search)
+      (global-set-key (sdh-kbd "C-/ C-r") 'phi-search-backward)))
+
+(if (sdh-try-require 'phi-replace)
+    (progn
+      (global-set-key (sdh-kbd "C-/ %") 'phi-replace)))
+
+(if (sdh-try-require 'multiple-cursors)
+    (progn
+      ;; multiple-cursors mode
+      (global-set-key (sdh-kbd "C-<") 'mc/mark-previous-like-this)
+      (global-set-key (sdh-kbd "C->") 'mc/mark-next-like-this)
+      (global-set-key (sdh-kbd "C-M-<") 'mc/skip-to-previous-like-this)
+      (global-set-key (sdh-kbd "C-M->") 'mc/skip-to-next-like-this)
+      (global-set-key (sdh-kbd "C-? C-?") 'mc/mark-all-like-this)
+      ;(global-set-key (sdh-kbd "C-? C-<") 'mc/skip-to-previous-like-this)
+      ;(global-set-key (sdh-kbd "C-? C->") 'mc/skip-to-next-like-this)
+      ;(global-set-key (sdh-kbd "C-c C->") 'mc/mark-more-like-this-extended)
+      ;(global-set-key (sdh-kbd "C-c C-<") 'mc/edit-lines)
+      (if (sdh-try-require 'phi-search)
+          (progn
+            ;; multiple-cursors mode doesn't support isearch: use phi-search
+            (define-key mc/keymap (kbd "C-s") 'phi-search)
+            (define-key mc/keymap (kbd "C-r") 'phi-search-backward)
+            (if (sdh-try-require 'phi-search-mc)
+                (progn (phi-search-mc/setup-keys)
+                       (add-hook 'isearch-mode-hook 'phi-search-from-isearch-mc/setup-keys)))))))
+
 
 (global-set-key (kbd "C-x TAB") 'sdh-maybe-start-transient-indent-mode)
 ;; TODO - see if we actually like this?
-(global-set-key (kbd "<backtab>") 'sdh-unindent-region)
+;;(global-set-key (kbd "<backtab>") 'sdh-unindent-region)
+(global-set-key (kbd "<backtab>") 'sdh-maybe-start-transient-indent-mode)
 
 
 ; C-x C-m C-m -> enable xterm-mouse-mode

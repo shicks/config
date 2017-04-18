@@ -4,7 +4,7 @@
 
 my $count = 2;
 $count = $ARGV[1], shift, shift if $ARGV[0] eq '-c';
-my $lines = shift or `tput lines`; chomp $lines;
+my $lines = shift || (`tput lines` - 2); chomp $lines;
 my $cols = `tput cols`; chomp $cols;
 
 sub ceil {

@@ -28,8 +28,7 @@
  '(savehist-additional-variables
    (cons
     (quote gud-gdb-history)
-    savehist-additional-variables))
- '(tool-bar-mode nil))
+    savehist-additional-variables)))
 
 ;;; NOTE: '(cperl-array-face ((t (:background "wheat" :foreground "yellow" :weight normal))))
 
