@@ -30,6 +30,7 @@
 (setq inhibit-splash-screen t)  ; Never show splash screen
 
 (setq delete-active-region nil) ; don't delete active regions on backspace
+(setq set-mark-command-repeat-pop t) ; C-u C-SPC C-SPC... will cycle
 
 ;(setq debugger 'edebug-debug)  ; Use edebug for emacs lisp
 
@@ -56,10 +57,10 @@
   (interactive "FFind file (root): ")
   (find-file (concat "/sudo:root@localhost:" file)))
 
-(defun sdh-reopen-file-as-root (file)
+(defun sdh-reopen-file-as-root ()
   "Reopens the current file with tramp to open it as root"
   (interactive)
-  (find-file (concat "/sudo:root@localhost:" file)))
+  (find-alternate-file (concat "/sudo:root@localhost:" (buffer-file-name))))
 
 ;;;;;;;;;;;;;;;;
 ;; Clipboard handling

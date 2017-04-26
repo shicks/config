@@ -40,7 +40,7 @@
 (global-set-key (kbd "C-x x") 'sdh-move-point-to-mark)
 (global-set-key (kbd "C-x w") 'delete-region)
 (global-set-key (kbd "C-a") 'sdh-beginning-of-line)
-(global-set-key (sdh-kbd "C-x S-C-f") 'sdh-find-file-as-root)
+(global-set-key (sdh-kbd "C-x S-C-f") 'sdh-reopen-file-as-root)
 
 (global-set-key (sdh-kbd "C-\\") 'toggle-input-method)
 (global-set-key (sdh-kbd "C-,") 'sdh-previous-error)

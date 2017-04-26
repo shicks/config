@@ -4,35 +4,61 @@ Emacs.foreground: White
 
 
 URxvt.geometry:   203x70
-URxvt.saveLines:  8192
+! NOTE(sdh): do not save any lines: prevent terminal intercepting scrollback
+! URxvt.saveLines:  8192
 
-! to match gnome-terminal "Linux console" scheme
-! foreground/background
+
+! to match gnome-terminal "Linux console" scheme (foreground/background)
+! NOTE(sdh): made colors brighter from originals (commented out #AA0000, etc)
+! The downside of this is that non-bold background colors also get brighter.
+! It would be nice if we could have the backgrounds stay the original dark
+! colors, but still get brighter non-bold foreground.
+
+
 URxvt*background: #000000
 URxvt*foreground: #ffffff
+
 ! black
 URxvt.color0  : #000000
 URxvt.color8  : #555555
+
 ! red
-URxvt.color1  : #AA0000
+!URxvt.color1  : #AA0000
+!URxvt.color1  : #EE4444
+URxvt.color1  : #DD3C3C
 URxvt.color9  : #FF5555
+
 ! green
-URxvt.color2  : #00AA00
+!URxvt.color2  : #00AA00
+!URxvt.color2  : #44EE44
+URxvt.color2  : #3CDD3C
 URxvt.color10 : #55FF55
+
 ! yellow
-URxvt.color3  : #AA5500
+!URxvt.color3  : #AA5500
+URxvt.color3  : #DD9944
 URxvt.color11 : #FFFF55
+
 ! blue
-URxvt.color4  : #0000AA
-URxvt.color12 : #5555FF
+!URxvt.color4  : #0000AA
+!URxvt.color4  : #4444EE
+URxvt.color4  : #7777FF
+!URxvt.color12 : #5555FF
+URxvt.color12 : #7777FF
+
 ! magenta
-URxvt.color5  : #AA00AA
+!URxvt.color5  : #AA00AA
+URxvt.color5  : #DD44DD
 URxvt.color13 : #FF55FF
+
 ! cyan
-URxvt.color6  : #00AAAA
+!URxvt.color6  : #00AAAA
+URxvt.color6  : #44DDDD
 URxvt.color14 : #55FFFF
+
 ! white
-URxvt.color7  : #AAAAAA
+!URxvt.color7  : #AAAAAA
+URxvt.color7  : #CCCCCC
 URxvt.color15 : #FFFFFF
 
 !URxvt.font: xft:deja vu sans mono:size=9:antialias=true
@@ -105,7 +131,7 @@ URxvt.iso14755: false
 !URxvt.iconFile: /usr/share/icons/gnome/32x32/apps/gnome-terminal.png
 URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 
-!! tmux 1.5 renders italics "properly", but it's harder to spot at a glance,
+!! tmux 1.5 renders italics "properly", but it is harder to spot at a glance,
 !! so instead we highlight them extra.  An alternative is screen-noit
 !URxvt.colorIT: #ff0000
 
@@ -126,7 +152,7 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !! which we will call @36 below.
 !!
 !! At one point we played with using << ESC [ 3 7 ~ >> as a prefix for
-!! mod4 (super), but as far as I can tell we don't actually use it (and
+!! mod4 (super), but as far as I can tell we do not actually use it (and
 !! it clobbers AwesomeWM keybindings anyway).
 !!
 !! List of all keys (note: xev shows keysym)
@@ -160,10 +186,10 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !!       2, 7, 5, 3, 8, 6, respectively, and thus send ^ instead of ~.
 !!     * [, \, and ]: also subtracts 0x40, for \x1b (ESC), \x1c (FILE
 !!       SEPARATOR), and \x1d (GROUP SEPARATOR).  \x1c can cause problems,
-!!       but emacs handles C-\ correctly, so don't remap this one.
+!!       but emacs handles C-\ correctly, so do not remap this one.
 !!       -> [2] remap with other symbols to << @36 sym >> since more useful
 !!     * TAB, ENTER, and all other digits/symbols simply ignore the modifier.
-!!       -> don't remap Ctrl-Tab for now
+!!       -> do not remap Ctrl-Tab for now
 !!       -> [2] remap Ctrl-all others to @36 prefix plus unmodified sequence
 !!          (includes digits, backtick, hyphen, equals, brackets, backslash,
 !!          semicolon, comma, period, slash)
@@ -174,7 +200,7 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !!     * INS: unknown, the window manager pastes before I see it.
 !!     * HOME, PGUP, DEL, END, PGDN: send $ instead of ~
 !!     * BACKSPACE, SPACE, ENTER: ignores the shift.
-!!       -> don't remap for now
+!!       -> do not remap for now
 !!   Control-Shift -
 !!     * INS/HOM/PUP/DEL/END/PDN: @ suffix - no problem
 !!     * F-keys - sends ^ (ctrl) suffix with shifted number
@@ -185,9 +211,9 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !!     * Digits and other symbols ignore the control
 !!       -> [5] remap to @36 prefix plus the normal shifted character
 !!     * BACKSPACE, SPACE: ignores the shift
-!!       -> don't remap for now
+!!       -> do not remap for now
 !!     * ENTER: ignores both
-!!       -> don't remap for now
+!!       -> do not remap for now
 !!   Control-Meta -
 !!     * Letters - send ESC prefix to Ctrl-letter
 !!     * Numbers, unshifted symbols - ignore control
@@ -240,7 +266,7 @@ URxvt.keysym.Control-slash: \033[36~\057
 
 
 !! [3] Convert C-Enter to C-Shift-J
-!!   - I don't remember why we did this...
+!!   - I do not remember why we did this...
 
 URxvt.keysym.Control-Return: \033[36~\015
 
@@ -299,7 +325,7 @@ URxvt.keysym.Control-greater: \033[36~\076
 URxvt.keysym.Control-question: \033[36~\077
 
 
-!! [6] Convert C-M-? to insert ESC after C-?'s @36 (cf. [2])
+!! [6] Convert C-M-? to insert ESC after the @36 from C-? (cf. [2])
 
 URxvt.keysym.Control-Meta-0: \033[36~\0330
 URxvt.keysym.Control-Meta-1: \033[36~\0331
@@ -325,7 +351,7 @@ URxvt.keysym.Control-Meta-period: \033[36~\033\056
 URxvt.keysym.Control-Meta-slash: \033[36~\033\057
 
 
-!! [7] Convert C-M-Shift-Letter to insert ESC after C-Shift-Letter's @36
+!! [7] Convert C-M-Shift-Letter to insert ESC after the @36 from C-Shift-Letter
 
 URxvt.keysym.Control-Meta-Shift-A: \033[36~\033\001
 URxvt.keysym.Control-Meta-Shift-B: \033[36~\033\002
