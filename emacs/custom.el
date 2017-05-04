@@ -25,12 +25,15 @@
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "p")
  '(perl6-indent-offset 2)
+ '(package-selected-packages (quote (js2-mode)))
  '(savehist-additional-variables
    (cons
     (quote gud-gdb-history)
     savehist-additional-variables)))
 
 ;;; NOTE: '(cperl-array-face ((t (:background "wheat" :foreground "yellow" :weight normal))))
+;;;       '(cperl-array-face ((((class color)) (:background "wheat" :foreground "yellow" :weight normal))))
+;;;       '(cperl-array-face ((t (:background "wheat" :foreground "Brown" :weight normal))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
