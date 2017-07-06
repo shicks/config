@@ -7,3 +7,5 @@ export SHELL=$(which bash)
 for a in $HOME/.bash.d/??_*.sh; do
   . $a
 done
+export CLICOLOR=1
+export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd

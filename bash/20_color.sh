@@ -57,9 +57,9 @@ case "$TERM:$COLORTERM" in
 esac
 
 case "$TERM" in
-  *-color)     set_ansi_colors ;;
-  *-256color)  set_ansi_colors ;;
-  *)           unset_ansi_colors ;;
+  *-color*)     set_ansi_colors ;;
+  *-256color*)  set_ansi_colors ;;
+  *)            unset_ansi_colors ;;
 esac
 
 export TERM

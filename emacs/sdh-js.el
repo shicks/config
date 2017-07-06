@@ -14,7 +14,8 @@
 
 (setq-default js2-basic-offset 2)
 (setq-default js2-bounce-indent-p 't)
-(setq-default js2-global-externs '("goog" "sdh" "window" "JSON"))
+(setq-default js2-global-externs
+              '("goog" "sdh" "window" "JSON" "process" "require" "__dirname"))
 (setq-default js2-strict-trailing-comma-warning nil)
 
 ;(smart-tabs-advice js2-indent-line js2-basic-offset)

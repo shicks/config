@@ -5,8 +5,19 @@ function ps1_dollar {
   case "$UID" in (0) echo '#' ;; (*) echo '$' ;; esac
 }
 
+if touch -d "now + 5 minutes" $HOME/.sh/$$.ps1time &> /dev/null; then
+  function ps1_updatetime {
+    touch -d "now + 5 minutes" $HOME/.sh/$$.ps1time
+  }
+else
+  function ps1_updatetime {
+    touch -am $HOME/.sh/$$.ps1time
+    touch -A0500 $HOME/.sh/$$.ps1time
+  }
+fi
+
 function ps1_time {
-  touch -d "now + 5 minutes" $HOME/.sh/$$.ps1time
+  ps1_updatetime
   local timecolor
   case "$(hostname -s)" in
     (dors|daneel) timecolor=cyan ;;
