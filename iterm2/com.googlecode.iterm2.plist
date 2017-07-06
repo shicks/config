@@ -212,11 +212,11 @@
 	<key>NSTableView Supports v2 KeyBingingTable</key>
 	<true/>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>269 100 918 512 0 0 1440 877 </string>
+	<string>269 139 796 473 0 0 1440 900 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>777 64 570 402 0 0 1440 877 </string>
+	<string>30 49 570 402 0 0 1440 877 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>0 464 570 402 0 0 1440 877 </string>
+	<string>0 74 584 792 0 0 1440 877 </string>
 	<key>NeverWarnAboutShortLivedSessions_01F2BCD4-EEC4-49E3-816E-A4730E68A07C</key>
 	<true/>
 	<key>New Bookmarks</key>
