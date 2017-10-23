@@ -1,0 +1,374 @@
+{
+  "BTTPresetName" : "BetterTouchTool_8254AE13-AAAA-4AFF-943F-53129C4C0237",
+  "BTTPresetUUID" : "5622B84D-B672-4DE6-9F26-48065E361F71",
+  "BTTPresetContent" : [
+    {
+      "BTTAppBundleIdentifier" : "org.gnu.Emacs",
+      "BTTAppName" : "Emacs",
+      "BTTAppSpecificSettings" : {
+
+      },
+      "BTTTriggers" : [
+        {
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,51",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 51,
+          "BTTShortcutModifierKeys" : 262144,
+          "BTTOrder" : 0
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "BT.G",
+      "BTTAppName" : "Global",
+      "BTTAppSpecificSettings" : {
+
+      },
+      "BTTTriggers" : [
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTPredefinedActionType" : 5,
+          "BTTPredefinedActionName" : "Mission Control",
+          "BTTEnabled" : 0,
+          "BTTShortcutKeyCode" : 126,
+          "BTTShortcutModifierKeys" : 9043968,
+          "BTTOrder" : 4
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTPredefinedActionType" : 113,
+          "BTTPredefinedActionName" : "Move Left a Space",
+          "BTTEnabled" : 0,
+          "BTTShortcutKeyCode" : 123,
+          "BTTShortcutModifierKeys" : 9043968,
+          "BTTOrder" : 2
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTPredefinedActionType" : 114,
+          "BTTPredefinedActionName" : "Move Right a Space",
+          "BTTEnabled" : 0,
+          "BTTShortcutKeyCode" : 124,
+          "BTTShortcutModifierKeys" : 9043968,
+          "BTTOrder" : 3
+        },
+        {
+          "BTTTriggerType" : 138,
+          "BTTTriggerTypeDescription" : "TipTap Middle (2 Fingers Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTPredefinedActionType" : 1,
+          "BTTPredefinedActionName" : "Middle Click",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 0
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "59,14",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 119,
+          "BTTShortcutModifierKeys" : 0,
+          "BTTOrder" : 7
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "59,0",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 115,
+          "BTTShortcutModifierKeys" : 8388608,
+          "BTTOrder" : 6
+        },
+        {
+          "BTTTriggerType" : 106,
+          "BTTTriggerTypeDescription" : "4 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTPredefinedActionType" : 113,
+          "BTTPredefinedActionName" : "Move Left a Space",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 2
+        },
+        {
+          "BTTTriggerType" : 108,
+          "BTTTriggerTypeDescription" : "4 Finger Swipe Up",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTPredefinedActionType" : 5,
+          "BTTPredefinedActionName" : "Mission Control",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 3
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,51",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 51,
+          "BTTShortcutModifierKeys" : 262144,
+          "BTTOrder" : 0
+        },
+        {
+          "BTTTriggerType" : 105,
+          "BTTTriggerTypeDescription" : "4 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTPredefinedActionType" : 114,
+          "BTTPredefinedActionName" : "Move Right a Space",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 1
+        },
+        {
+          "BTTTriggerType" : 107,
+          "BTTTriggerTypeDescription" : "4 Finger Swipe Down",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTPredefinedActionType" : 6,
+          "BTTPredefinedActionName" : "Application Expose",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 4
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTPredefinedActionType" : 45,
+          "BTTPredefinedActionName" : "Show Desktop",
+          "BTTEnabled" : 0,
+          "BTTShortcutKeyCode" : 125,
+          "BTTShortcutModifierKeys" : 9043968,
+          "BTTOrder" : 5
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTPredefinedActionType" : 49,
+          "BTTPredefinedActionName" : "Open Application \/ File \/ Apple Script …",
+          "BTTLaunchPath" : "file:\/\/\/Users\/sdh\/Library\/Scripts\/Toggle%20Function%20Keys.scpt",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 49,
+          "BTTShortcutModifierKeys" : 1835008,
+          "BTTOrder" : 1
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.googlecode.iterm2",
+      "BTTAppName" : "iTerm",
+      "BTTAppSpecificSettings" : {
+
+      },
+      "BTTTriggers" : [
+        {
+          "BTTTriggerType" : 113,
+          "BTTTriggerTypeDescription" : "TipTap Left (1 Finger Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "63,59,58,56,55,115",
+          "BTTEnabled" : 1,
+          "BTTRequiredModifierKeys" : 131072,
+          "BTTOrder" : 2
+        },
+        {
+          "BTTGestureNotes" : "-> C-z n",
+          "BTTTriggerType" : 114,
+          "BTTTriggerTypeDescription" : "TipTap Right (1 Finger Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "63,59,58,55,119",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 1
+        },
+        {
+          "BTTTriggerType" : 114,
+          "BTTTriggerTypeDescription" : "TipTap Right (1 Finger Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "63,59,58,56,55,119",
+          "BTTEnabled" : 1,
+          "BTTRequiredModifierKeys" : 131072,
+          "BTTOrder" : 3
+        },
+        {
+          "BTTGestureNotes" : "-> C-z p",
+          "BTTTriggerType" : 113,
+          "BTTTriggerTypeDescription" : "TipTap Left (1 Finger Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "63,59,58,55,115",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 0
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.apple.finder",
+      "BTTAppName" : "Finder",
+      "BTTAppSpecificSettings" : {
+
+      },
+      "BTTTriggers" : [
+
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.google.Chrome",
+      "BTTAppName" : "Google Chrome",
+      "BTTAppSpecificSettings" : {
+
+      },
+      "BTTTriggers" : [
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,51",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 51,
+          "BTTShortcutModifierKeys" : 262144,
+          "BTTOrder" : 1
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 6
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,124",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 124,
+          "BTTShortcutModifierKeys" : 262144,
+          "BTTOrder" : 3
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,56,123",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 123,
+          "BTTShortcutModifierKeys" : 393216,
+          "BTTOrder" : 4
+        },
+        {
+          "BTTGestureNotes" : "Reload",
+          "BTTTriggerType" : 118,
+          "BTTTriggerTypeDescription" : "Rotate Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "55,15",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 5
+        },
+        {
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,55,34",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 111,
+          "BTTShortcutModifierKeys" : 0,
+          "BTTOrder" : 0
+        },
+        {
+          "BTTGestureNotes" : "Close Tab",
+          "BTTTriggerType" : 167,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe From Top Edge",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "55,13",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 2
+        },
+        {
+          "BTTGestureNotes" : "New Tab",
+          "BTTTriggerType" : 132,
+          "BTTTriggerTypeDescription" : "TipTap Left (2 Fingers Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "55,17",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 3
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,123",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 123,
+          "BTTShortcutModifierKeys" : 262144,
+          "BTTOrder" : 2
+        },
+        {
+          "BTTGestureNotes" : "Prev Tab",
+          "BTTTriggerType" : 113,
+          "BTTTriggerTypeDescription" : "TipTap Left (1 Finger Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "59,56,48",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 0
+        },
+        {
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 12,
+          "BTTShortcutModifierKeys" : 1048576,
+          "BTTOrder" : 10
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "55,125",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 119,
+          "BTTShortcutModifierKeys" : 8388608,
+          "BTTOrder" : 7
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "55,126",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 115,
+          "BTTShortcutModifierKeys" : 8388608,
+          "BTTOrder" : 6
+        },
+        {
+          "BTTGestureNotes" : "Open Tab",
+          "BTTTriggerType" : 168,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe From Bottom Edge",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "56,55,17",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 4
+        },
+        {
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 13,
+          "BTTShortcutModifierKeys" : 262144,
+          "BTTOrder" : 8
+        },
+        {
+          "BTTGestureNotes" : "Next Tab",
+          "BTTTriggerType" : 114,
+          "BTTTriggerTypeDescription" : "TipTap Right (1 Finger Fix)",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTShortcutToSend" : "59,48",
+          "BTTEnabled" : 1,
+          "BTTOrder" : 1
+        },
+        {
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 13,
+          "BTTShortcutModifierKeys" : 524288,
+          "BTTOrder" : 9
+        },
+        {
+          "BTTTriggerType" : -1,
+          "BTTTriggerClass" : "BTTTriggerTypeKeyboardShortcut",
+          "BTTShortcutToSend" : "58,56,124",
+          "BTTEnabled" : 1,
+          "BTTShortcutKeyCode" : 124,
+          "BTTShortcutModifierKeys" : 393216,
+          "BTTOrder" : 5
+        }
+      ]
+    }
+  ],
+  "BTTPresetSnapAreas" : [
+
+  ]
+}

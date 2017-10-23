@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+
+# Determines a color scheme for the current directory.
+# Basic functionality is as follows:
+#  - store data for the N most-recently-used repos in files a $TMP subdir
+#  - find the root of the current repository
+#    - if not in a repository, return black
+#  - map path to a file in tmp dir
+#    - if exists, just return it
+#  - if file doesn't exist then find the oldest repo and deallocate its colors,
+#    reassigning to current repo
+
+# N=12 would be reasonable...?
+# Option: save out 4-5 unused colors, pick one as different as possible
+#         from most recent 1 or 2?
+
+use strict;
+use warnings;
+
+my @COLORS = (
+  ['PaleVioletRed',	'#ff82ab', '#8b475d'],
+  ['MediumOrchid',	'#e066ff', '#7a378b'],
+  ['MediumPurple',	'#ab82ff', '#5d478b'],
+  ['DodgerBlue',  	'#2090ff', '#104e8b'], # 2/256 more red
+  ['SkyBlue',    	'#87ceff', '#4a708b'],
+  ['turquoise', 	'#00f5ff', '#00868b'],
+  ['aquamarine', 	'#7ffcd4', '#458b74'],
+  ['green',     	'#04f900', '#008b00'],
+  ['DarkOliveGreen', 	'#a2cd5a', '#6e8b3d'],
+  ['gold',      	'#ffd700', '#8b7500'],
+  ['burlywood', 	'#ffd39b', '#8b7355'],
+  ['LightSalmon', 	'#ffa07a', '#8b5742'],
+  ['DarkOrange',    	'#ff7f00', '#8b4500'],
+  ['tomato',    	'#ff6347', '#8b3626'],
+);
+
+# Ideally we would parse the colors, map to L*a*b* color space, and then
+# measure absolute differences.  But given the device-dependence of RGB,
+# this turns out to be ridiculously hard, so I won't bother.
+my @PENALTIES = (
+  ['PaleVioletRed', 'MediumOrchid', 2],
+  ['MediumOrchid', 'MediumPurple', 8],
+  ['MediumPurple', 'DodgerBlue', 2],
+  ['MediumPurple', 'SkyBlue', 1],
+  ['DodgerBlue', 'SkyBlue', 1],
+  ['SkyBlue', 'turquoise', 8],
+  ['SkyBlue', 'aquamarine', 2],
+  ['turquoise', 'aquamarine', 8],
+  ['turquoise', 'green', 2],
+  ['aquamarine', 'green', 8],
+  ['aquamarine', 'DarkOliveGreen', 2],
+  ['green', 'DarkOliveGreen', 2],
+  ['DarkOliveGreen', 'gold', 2],
+  ['gold', 'burlywood', 8],
+  ['gold', 'LightSalmon', 1],
+  ['burlywood', 'LightSalmon', 8],
+  ['LightSalmon', 'DarkOrange', 4],
+  ['LightSalmon', 'tomato', 2],
+  ['DarkOrange', 'tomato', 8],
+  ['LightSalmon', 'PaleVioletRed', 1],
+  ['DarkOrange', 'PaleVioletRed', 4],
+  ['tomato', 'PaleVioletRed', 4],
+  ['tomato', 'MediumOrchid', 1],
+}
+
+# Usage in emacs:
+#   (face-remap-add-relative 'mode-line-inactive :background "#6e8b3d")
+# Would be nice to set on a timer to periodically reset colors
+#  - mode to ask for color "in background" that doesn't register as a use
+#    buffer-list-update-hook & current-buffer should allow only ever
+#    updating when changing buffers
+
+# Usage in shell:
+#   Background color for in-between command lines??? (color in decimal)
+#   \x1b[48;2;R;G;Bm---\x1b[m(\x1b[1;32mHOST\x1b[m)\x1b[48;2;R;G;Bm------\x1b[m(\x1b[1mWed, ...
+
+# Then compare at a glance to ensure in same repo
+#   - neighboring buffers should have same modeline color (though disabled will be less obv)
+
+
+#### prompt
+
+# ╲╱╲╱╳╳╳  ╱╳╲╳╲╳╱  ╱╲╱╲╳╳╳  ╲╳╱╳╱╳╲  ╳╳╳╲╱╲╱  ╳╳╳╱╲╱╲
+# \u2571 - \u2573, with spaces interspersed...?
+# Consider making a random pattern of these chars for each divider. Would look very nice
+
+# Install powerline fonts...  \ue0b2 is <  and  \ue0b0 is >
+
+# \e[30;48;2;162;205;90m  \ue0b2\e[m\e[1;32m sdh@sdh-macbookpro2 \e[m\e[30;48;2;162;205;90m\ue0b0\e[38;2;110;139;61m ╲╱╲╱╳╳╳  ╱╲╱╲╳╳╳  ╱╲╱╲╳╳╳  ╲╱╲╱╳╳╳(\x1b[1mWed, Oct 18, 16:18:17\x1b[m\x1b[7;38;2;162;205;90m)———\x1b[m\n\n'
+
+# Generate random sequence of diagonal lines: Use matching FG color for very faint pattern
+binmode STDOUT, ":utf8";
+for (1..500) {
+  my $r=int(rand()*4); $r+=0x2570 if $r; $r=32 unless $r;print chr($r);
+}

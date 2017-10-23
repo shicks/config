@@ -1,3 +1,7 @@
+function update_git_branch {
+  # Overwrite later?
+}
+
 function strip_semis {
   # usage: strip_semis <var_name>
   # eliminates any extra semicolons, as well as any spaces

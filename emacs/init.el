@@ -18,10 +18,11 @@
 (require 'sdh-git)
 (require 'sdh-hg)
 
+(require 'sdh-js)
+
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
-    (progn (require 'sdh-ledger)
-           (require 'sdh-js)))
+    (require 'sdh-ledger))
 
 (if (string= system-type "darwin")
     ; TODO(sdh): figure out how to do this more consistently.
@@ -51,3 +52,5 @@
 ;;;;;;    so that we don't lose the normal kbd-macro-query
 ;(add-to-list 'load-path "~/config/emacs/kmacro-decision")
 ;(require 'kmacro-decision)
+
+(electric-indent-mode 0)

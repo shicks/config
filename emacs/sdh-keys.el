@@ -48,6 +48,7 @@
 (global-set-key (sdh-kbd "C-.") 'sdh-next-error)
 ;(global-set-key (sdh-kbd "C-M-,") 'smerge-keep-mine)
 ;(global-set-key (sdh-kbd "C-M-.") 'smerge-keep-other)
+(global-unset-key (kbd "C-/"))
 (global-set-key (sdh-kbd "C-/ C-,") 'smerge-keep-mine)
 (global-set-key (sdh-kbd "C-/ C-.") 'smerge-keep-other)
 (global-set-key (sdh-kbd "C-/ C-/") 'sdh-kill-middle-version)
