@@ -223,6 +223,24 @@ function install_urxvt {
   safe_link urxvt/mycopy-osc ${perldir}/mycopy-osc
 }
 
+function install_fzf {
+  # NOTE: Should happen after git and go are both installed...
+  echo "Installing fzf"
+  (
+    mkdir -p ~/local/opt
+    cd ~/local/opt
+    git clone --depth=1 https://github.com/junegunn/fzf
+    cd fzf
+    yes | ./install
+    # Fix TMUX environment variable overriding (broken)
+    sed 's/TMUX=\$([^)]*) //g' bin/fzf-tmux > ~/local/bin/fzf-tmux
+    chmod +x ~/local/bin/fzf-tmux
+    # Fix ^T to ^F for inserting a filename.
+    sed -i 's/\^T/^F/g' shell/*.zsh
+    sed -i 's/\\C-t/\\C-f/g' shell/*.bash
+  )
+}
+
 function print_usage {
   cat <<EOF
 Usage: install [home dir] [files|term|gtk|all]...
@@ -246,6 +264,7 @@ while [ $# -gt 0 ]; do
     (term)  install_term ;;
     (gtk)   install_gtk ;;
     (all)   install_files; install_term; install_gtk ;;
+    (fzf)   install_fzf ;;
     (*) if [ -f $1 ]; then
           home=$1
         else

@@ -34,3 +34,7 @@ alias :c='PAGER=cat '
 alias unletterbox="mplayer -vf crop=704:352:8:64"
 
 alias dirs="dirs -v"
+
+if which fzf-tmux &> /dev/null; then
+  alias fzf=fzf-tmux
+fi

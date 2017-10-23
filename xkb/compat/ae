@@ -1,0 +1,6 @@
+partial xkb_compat "ae" {
+  include "complete"
+  interpret Home+AnyOfOrNone(all) {
+    action=ClearMods(modifiers=Control);
+  };
+};

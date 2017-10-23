@@ -39,6 +39,7 @@
 (global-set-key (kbd "C-x C-x") 'sdh-exchange-point-and-mark)
 (global-set-key (kbd "C-x x") 'sdh-move-point-to-mark)
 (global-set-key (kbd "C-x w") 'delete-region)
+(global-set-key (kbd "C-x M-d") 'sdh-delete-word)
 (global-set-key (kbd "C-a") 'sdh-beginning-of-line)
 (global-set-key (sdh-kbd "C-x S-C-f") 'sdh-reopen-file-as-root)
 
@@ -57,7 +58,11 @@
 
 (global-set-key (sdh-kbd "C--") 'sdh-prev-window)
 (global-set-key (sdh-kbd "C-=") 'sdh-other-window)
-(global-set-key (sdh-kbd "C-+") 'mode-line-other-buffer)
+;(global-set-key (sdh-kbd "C-+") 'mode-line-other-buffer)  ;; too distracting
+(global-set-key (sdh-kbd "C-9") 'mode-line-other-buffer)  ;; too distracting
+
+; Stolen from vim
+(global-set-key (sdh-kbd "C-5") 'forward-or-backward-sexp)
 
 ;; visual-regexp
 (if (sdh-try-require 'visual-regexp)
@@ -112,6 +117,8 @@
 ;; Mouse wheel scrolling (this used to just work automatically...)
 (global-set-key [mouse-4] 'sdh-mwheel-scroll)
 (global-set-key [mouse-5] 'sdh-mwheel-scroll)
+(global-set-key (kbd "<mode-line> <mouse-4>") 'previous-buffer)
+(global-set-key (kbd "<mode-line> <mouse-5>") 'next-buffer)
 
 
 ;; TODO(sdh): C-M-y and C-M-c should call xclip (or use urxvt mycopy)
@@ -125,7 +132,6 @@
 ;; This used to be automatic, but something changed.
 (global-set-key [(control backspace)] 'backward-kill-word)
 (global-set-key [(super backspace)] 'backward-kill-word)
-
 
 
 ;; perforce keybindings are a pain, and seem to keep overriding me.
@@ -170,7 +176,7 @@
 
 
 ;; rect-mark bindings
-(define-key ctl-x-map (kbd "r C-@") 'rm-set-mark)
+(define-key ctl-x-map (kbd "r C-@") 'rm-set-mark) ; note: C-@ is C-SPC in terminal
 (define-key ctl-x-map (kbd "r C-SPC") 'rm-set-mark)
 (define-key ctl-x-map (kbd "r C-x") 'rm-exchange-point-and-mark)
 (define-key ctl-x-map (kbd "r C-w") 'rm-kill-region)

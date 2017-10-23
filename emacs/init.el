@@ -16,6 +16,7 @@
 ;; Language-specific settings
 (require 'sdh-perl)
 (require 'sdh-git)
+(require 'sdh-hg)
 
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")

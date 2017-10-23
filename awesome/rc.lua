@@ -311,9 +311,9 @@ globalkeys = awful.util.table.join(
 
     -- sdh bindings
     -- TODO(sdh): add naughty notifications with volume levels
-    -- ,awful.key({ modkey }, "F12", function () awful.util.spawn("fnome-screensaver-command -l") end)
     ,awful.key({ modkey }, "F11", function () awful.util.spawn("pkill -HUP awesome") end)
-    ,awful.key({ modkey }, "F12", function () awful.util.spawn("xflock4") end)
+    -- ,awful.key({ modkey }, "F12", function () awful.util.spawn("xflock4") end)
+    ,awful.key({ modkey }, "F12", function () awful.util.spawn("gnome-screensaver-command -l") end)
     ,awful.key({ }, "XF86Favorites", function () awful.util.spawn("xterm -name prodaccess -e 'prodaccess; updatecert'") end)
     ,awful.key({ modkey, "Control" }, "F12",
         function ()

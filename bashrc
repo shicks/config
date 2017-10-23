@@ -7,3 +7,6 @@ export SHELL=$(which bash)
 for a in $HOME/.bash.d/??_*.sh; do
   . $a
 done
+
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

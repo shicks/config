@@ -468,10 +468,30 @@ See also: `xah-copy-to-register-1', `insert-register'."
   ;  )
   (insert-register ?1 t))
 
+(defun sdh-save-position-to-register-1 ()
+  "Save the current cursor position to register 1."
+  (interactive)
+  (set-register ?1 (point-marker)))
+(defun sdh-restore-position-from-register-1 ()
+  "Restore the cursor position from register 1."
+  (interactive)
+  (goto-char (get-register ?1)))
+
 (defun sdh-copy-or-insert-register (arg)
   "Copies or inserts the contents of the '1' register: basically C-x r [si] 1"
   (interactive "P")
-  (if arg (xah-copy-to-register-1) (xah-paste-from-register-1)))
+  (if arg (sdh-save-x-to-register-1) (sdh-restore-x-from-register-1)))
+
+(defun sdh-save-x-to-register-1 ()
+  (interactive)
+  (if (and transient-mark-mode mark-active)
+      (xah-copy-to-register-1)
+    (sdh-save-position-to-register-1)))
+(defun sdh-restore-x-from-register-1 ()
+  (interactive)
+  (if (markerp (get-register ?1))
+      (sdh-restore-position-from-register-1)
+    (xah-paste-from-register-1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation buffer navigation
@@ -623,9 +643,10 @@ See also: `xah-copy-to-register-1', `insert-register'."
       (| (group-n 4 letter)
          ; TODO(sdh): match uppercase/lowercase separately?
          (group-n 5 digit)
-         (group-n 6 (any "\\`~-_=+[{]}\|;:'\",<.>/?!@#$%^&*()"))
+         (group-n 6 (any "-\\`~_=+[{]}\|;:'\",<.>/?!@#$%^&*()"))
          ; TODO(sdh): F-keys, navigation keys, tab/etc
-         (group-n 7 (+ anything)))
+         (seq "<" (group-n 7 (| "delete")) ">")
+         (group-n 8 (+ anything)))
       string-end)
   "Regex for parsing keyboard sequences")
 
@@ -647,9 +668,11 @@ See also: `xah-copy-to-register-1', `insert-register'."
                  (digit  (match-string 5 term))
                  (symbol (match-string 6 term))
                  (ds     (or digit symbol))
-                 (rest   (match-string 7 term))
+                 (named  (match-string 7 term))
+                 (rest   (match-string 8 term))
                  ; Error cases, fall back on (kbd term)
-               (err    (or
+                 (err    (or
+                          named ; TODO(sdh): handle this later.
                           rest ; unknown final key
                           (and shift ds)))) ; use correct symbol
             (cond
@@ -661,10 +684,37 @@ See also: `xah-copy-to-register-1', `insert-register'."
              ;; 3. ctrl-digit, ctrl-symbol
              ((and ctrl ds)
               (format "M-[ 3 6 ~ %s %s" esc ds))
-             ;; 4. all other cases are trivial, just forward as-is
+             ;; 4. named symbols - TODO(sdh): flesh this out later
+             ((and (eq named "delete") ctrl shift)
+              term)
+             ;; 5. all other cases are trivial, just forward as-is
              (t term)))
        term))
     (split-string spec)
     " ")))
+
+(defun sdh-delete-word ()
+  (interactive)
+  (save-excursion
+    (let* ((start (point))
+           (end (progn (forward-word) (point))))
+      (delete-region start end))))
+
+(defun forward-or-backward-sexp (&optional arg)
+  "Go to the matching parenthesis character if one is adjacent to point."
+  (interactive "^p")
+  (cond ((looking-at "\\s(") (forward-sexp arg))
+        ((looking-back "\\s)" 1) (backward-sexp arg))
+        ;; Now, try to succeed from inside of a bracket
+        ((looking-at "\\s)") (forward-char) (backward-sexp arg))
+        ((looking-back "\\s(" 1) (backward-char) (forward-sexp arg))))
+
+;; Highlight current line, only when idle.
+(if (sdh-try-require 'hl-line+)
+    (toggle-hl-line-when-idle))
+
+; Use bracketed paste if it's installed (doesn't seem to work...)
+;(if (sdh-try-require 'bracketed-paste)
+;    (bracketed-paste-enable))
 
 (provide 'sdh-misc)

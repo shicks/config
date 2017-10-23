@@ -66,7 +66,6 @@ URxvt.color15 : #FFFFFF
 !URxvt.font: xft:terminus:pixelsize=12
 !URxvt.font: xft:Inconsolata:pixelsize=15:antialias=true
 !URxvt.boldFont: xft:Monospace:pixelsize=11
-!URxvt.letterSpace: -1
 
 !URxvt.font: xft:bitstream vera sans mono:size=9:antialias=true
 !URxvt.font: xft:bitstream vera sans mono:pixelsize=11
@@ -79,6 +78,7 @@ URxvt.color15 : #FFFFFF
 URxvt.font: xft:monofur:pixelsize=14;antialias=true
 !URxvt.font: xft:Inconsolata:pixelsize=15
 !URxvt.font: xft:bitstream vera sans mono:pixelsize=13
+URxvt.letterSpace: -1
 
 !,tabbedex
 URxvt.perl-ext-common : default,matcher,mycopy-osc,set-option-osc
@@ -184,6 +184,7 @@ URxvt.iconFile: /usr/share/icons/Tango/32x32/apps/terminal.png
 !!     * SPACE: I believe this becomes NUL (\x00), but hard to verify.
 !!     * INS, HOME, PGUP, DEL, END, PGDN: act like F-keys with numbers
 !!       2, 7, 5, 3, 8, 6, respectively, and thus send ^ instead of ~.
+!!       (NOTE: these don't seem to get through tmux for some reason)
 !!     * [, \, and ]: also subtracts 0x40, for \x1b (ESC), \x1c (FILE
 !!       SEPARATOR), and \x1d (GROUP SEPARATOR).  \x1c can cause problems,
 !!       but emacs handles C-\ correctly, so do not remap this one.

@@ -2,27 +2,53 @@
 
 use strict;
 
-# Usage: run <command...>
-# Runs the command, printing it to stdout first.  Useful for scripts.
+# Usage: run [-q|-h|-n] <command...>
+# Runs the command, optionally printing it and/or appending to history.
+# If -q then doesn't print
+# If -h then appends to history
+# If -n then doesn't actually run
+# Properly escapes args
 
-my @toPrint = map { 
-  local($_) = $_;
-  if (/\s/ and not /'/) {
-    $_ = "'$_'";
-  } else {
-    s/\\/\\\\/g;
-    s/"/\\"/g;
-    s/`/\\`/g;
-    s/\$/\\\$/g;
-    if (/\s/) {
-      $_ = "\"$_\"";
+my $quiet = 0;
+my $hist = 0;
+my $suffix = "\n";
+
+while ($ARGV[0] =~ /^-[qhn]*$/) {
+  my $arg = shift;
+  $quiet = 1 if $arg =~ /[qhn]/;
+  $hist = 1 if $arg =~ /[hn]/;
+  $suffix = "" if $arg =~ /n/;
+}
+
+my @cmd = @ARGV;
+my @escaped;
+
+if (@cmd) {
+  @escaped = map {
+    local($_) = $_;
+    if (/\s/ and not /'/) {
+      $_ = "'$_'";
     } else {
-      s/'/\\'/g;
+      s/\\/\\\\/g;
+      s/"/\\"/g;
+      s/`/\\`/g;
+      s/\$/\\\$/g;
+      if (/\s/) {
+        $_ = "\"$_\"";
+      } else {
+        s/'/\\'/g;
+      }
     }
-  }
-  $_;
-} @ARGV;
+    $_;
+  } @cmd;
+} else {
+  my $cmd = <STDIN>;
+  $cmd =~ s/\s*$//;
+  @escaped = @cmd = ($cmd,);
+}
 
-print "\e[1;30m@toPrint\e[m\n";
-system @ARGV;
-exit $? >> 8;
+print "\e[1;30m@escaped\e[m\n" unless $quiet;
+exec @cmd unless $hist;
+
+$::TIOCSTI = 0x5412;
+map { ioctl STDOUT, $::TIOCSTI, $_ } split "", "@escaped$suffix";

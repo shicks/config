@@ -7,9 +7,9 @@ case "$(basename $SHELL)" in
     }
 
     ## don't put duplicate lines in the history. See bash(1) for more options
-    #export HISTCONTROL=ignoredups
+    #HISTCONTROL=ignoredups
     ## ... and ignore same sucessive entries.
-    export HISTCONTROL=ignoreboth
+    HISTCONTROL=ignorespace:erasedups
 
     ## disable history expansion (i.e. from "!")
     set +o histexpand
