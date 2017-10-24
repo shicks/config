@@ -9,6 +9,12 @@
 
 # TODO(sdh): support a NOCOMMENT directive in patches
 
+# TODO(sdh): automatically download and install monofur-powerline fonts ?
+# TODO(sdh): fallback on apt-get for terminal emulator (maybe switch to alacritty
+#            instead of urxvt?)
+
+# TODO(sdh): merge tmux changes, consider pushing upstream?
+
 verbose=false
 conf=$(dirname "$0")
 conf=${conf-.}
@@ -107,6 +113,7 @@ function install_files {
   safe_link Xmodmap
   safe_link Xdefaults
   safe_link tmux.conf
+  safe_link alacritty.yml
   safe_link bashrc
   safe_link zshrc
   safe_link gitconfig
@@ -175,6 +182,20 @@ function install_files {
       safe_link $a .gitconfig.d/${a#git/}
     done
   fi
+}
+
+function install_fonts {
+  # Also available at ...
+  # https://github.com/powerline/fonts/raw/master/Monofur/Monofur%20for%20Powerline.ttf
+  # https://github.com/powerline/fonts/raw/master/Monofur/Monofur%20Italic%20for%20Powerline.ttf
+  (
+    local repo='https://github.com/rsrsl/ttf-monofur-powerline/raw/master'
+    local files='monof5{5,6}.ttf'
+    mkdir -p /usr/share/fonts/truetype/monofur
+    cd /usr/share/fonts/truetype/monofur
+    curl "$repo/$files"
+  )
+  fc-cache -fv
 }
 
 function install_term {
@@ -265,6 +286,7 @@ while [ $# -gt 0 ]; do
     (gtk)   install_gtk ;;
     (all)   install_files; install_term; install_gtk ;;
     (fzf)   install_fzf ;;
+    (fonts) install_fonts ;;
     (*) if [ -f $1 ]; then
           home=$1
         else
