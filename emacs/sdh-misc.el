@@ -717,4 +717,37 @@ See also: `xah-copy-to-register-1', `insert-register'."
 ;(if (sdh-try-require 'bracketed-paste)
 ;    (bracketed-paste-enable))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Some random functions from the internet
+
+;; From https://emacs.stackexchange.com/questions/20481/incrementing-characters-in-emacs-next-to-numbers/20484
+(defun increment-char-at-point ()
+  "Increment number or character at point."
+  (interactive)
+  (condition-case nil
+      (save-excursion
+        (let ((chr  (1+ (char-after))))
+          (unless (characterp chr) (error "Cannot increment char by one"))
+          (delete-char 1)
+          (insert chr)))
+    (error (error "No character at point"))))
+
+(defun increment-number-or-char-at-point ()
+  "Increment number or character at point."
+  (interactive)
+  (let ((nump  nil))
+    (save-excursion
+      (skip-chars-backward "0123456789")
+      (when (looking-at "[0123456789]+")
+        (replace-match (number-to-string (1+ (string-to-number (match-string 0)))))
+        (setq nump  t)))
+    (unless nump
+      (save-excursion
+        (condition-case nil
+            (let ((chr  (1+ (char-after))))
+              (unless (characterp chr) (error "Cannot increment char by one"))
+              (delete-char 1)
+              (insert chr))
+          (error (error "No character at point")))))))
+
 (provide 'sdh-misc)

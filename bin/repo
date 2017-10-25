@@ -13,6 +13,7 @@ sub main {
   my $cmd = shift;
   do_root(@_) if $cmd eq 'root';
   do_colors(@_) if $cmd eq 'colors';
+  do_prompt(@_) if $cmd eq 'prompt';
   help(1);
 }
 
@@ -27,8 +28,13 @@ Commands:
                --notouch - does not touch the color files or make new ones
                --fg|--bg - just return fore/background color (default is fg:bg)
                --ansi    - return ansi format 8;2;r;g;b (default is #hex)
-               --prompt  - print the entire prompt line, takes three arguments,
-                           the column width and the text in each "bubble".
+  prompt     Print a colored prompt line.
+             Options:
+               --notouch - does not touch the color files or make new ones
+               --columns=COL - total number of columns.
+               --left=TEXT   - text for left bubble.
+               --right=TEXT  - text for right bubble.
+               --style=STYLE - style for decoration (diag, box, or flag)
 EOF
   exit $_[0];
 }
@@ -63,20 +69,74 @@ sub do_root {
   }
 }
 
+sub do_prompt {
+  # Handle args
+  my $touch = 1;
+  my $columns = 0;
+  my $left = '';
+  my $right = '';
+  my $style = 'DEFAULT';
+  while ($_ = shift) {
+    unshift @_, $1 if s/^--[^=]+\K=(.*)$//;
+    $touch = 0, next if $_ eq '--notouch';
+    $style = shift, next if $_ eq '--style';
+    $left = shift, next if $_ eq '--left';
+    $right = shift, next if $_ eq '--right';
+    $columns = shift, next if $_ eq '--columns';
+    help(1);
+  }
+  my $root = root();
+  my $colors = find_colors($touch, $root);
+  my ($bg, $fg, $ansi_bg, $ansi_fg) = split / /, $colors;
+
+  my %STYLES = (
+    DIAG => sub { my $r = int(rand() * 4); return $r ? chr($r + 0x2570) : ' ';  },
+    BOX => sub { return chr(int(rand() * 10) + 0x2596); },
+    FLAG => sub { return chr(int(rand() * 8) + 9776); },
+    DEFAULT => sub { return ' '; },
+  );
+  die "No such style: $style" unless defined $STYLES{uc $style};
+  $style = $STYLES{uc $style};
+
+  $columns = `tput cols`, chomp $columns unless $columns;
+  my $dashes = $columns - length($left) - length($right);
+  if ($ansi_bg eq '0') { # NOTE: currently never runs, since we changed the blank default
+    print "\e[1;30m———(\e[32m$left\e[m\e[30m)";
+    print '—' x ($dashes - 10);
+    print "(\e[m\e[37m$right\e[30m)———\e[m";
+  } else {
+    # TODO(sdh): figure out if terminal is running powerline fonts (maybe just a list of
+    # known terminals that do support it?). Fall back on parens or something else?
+    binmode STDOUT, ":utf8";
+    my ($open, $close) = (chr 0xe0b2, chr 0xe0b0);
+    my $main = "\e[1;3${ansi_fg};4${ansi_bg}m";
+    $open = "\e[m\e[30;4${ansi_bg}m  ${open}";
+    $close = "\e[1;38;2;0;0;0;4${ansi_bg}m${close}${main} ";
+    $dashes -= 7 if $left;
+    $dashes -= 8 if $right;
+    $left = "${open}\e[m\e[1;32m ${left} \e[m${close}" if $left;
+    $right = "${open}\e[m\e[1;37m ${right} \e[m${close} " if $right;
+    print $main;
+    print $left;
+    print &$style() for (1..$dashes);
+    print $right;
+    print "\e[m";
+  }
+  exit;
+}
+
 sub do_colors {
   # Handle args
   my $touch = 1;
   my $get_fg = 1;
   my $get_bg = 1;
   my $ansi = 0;
-  my $prompt = 0;
   while ($_ = shift) {
     unshift @_, $1 if s/^--[^=]+\K=(.*)$//;
     $touch = 0, next if $_ eq '--notouch';
     $get_fg = 0, next if $_ eq '--bg';
     $get_bg = 0, next if $_ eq '--fg';
     $ansi = 1, next if $_ eq '--ansi';
-    $prompt = [shift || 80, shift || '', shift || ''], next if $_ eq '--prompt';
     help(1);
   }
   my $root = root();
@@ -84,34 +144,12 @@ sub do_colors {
   my ($bg, $fg, $ansi_bg, $ansi_fg) = split / /, $colors;
 
   # Now print what was asked for.
-  if ($prompt) {
-    # TODO - consider pulling this into a separate command `repo prompt` ?
-    my ($columns, $left, $right) = @$prompt;
-    my $dashes = $columns - length($left) - length($right) - 15;
-    if ($ansi_bg eq '0') {
-      print "\e[1;30m———(\e[32m$left\e[m\e[30m)";
-      print '—' x ($dashes + 5);
-      print "(\e[m\e[37m$right\e[30m)———\e[m";
-    } else {
-      binmode STDOUT, ":utf8";
-      my ($open, $close) = (chr 0xe0b2, chr 0xe0b0);
-      print "\e[30;4${ansi_bg}m  $open\e[m\e[1;32m $left \e[m";
-      print "\e[30;4${ansi_bg}m$close \e[1;3${ansi_fg}m";
-      for (1..$dashes) {
-        my $r = int(rand() * 4); $r += 0x2570 if $r; $r = 32 unless $r;
-        print chr $r;
-      }
-      print "\e[m\e[30;4${ansi_bg}m  $open\e[m\e[1;37m $right \e[m";
-      print "\e[30;4${ansi_bg}m$close  \e[m";
-    }
-  } else {
-    $fg = $ansi_fg if $ansi;
-    $bg = $ansi_bg if $ansi;
-    print $fg if $get_fg;
-    print ":" if $get_fg and $get_bg;
-    print $bg if $get_bg;
-    print "\n";
-  }
+  $fg = $ansi_fg if $ansi;
+  $bg = $ansi_bg if $ansi;
+  print $fg if $get_fg;
+  print ":" if $get_fg and $get_bg;
+  print $bg if $get_bg;
+  print "\n";
   exit;
 }
 
@@ -138,7 +176,8 @@ sub find_colors {
   # Find directory
   local $_;
   my ($touch, $root) = @_;
-  my $blank = '#000000 #666666 0 7';
+  # my $blank = '#000000 #666666 0 7';
+  my $blank = '#000000 #666666 ' . to_ansi('#666666') . ' ' . to_ansi('#000000'); #8;2;0;0;0 8;2;255;255;255';
   return $blank unless $root;
   (my $root_scrubbed = $root) =~ s|/|!|g; # don't worry about collisions
   my $dir = $ENV{REPO_COLOR_DIR} || "$ENV{HOME}/.repo_colors";

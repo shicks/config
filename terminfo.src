@@ -1,0 +1,34 @@
+tmux-256color|tmux running on top of rxvt-unicode-256color,
+  sitm=\E[3m,ritm=\E[23m,smso=\E[7m,rmso=\E[27m,
+  use=screen-256color,
+
+# True color:
+#  (emacs) http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e463e57
+#  (tmux)  http://lists.schmorp.de/pipermail/rxvt-unicode/2016q2/002251.html
+# Note that the color count will truncate at 2^15-1, since termcap uses int16.
+#   https://lists.gnu.org/archive/html/bug-ncurses/2013-10/msg00008.html
+# See also
+#   http://invisible-island.net/ncurses/terminfo.src.html
+
+alacritty|alacritty terminal emulator,
+  colors#16777216,
+  setb24=\E[48;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+  setf24=\E[38;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+  Tc,
+  use=xterm-256color,
+
+alacritty-256color|alacritty terminal emulator,
+  use=alacritty,
+
+tmux-alacritty|tmux running on top of alacritty,
+  colors#16777216,
+  setb24=\E[48;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+  setf24=\E[38;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+  Tc,
+  use=screen-256color,
+
+# iTerm2 TERMINFO that adds the escape sequences for italic
+
+xterm-256color-italic|xterm with 256 colors and italic,
+  sitm=\E[3m, ritm=\E[23m,
+  use=xterm-256color,
