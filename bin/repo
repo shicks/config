@@ -30,11 +30,14 @@ Commands:
                --ansi    - return ansi format 8;2;r;g;b (default is #hex)
   prompt     Print a colored prompt line.
              Options:
-               --notouch - does not touch the color files or make new ones
+               --fg=CODE     - use a fixed color instead.
+               --bg=CODE     - use a fixed color instead.
+               --notouch     - does not touch the color files or make new ones.
                --columns=COL - total number of columns.
                --left=TEXT   - text for left bubble.
                --right=TEXT  - text for right bubble.
                --style=STYLE - style for decoration (diag, box, or flag)
+               --sep=STYLE   - separator (triangle, round, fire...)
 EOF
   exit $_[0];
 }
@@ -54,7 +57,7 @@ sub root {
       return $dir if -e "$dir/$_";
     }
     $dir = dirname($dir);
-  }
+ }
   return '';
 }
 
@@ -69,6 +72,13 @@ sub do_root {
   }
 }
 
+# TODO(sdh): Add more fonts for styles
+#   http://www.fontspace.com/category/patterns
+#    - a number of options here
+#   http://www.fontspace.com/agasilva/maya-tiles-promo
+#    - would need to auto-download and merge with nerd font...
+# Might be able to put together a little font for this...?
+  
 sub do_prompt {
   # Handle args
   my $touch = 1;
@@ -76,6 +86,9 @@ sub do_prompt {
   my $left = '';
   my $right = '';
   my $style = 'DEFAULT';
+  my $flag_fg = '';
+  my $flag_bg = '';
+  my $sep = 'triangle';
   while ($_ = shift) {
     unshift @_, $1 if s/^--[^=]+\K=(.*)$//;
     $touch = 0, next if $_ eq '--notouch';
@@ -83,11 +96,16 @@ sub do_prompt {
     $left = shift, next if $_ eq '--left';
     $right = shift, next if $_ eq '--right';
     $columns = shift, next if $_ eq '--columns';
+    $flag_fg = shift, next if $_ eq '--fg';
+    $flag_bg = shift, next if $_ eq '--bg';
+    $sep = shift, next if $_ eq '--sep';
     help(1);
   }
   my $root = root();
-  my $colors = find_colors($touch, $root);
+  my $colors = $flag_fg && $flag_bg ? '' : find_colors($touch, $root);
   my ($bg, $fg, $ansi_bg, $ansi_fg) = split / /, $colors;
+  $ansi_bg = $flag_bg if $flag_bg;
+  $ansi_fg = $flag_fg if $flag_fg;
 
   my %STYLES = (
     DIAG => sub { my $r = int(rand() * 4); return $r ? chr($r + 0x2570) : ' ';  },
@@ -97,6 +115,21 @@ sub do_prompt {
   );
   die "No such style: $style" unless defined $STYLES{uc $style};
   $style = $STYLES{uc $style};
+
+  my %SEP = (
+    TRIANGLE => [0xe0b2, 0xe0b0],
+    ROUND => [0xe0b6, 0xe0b4],
+    DOWN => [0xe0be, 0xe0b8],
+    UP => [0xe0ba, 0xe0bc],
+    SPLIT => [0xe0d4, 0xe0d2],
+    #RSPLIT => [0xe0d2, 0xe0d4], # TODO - needs swap fg/bg
+    FIRE => [0xe0c2, 0xe0c0],
+    DISSOLVE => [0xe0c7, 0xe0c6], # smaller one (5,4) ugly at console font size
+    NONE => [0x20, 0x20],
+  );
+  die "No such separator: $sep" unless defined $SEP{uc $sep};
+  my ($open, $close) = @{$SEP{uc $sep}};
+  $open = chr $open; $close = chr $close;
 
   $columns = `tput cols`, chomp $columns unless $columns;
   my $dashes = $columns - length($left) - length($right);
@@ -108,10 +141,11 @@ sub do_prompt {
     # TODO(sdh): figure out if terminal is running powerline fonts (maybe just a list of
     # known terminals that do support it?). Fall back on parens or something else?
     binmode STDOUT, ":utf8";
-    my ($open, $close) = (chr 0xe0b2, chr 0xe0b0);
+    #my ($open, $close) = (chr 0xe0b2, chr 0xe0b0);
     my $main = "\e[1;3${ansi_fg};4${ansi_bg}m";
     $open = "\e[m\e[30;4${ansi_bg}m  ${open}";
-    $close = "\e[1;38;2;0;0;0;4${ansi_bg}m${close}${main} ";
+    # $close = "\e[1;38;2;0;0;0;4${ansi_bg}m${close}${main} ";
+    $close = "\e[30;4${ansi_bg}m${close}${main} ";
     $dashes -= 7 if $left;
     $dashes -= 8 if $right;
     $left = "${open}\e[m\e[1;32m ${left} \e[m${close}" if $left;

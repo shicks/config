@@ -1,3 +1,6 @@
+# Documentation for this file format:
+#   https://www.mkssoftware.com/docs/man5/terminfo.5.asp
+
 tmux-256color|tmux running on top of rxvt-unicode-256color,
   sitm=\E[3m,ritm=\E[23m,smso=\E[7m,rmso=\E[27m,
   use=screen-256color,
@@ -10,21 +13,53 @@ tmux-256color|tmux running on top of rxvt-unicode-256color,
 # See also
 #   http://invisible-island.net/ncurses/terminfo.src.html
 
-alacritty|alacritty terminal emulator,
-  colors#16777216,
-  setb24=\E[48;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
-  setf24=\E[38;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+# alacritty|alacritty terminal emulator,
+#   colors#16777216,
+#   setb24=\E[48;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+#   setf24=\E[38;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+#   Tc,
+#   use=xterm-256color,
+
+# TODO(sdh): would be nice to at least use 2^15-1 instead of 256...?
+# TODO(sdh): this doesn't seem to actually trigger emacs! arg...
+# Note: various mailing lists have %@{256@} but my terminfo library seems to
+#       not want the @'s there.  These could have been artifacts from some
+#       poor attempt at XSS prevention?
+# See also: https://linux.die.net/man/5/terminfo
+
+true-color|mixin for true-color,
+  colors#256,
+  setb24=\E[48;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
+  setf24=\E[38;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
   Tc,
+
+# Note: The keypad versions of the arrow keys don't seem to work nicely with
+# tmux and/or zsh, so just use the same as the cursor versions.
+alacritty-keyboard|mixin for the keybindings we set in alacritty.yml,
+  kb2=\E[E, kcub1=\E[D, kcud1=\E[B, kcuf1=\E[C, kcuu1=\E[A, kent=\E^M,
+  khome=\E[H, kend=\E[F,
+
+alacritty-status|mixin for capability to set status line (i.e. title),
+  tsl=\E]2;, fsl=^G,
+
+# TODO(sdh): Is there any place for termcaps to set and reset the global
+# bg and fg colors for the whole terminal? e.g. \E]11;#rgb^G to set bg,
+# \E]10;#rgb^G for fg, \E]110^G to reset fg and \E]111^G to reset bg...?
+
+#  setb24=\E[48;2;%p1%d;%p2%d;%p3%dm,
+#  setf24=\E[38;2;%p1%d;%p2%d;%p3%dm,
+
+alacritty|alacritty terminal emulator,
+  use=true-color,
+  use=alacritty-keyboard,
+  use=alacritty-status,
   use=xterm-256color,
 
 alacritty-256color|alacritty terminal emulator,
   use=alacritty,
 
 tmux-alacritty|tmux running on top of alacritty,
-  colors#16777216,
-  setb24=\E[48;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
-  setf24=\E[38;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
-  Tc,
+  use=true-color,
   use=screen-256color,
 
 # iTerm2 TERMINFO that adds the escape sequences for italic

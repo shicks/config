@@ -53,45 +53,47 @@ draw_bold_text_with_bright_colors: true
 # * https://wiki.archlinux.org/index.php/font_configuration#Fontconfig_configuration
 # * file:///usr/share/doc/fontconfig/fontconfig-user.html
 font:
-  # The normal (roman) font face to use.
   normal:
-    family: monofur for Powerline # should be "Menlo" or something on macOS.
-    # Style can be specified to pick a specific face.
-    style: Regular
+    family: Monofur Nerd Font
+    style: Book
 
-  # The bold font face
   bold:
-    family: monofur for Powerline # should be "Menlo" or something on macOS.
-    # Style can be specified to pick a specific face.
+    family: Monofurbold Nerd Font
     style: Bold
 
-  # The italic font face
   italic:
-    family: monofur for Powerline # should be "Menlo" or something on macOS.
-    # Style can be specified to pick a specific face.
+    family: Monofuritalic Nerd Font
     style: Italic
 
-  # Point size of the font
   size: 11.0
 
   # Offset is the extra space around each character. offset.y can be thought of
   # as modifying the linespacing, and offset.x as modifying the letter spacing.
   offset:
-    x: -1.0
+    # Note: We seem to need a big negative offset to counteract the fact
+    # that there are double-wide glyphs in the font.  On top of that, we
+    # also add a couple extra pixels to tighten things up and to eliminate
+    # ugly vertical lines between powerline glyphs.
+    x: -13.0
     y: 0.0
 
   # Glyph offset determines the locations of the glyphs within their cells with
   # the default being at the bottom. Increase the x offset to move the glyph to
   # the right, increase the y offset to move the glyph upward.
   glyph_offset:
-    x: 0.0
+    # Move everything over by one to eliminate artifact before powerline >.
+    # This has the unfortunate side effect that the > doesn't blend quite
+    # as well into the previous space, but it's slightly nicer than having
+    # a half-pixel line between them.
+    x: -1.0
     y: 0.0
 
   # OS X only: use thin stroke font rendering. Thin strokes are suitable
   # for retina displays, but for non-retina you probably want this set to
   # false.
   use_thin_strokes: true
-  antialias: false
+  antialias: true
+  #rgba: none
 
 # Should display the render timer
 render_timer: false
@@ -252,6 +254,16 @@ shell:
 # (e.g. "\x1b[5~") is? Open another terminal (like xterm) without tmux,
 # then run `showkey -a` to get the sequence associated to a key combination.
 
+# Note: AppCursor and AppKeypad mode seem to refer to the following:
+#   http://www.tldp.org/HOWTO/Keyboard-and-Console-HOWTO-21.html
+# It's not clear to me why I care to send different keys for these modes.
+# One place it makes a difference is that shift works differently in AppKeypad
+# mode when numlock is off: it does not send numbers, but instead weird
+# shifted keycodes (home's ^[OH becomes ^[O2w, for instance), FWIW.
+# Other possibly interesting references:
+#    http://www.tldp.org/HOWTO/Keyboard-and-Console-HOWTO-21.html (special keys)
+#    https://ttssh2.osdn.jp/manual/en/usage/tips/appkeypad.html
+
 ## REMAP KEYS
 ##
 ## The basic strategy here is to use an F-key prefix.  Note that rxvt
@@ -319,7 +331,7 @@ shell:
 ##     * BACKSPACE, SPACE, ENTER: ignores the shift.
 ##       -> do not remap for now
 ##   Control-Shift -
-##     * INS/HOM/PUP/DEL/END/PDN: @ suffix - no problem
+##     * INS/HOM/PUP/DEL/END/PDN: @ suffix (instead of ~) -> no problem
 ##     * F-keys - sends ^ (ctrl) suffix with shifted number
 ##     * Letters ignore the shift.
 ##       -> [4] remap to @36 prefix plus the normal control character
@@ -351,55 +363,113 @@ shell:
 ##            bitmask?  \e[4x~ where x is 1..7 for diff modifiers?
 
 key_bindings:
-  - { key: V,        mods: Control|Shift,    action: Paste               }
-  - { key: C,        mods: Control|Shift,    action: Copy                }
-  - { key: Q,        mods: Command, action: Quit                         }
-  - { key: W,        mods: Command, action: Quit                         }
-  - { key: Insert,   mods: Shift,   action: PasteSelection               }
+  #- { key: V,        mods: Control|Shift,    action: Paste               }
+  #- { key: C,        mods: Control|Shift,    action: Copy                }
+  #- { key: Q,        mods: Command, action: Quit                         }
+  #- { key: W,        mods: Command, action: Quit                         }
+  ###- { key: Insert,   mods: Shift,   action: PasteSelection               }
   # TODO(sdh): These are useful, but we already have bindings for them
   # Consider finding bindings with numpad (Minus, Plus, etc)
   - { key: Key0,     mods: Control, action: ResetFontSize                }
   - { key: Equals,   mods: Control, action: IncreaseFontSize             }
   - { key: Subtract, mods: Control, action: DecreaseFontSize             }
-  - { key: Home,                    chars: "\x1bOH",   mode: AppCursor   }
-  - { key: Home,                    chars: "\x1b[H",   mode: ~AppCursor  }
-  - { key: End,                     chars: "\x1bOF",   mode: AppCursor   }
-  - { key: End,                     chars: "\x1b[F",   mode: ~AppCursor  }
-  - { key: PageUp,   mods: Shift,   chars: "\x1b[5;2~"                   }
-  - { key: PageUp,   mods: Control, chars: "\x1b[5;5~"                   }
-  - { key: PageUp,                  chars: "\x1b[5~"                     }
-  - { key: PageDown, mods: Shift,   chars: "\x1b[6;2~"                   }
-  - { key: PageDown, mods: Control, chars: "\x1b[6;5~"                   }
-  - { key: PageDown,                chars: "\x1b[6~"                     }
+
+  ## Cursor Keys:
+  ##  1. Arrows and Home/End: ^[[<mods><letter>
+  ##     <mods> = "" for unmodified, "1;<mask+1>" for modified
+  ##     <letter> = {up: A, down: B, right: C, left: D, home: H, end: F}
+  ##  2. Non-arrows: ^[[<number><mods>~
+  ##     <mods> = "" for unmodified, ";<mask+1>" for modified
+  ##     <number> = {insert: 2, delete: 3, pgup: 5, pgdn: 6}
+  ##  <mask> = sum(1 for shift, 2 for alt, 4 for ctrl)
+  ## (Note: some additional keys not used or present have numbers,
+  ## too, including {find: 1, select: 4, home: 7, end: 8})
+  - { key: Insert,                             chars: "\x1b[2~"          }
+  - { key: Insert,    mods: Shift,             chars: "\x1b[2;2~"        }
+  - { key: Insert,    mods: Alt,               chars: "\x1b[2;3~"        }
+  - { key: Insert,    mods: Shift|Alt,         chars: "\x1b[2;4~"        }
+  - { key: Insert,    mods: Control,           chars: "\x1b[2;5~"        }
+  - { key: Insert,    mods: Control|Shift,     chars: "\x1b[2;6~"        }
+  - { key: Insert,    mods: Control|Alt,       chars: "\x1b[2;7~"        }
+  - { key: Insert,    mods: Control|Shift|Alt, chars: "\x1b[2;8~"        }
+  - { key: Delete,                             chars: "\x1b[3~"          }
+  - { key: Delete,    mods: Shift,             chars: "\x1b[3;2~"        }
+  - { key: Delete,    mods: Alt,               chars: "\x1b[3;3~"        }
+  - { key: Delete,    mods: Shift|Alt,         chars: "\x1b[3;4~"        }
+  - { key: Delete,    mods: Control,           chars: "\x1b[3;5~"        }
+  - { key: Delete,    mods: Control|Shift,     chars: "\x1b[3;6~"        }
+  - { key: Delete,    mods: Control|Alt,       chars: "\x1b[3;7~"        }
+  - { key: Delete,    mods: Control|Shift|Alt, chars: "\x1b[3;8~"        }
+  - { key: PageUp,                             chars: "\x1b[5~"          }
+  - { key: PageUp,    mods: Shift,             chars: "\x1b[5;2~"        }
+  - { key: PageUp,    mods: Alt,               chars: "\x1b[5;3~"        }
+  - { key: PageUp,    mods: Shift|Alt,         chars: "\x1b[5;4~"        }
+  - { key: PageUp,    mods: Control,           chars: "\x1b[5;5~"        }
+  - { key: PageUp,    mods: Control|Shift,     chars: "\x1b[5;6~"        }
+  - { key: PageUp,    mods: Control|Alt,       chars: "\x1b[5;7~"        }
+  - { key: PageUp,    mods: Control|Shift|Alt, chars: "\x1b[5;8~"        }
+  - { key: PageDown,                           chars: "\x1b[6~"          }
+  - { key: PageDown,  mods: Shift,             chars: "\x1b[6;2~"        }
+  - { key: PageDown,  mods: Alt,               chars: "\x1b[6;3~"        }
+  - { key: PageDown,  mods: Shift|Alt,         chars: "\x1b[6;4~"        }
+  - { key: PageDown,  mods: Control,           chars: "\x1b[6;5~"        }
+  - { key: PageDown,  mods: Control|Shift,     chars: "\x1b[6;6~"        }
+  - { key: PageDown,  mods: Control|Alt,       chars: "\x1b[6;7~"        }
+  - { key: PageDown,  mods: Control|Shift|Alt, chars: "\x1b[6;8~"        }
+  - { key: Up,                                 chars: "\x1b[A"           }
+  - { key: Up,        mods: Shift,             chars: "\x1b[1;2A"        }
+  - { key: Up,        mods: Alt,               chars: "\x1b[1;3A"        }
+  - { key: Up,        mods: Shift|Alt,         chars: "\x1b[1;4A"        }
+  - { key: Up,        mods: Control,           chars: "\x1b[1;5A"        }
+  - { key: Up,        mods: Control|Shift,     chars: "\x1b[1;6A"        }
+  - { key: Up,        mods: Control|Alt,       chars: "\x1b[1;7A"        }
+  - { key: Up,        mods: Control|Shift|Alt, chars: "\x1b[1;8A"        }
+  - { key: Down,                               chars: "\x1b[B"           }
+  - { key: Down,      mods: Shift,             chars: "\x1b[1;2B"        }
+  - { key: Down,      mods: Alt,               chars: "\x1b[1;3B"        }
+  - { key: Down,      mods: Shift|Alt,         chars: "\x1b[1;4B"        }
+  - { key: Down,      mods: Control,           chars: "\x1b[1;5B"        }
+  - { key: Down,      mods: Control|Shift,     chars: "\x1b[1;6B"        }
+  - { key: Down,      mods: Control|Alt,       chars: "\x1b[1;7B"        }
+  - { key: Down,      mods: Control|Shift|Alt, chars: "\x1b[1;8B"        }
+  - { key: Right,                              chars: "\x1b[C"           }
+  - { key: Right,     mods: Shift,             chars: "\x1b[1;2C"        }
+  - { key: Right,     mods: Alt,               chars: "\x1b[1;3C"        }
+  - { key: Right,     mods: Shift|Alt,         chars: "\x1b[1;4C"        }
+  - { key: Right,     mods: Control,           chars: "\x1b[1;5C"        }
+  - { key: Right,     mods: Control|Shift,     chars: "\x1b[1;6C"        }
+  - { key: Right,     mods: Control|Alt,       chars: "\x1b[1;7C"        }
+  - { key: Right,     mods: Control|Shift|Alt, chars: "\x1b[1;8C"        }
+  - { key: Left,                               chars: "\x1b[D"           }
+  - { key: Left,      mods: Shift,             chars: "\x1b[1;2D"        }
+  - { key: Left,      mods: Alt,               chars: "\x1b[1;3D"        }
+  - { key: Left,      mods: Shift|Alt,         chars: "\x1b[1;4D"        }
+  - { key: Left,      mods: Control,           chars: "\x1b[1;5D"        }
+  - { key: Left,      mods: Control|Shift,     chars: "\x1b[1;6D"        }
+  - { key: Left,      mods: Control|Alt,       chars: "\x1b[1;7D"        }
+  - { key: Left,      mods: Control|Shift|Alt, chars: "\x1b[1;8D"        }
+  - { key: Home,                               chars: "\x1b[H"           }
+  - { key: Home,      mods: Shift,             chars: "\x1b[1;2H"        }
+  - { key: Home,      mods: Alt,               chars: "\x1b[1;3H"        }
+  - { key: Home,      mods: Shift|Alt,         chars: "\x1b[1;4H"        }
+  - { key: Home,      mods: Control,           chars: "\x1b[1;5H"        }
+  - { key: Home,      mods: Control|Shift,     chars: "\x1b[1;6H"        }
+  - { key: Home,      mods: Control|Alt,       chars: "\x1b[1;7H"        }
+  - { key: Home,      mods: Control|Shift|Alt, chars: "\x1b[1;8H"        }
+  - { key: End,                                chars: "\x1b[F"           }
+  - { key: End,       mods: Shift,             chars: "\x1b[1;2F"        }
+  - { key: End,       mods: Alt,               chars: "\x1b[1;3F"        }
+  - { key: End,       mods: Shift|Alt,         chars: "\x1b[1;4F"        }
+  - { key: End,       mods: Control,           chars: "\x1b[1;5F"        }
+  - { key: End,       mods: Control|Shift,     chars: "\x1b[1;6F"        }
+  - { key: End,       mods: Control|Alt,       chars: "\x1b[1;7F"        }
+  - { key: End,       mods: Control|Shift|Alt, chars: "\x1b[1;8F"        }
+
+  # Back to the defaults
   - { key: Tab,      mods: Shift,   chars: "\x1b[Z"                      }
   - { key: Back,                    chars: "\x7f"                        }
   - { key: Back,     mods: Alt,     chars: "\x1b\x7f"                    }
-  - { key: Insert,                  chars: "\x1b[2~"                     }
-  - { key: Delete,                  chars: "\x1b[3~"                     }
-  - { key: Left,     mods: Shift,   chars: "\x1b[1;2D"                   }
-  - { key: Left,     mods: Control, chars: "\x1b[1;5D"                   }
-  - { key: Left,     mods: Alt,     chars: "\x1b[1;3D"                   }
-  #- { key: Left,                    chars: "\x1b[D",   mode: ~AppCursor  }
-  #- { key: Left,                    chars: "\x1bOD",   mode: AppCursor   }
-  - { key: Left,                    chars: "\x1b[D"                      }
-  - { key: Right,    mods: Shift,   chars: "\x1b[1;2C"                   }
-  - { key: Right,    mods: Control, chars: "\x1b[1;5C"                   }
-  - { key: Right,    mods: Alt,     chars: "\x1b[1;3C"                   }
-  #- { key: Right,                   chars: "\x1b[C",   mode: ~AppCursor  }
-  #- { key: Right,                   chars: "\x1bOC",   mode: AppCursor   }
-  - { key: Right,                   chars: "\x1b[C"                      }
-  - { key: Up,       mods: Shift,   chars: "\x1b[1;2A"                   }
-  - { key: Up,       mods: Control, chars: "\x1b[1;5A"                   }
-  - { key: Up,       mods: Alt,     chars: "\x1b[1;3A"                   }
-  #- { key: Up,                      chars: "\x1b[A",   mode: ~AppCursor  }
-  #- { key: Up,                      chars: "\x1bOA",   mode: AppCursor   }
-  - { key: Up,                      chars: "\x1b[A"                      }
-  - { key: Down,     mods: Shift,   chars: "\x1b[1;2B"                   }
-  - { key: Down,     mods: Control, chars: "\x1b[1;5B"                   }
-  - { key: Down,     mods: Alt,     chars: "\x1b[1;3B"                   }
-  #- { key: Down,                    chars: "\x1b[B",   mode: ~AppCursor  }
-  #- { key: Down,                    chars: "\x1bOB",   mode: AppCursor   }
-  - { key: Down,                    chars: "\x1b[B"                      }
+  # NOTE(sdh): These are xterm's sequences, rather than urxvt, which is fine
   - { key: F1,                      chars: "\x1bOP"                      }
   - { key: F2,                      chars: "\x1bOQ"                      }
   - { key: F3,                      chars: "\x1bOR"                      }
@@ -481,7 +551,7 @@ key_bindings:
 
   - { key: Grave,    mods: Control, chars: "\x1b[36~`"                   }
   - { key: Subtract, mods: Control, chars: "\x1b[36~-"                   }
-  - { key: Equal,    mods: Control, chars: "\x1b[36~="                   }
+  - { key: Equals,   mods: Control, chars: "\x1b[36~="                   }
   - { key: LBracket, mods: Control, chars: "\x1b[36~["                   }
   - { key: RBracket, mods: Control, chars: "\x1b[36~]"                   }
   - { key: Backslash, mods: Control, chars: "\x1b[36~\\"                 }
@@ -538,8 +608,8 @@ key_bindings:
   - { key: Key8,  mods: Control|Shift, chars: "\x1b[36~*" }
   - { key: Key9,  mods: Control|Shift, chars: "\x1b[36~(" }
   # skip tilde and underscore since they have dedicated sequences
-  - { key: Equal, mods: Control|Shift, chars: "\x1b[36~+" }
   # skip curlies and pipe to just send \x1[bdc] since these are sometimes useful??
+  - { key: Equals,    mods: Control|Shift, chars: "\x1b[36~+" }
   - { key: Semicolon, mods: Control|Shift, chars: "\x1b[36~:" }
   - { key: Comma,     mods: Control|Shift, chars: "\x1b[36~<" }
   - { key: Period,    mods: Control|Shift, chars: "\x1b[36~>" }
@@ -560,7 +630,7 @@ key_bindings:
 
   - { key: Grave,      mods: Control|Alt, chars: "\x1b[36~\x1b`"  }
   - { key: Subtract,   mods: Control|Alt, chars: "\x1b[36~\x1b-"  }
-  - { key: Equal,      mods: Control|Alt, chars: "\x1b[36~\x1b="  }
+  - { key: Equals,     mods: Control|Alt, chars: "\x1b[36~\x1b="  }
   - { key: LBracket,   mods: Control|Alt, chars: "\x1b[36~\x1b["  }
   - { key: RBracket,   mods: Control|Alt, chars: "\x1b[36~\x1b]"  }
   - { key: Backslash,  mods: Control|Alt, chars: "\x1b[36~\x1b\\" }
@@ -612,7 +682,7 @@ key_bindings:
   - { key: Key7,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b&" }
   - { key: Key8,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b*" }
   - { key: Key9,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b(" }
-  - { key: Equal, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b+" }
+  - { key: Equals,    mods: Control|Shift|Alt, chars: "\x1b[36~\x1b+" }
   - { key: Semicolon, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b:" }
   - { key: Comma,     mods: Control|Shift|Alt, chars: "\x1b[36~\x1b<" }
   - { key: Period,    mods: Control|Shift|Alt, chars: "\x1b[36~\x1b>" }
@@ -621,5 +691,48 @@ key_bindings:
   - { key: RBracket,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b}" }
   - { key: Backslash, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b|" }
   # skip tilde and underscore since they have dedicated sequences
-  # - { key: Subtract, mode: Control|Shift|Alt, chars: "\x1b[36~\x1b_" }
-  # - { key: Grave, mode: Control|Shift|Alt, chars: "\x1b[36~\x1b~" }
+  # - { key: Subtract, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b_" }
+  # - { key: Grave, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b~" }
+
+## TODO(sdh): Consider the non-number keys in the numpad. Somewhere I saw
+## 'kent' produce \E^M, but I can't find that, so we'll just have it do ^M.
+## But these keys are rarely used and could be given special meanings?
+  - {key: NumpadEnter, chars: "\x0d"}
+  # TODO(sdh): I can't figure out how to make these produce anything
+  # when numlock is off...?
+  #- {key: Numpad5, chars: "\x1b[E" }
+  
+
+## NOTE: The following are bindings for rxvt-unicode's keycodes
+## - { key: PageUp,                             chars: "\x1b[5~"          }
+## - { key: PageUp,    mods: Shift,             chars: "\x1b[5$"          }
+## - { key: PageUp,    mods: Control,           chars: "\x1b[5^"          }
+## - { key: PageUp,    mods: Control|Shift,     chars: "\x1b[5@"          }
+## - { key: PageUp,    mods: Alt,               chars: "\x1b\x1b[5~"      }
+## - { key: PageUp,    mods: Shift|Alt,         chars: "\x1b\x1b[5$"      }
+## - { key: PageUp,    mods: Control|Alt,       chars: "\x1b\x1b[5^"      }
+## - { key: PageUp,    mods: Control|Shift|Alt, chars: "\x1b\x1b[5@"      }
+## - { key: PageDown,                           chars: "\x1b[6~"          }
+## - { key: PageDown,  mods: Shift,             chars: "\x1b[6$"          }
+## - { key: PageDown,  mods: Control,           chars: "\x1b[6^"          }
+## - { key: PageDown,  mods: Control|Shift,     chars: "\x1b[6@"          }
+## - { key: PageDown,  mods: Alt,               chars: "\x1b\x1b[6~"      }
+## - { key: PageDown,  mods: Shift|Alt,         chars: "\x1b\x1b[6$"      }
+## - { key: PageDown,  mods: Control|Alt,       chars: "\x1b\x1b[6^"      }
+## - { key: PageDown,  mods: Control|Shift|Alt, chars: "\x1b\x1b[6@"      }
+## - { key: Insert,                             chars: "\x1b[2~"          }
+## - { key: Insert,   mods: Shift,              chars: "\x1b[2$"          }
+## - { key: Insert,   mods: Control,            chars: "\x1b[2^"          }
+## - { key: Insert,   mods: Control|Shift,      chars: "\x1b[2@"          }
+## - { key: Insert,   mods: Alt,                chars: "\x1b\x1b[2~"      }
+## - { key: Insert,   mods: Shift|Alt,          chars: "\x1b\x1b[2$"      }
+## - { key: Insert,   mods: Control|Alt,        chars: "\x1b\x1b[2^"      }
+## - { key: Insert,   mods: Control|Shift|Alt,  chars: "\x1b\x1b[2@"      }
+## - { key: Delete,                             chars: "\x1b[3~"          }
+## - { key: Delete,   mods: Shift,              chars: "\x1b[3$"          }
+## - { key: Delete,   mods: Control,            chars: "\x1b[3^"          }
+## - { key: Delete,   mods: Control|Shift,      chars: "\x1b[3@"          }
+## - { key: Delete,   mods: Alt,                chars: "\x1b\x1b[3~"      }
+## - { key: Delete,   mods: Shift|Alt,          chars: "\x1b\x1b[3$"      }
+## - { key: Delete,   mods: Control|Alt,        chars: "\x1b\x1b[3^"      }
+## - { key: Delete,   mods: Control|Shift|Alt,  chars: "\x1b\x1b[3@"      }

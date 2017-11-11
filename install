@@ -192,10 +192,13 @@ function install_fonts {
   (
     sudo mkdir -p /usr/share/fonts/truetype/monofur
     cd /usr/share/fonts/truetype/monofur
-    sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof55.ttf
-    sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof56.ttf
+    # sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof55.ttf
+    # sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof56.ttf
+
     sudo fc-cache -fv .
   )
+
+  safe_link dot-fonts .fonts
 }
 
 function install_term {

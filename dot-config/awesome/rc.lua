@@ -46,7 +46,7 @@ end
 beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "x-terminal-emulator"
+terminal = os.getenv("HOME") .. "/local/bin/alacritty" -- "x-terminal-emulator"
 -- lock = "xflock4"
 -- lock = "gnome-screensaver-command -l"
 lock = "dm-tool lock"
@@ -647,6 +647,8 @@ client.connect_signal("property::floating", function(c)
   end
 end)
 
+-- TODO(sdh): This doesn't seem to make any difference, for some reason?
+-- We might try to debug it by printing some messages?
 awful.tag.attached_connect_signal(s, "property::layout", function (t)
   local float = t.layout.name == "floating"
   for _,c in pairs(t:clients()) do
