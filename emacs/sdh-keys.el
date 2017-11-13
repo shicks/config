@@ -145,8 +145,18 @@
 (global-set-key (kbd "C-x p") 'sdh-prev-window)
 (global-set-key (kbd "C-x o") 'sdh-other-window)
 
+;; TODO(sdh): alacritty now sends these sequences and they're not binding
+;; normally for some reason?
+(global-set-key (kbd "M-[ H") 'move-beginning-of-line)
+(global-set-key (kbd "M-[ F") 'move-end-of-line)
+
 (if (sdh-try-require 'window-jump)
     (progn
+      (global-set-key (sdh-kbd "C-M-<up>") 'window-jump-up)
+      (global-set-key (sdh-kbd "C-M-<down>") 'window-jump-down)
+      (global-set-key (sdh-kbd "C-M-<left>") 'window-jump-left)
+      (global-set-key (sdh-kbd "C-M-<right>") 'window-jump-right)
+      ; TODO(sdh): remove these keybindings once old tmux (and iterm?) no longer sends them?
       (global-set-key (kbd "ESC M-[ a") 'window-jump-up)
       (global-set-key (kbd "ESC M-[ b") 'window-jump-down)
       (global-set-key (kbd "ESC M-[ c") 'window-jump-right)
