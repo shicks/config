@@ -645,7 +645,7 @@ See also: `xah-copy-to-register-1', `insert-register'."
          (group-n 5 digit)
          (group-n 6 (any "-\\`~_=+[{]}\|;:'\",<.>/?!@#$%^&*()"))
          ; TODO(sdh): F-keys, navigation keys, tab/etc
-         (seq "<" (group-n 7 (| "delete")) ">")
+         (seq "<" (group-n 7 (| "delete" "left" "right" "up" "down")) ">")
          (group-n 8 (+ anything)))
       string-end)
   "Regex for parsing keyboard sequences")
@@ -653,7 +653,13 @@ See also: `xah-copy-to-register-1', `insert-register'."
 (defconst sdh-kbd-prefix "M-[ 36~"
   "Prefix used for most extended keyboard shortcuts")
 
+(defconst sdh-arrow-key-letters
+  '(("up" . "a") ("down" . "b") ("right" . "c") ("left" . "d"))
+  "Lookup table for mapping arrow keys to the right letter")
+
 ;; TODO(sdh): conditionally return just (kbd spec) if in a window?
+;; TODO(sdh): consider returning a list so that we can handle
+;;            the X case as well as rxvt/alacritty, etc.
 (defun sdh-kbd (spec)
   "Parses an extended keysequence specification."
   (kbd
@@ -672,11 +678,11 @@ See also: `xah-copy-to-register-1', `insert-register'."
                  (rest   (match-string 8 term))
                  ; Error cases, fall back on (kbd term)
                  (err    (or
-                          named ; TODO(sdh): handle this later.
+                          ; named ; TODO(sdh): handle this later.
                           rest ; unknown final key
                           (and shift ds)))) ; use correct symbol
             (cond
-            ;; 1. error cases (or just don't match them?)
+             ;; 1. error cases (or just don't match them?)
              (err term)
              ;; 2. ctrl-shift-letter
              ((and ctrl shift letter)
@@ -687,6 +693,11 @@ See also: `xah-copy-to-register-1', `insert-register'."
              ;; 4. named symbols - TODO(sdh): flesh this out later
              ((and (eq named "delete") ctrl shift)
               term)
+             ((assoc named sdh-arrow-key-letters)
+              (let* ((num (+ 1 (if shift 1 0) (if meta 2 0) (if ctrl 4 0)))
+                     (prefix (if (= num 1) "" (format "1 ; %d " num)))
+                     (code (cdr (assoc named sdh-arrow-key-letters))))
+                (concat "M-[ " prefix code)))
              ;; 5. all other cases are trivial, just forward as-is
              (t term)))
        term))
