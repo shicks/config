@@ -1,0 +1,385 @@
+#!/usr/bin/perl
+
+# An "xclip daemon", which supports copy/paste across SSH sessions, etc.
+# Usage:
+#   xclipd start          Start a new daemon (will error if already started)
+#   xclipd stop           Stop the running daemon
+#   xclipd status         Report the status of the daemon
+#   xclipd restart        Restart the current daemon
+#   xclipd remote <host>  Connect to a remote daemon
+#   xclipd copy < data    Sends data into the clipboard
+#   xclipd paste > data   Gets data out of the clipboard
+# Internal command:
+#   xclipd watch-remote   Called by `xclipd remote` on the other end
+#
+# All the commands except `stop` and `status` will start a new daemon if one
+# is not already running.
+
+
+# Implementation plan:
+#   Remote server:
+#     1. start watching with XCLIPD_REMOTE=1 xclipd
+#     2. this kicks off an async process to read STDIN and append to .in fifo
+#        - message is prepended with 'r'
+#     3. `xclipd -i` appends to .in fifo
+#        - message is prepended with 'i'
+#     4. main loop just reads from fifo and copies to .out file, and optionally
+#        to STDOUT if prefix was *not* 'r'
+#     5. 'xclipd -o` just cats the .out file.
+#   Local daemon:
+#     Basically the same as remote, but also
+#     6. kick off an async 'watch xclip -o' process, with a period of 2 seconds?
+
+# TODO - binmode ?
+
+use warnings;
+use strict;
+use IPC::Run qw/run start/;
+use File::Temp qw/tempfile/;
+use POSIX qw/setsid/;
+
+my $dir = '/var/run/xclipd';
+
+sub note {
+  open LOG, '>>', '/tmp/xclipd.log';
+  print LOG "@_\n";
+  close LOG;
+}
+
+sub main {
+  check_permissions();
+  check_inotify();
+  $_ = shift @_ || '';
+  usage(0) if $_ eq 'help';
+  do_stop() if $_ eq 'stop';
+  do_status() if $_ eq 'status';
+  do_restart() if $_ eq 'restart';
+  do_start() if $_ eq 'start';
+  do_remote(@_) if $_ eq 'remote';
+  do_copy() if $_ eq 'copy';
+  do_paste() if $_ eq 'paste';
+  do_watch_remote() if $_ eq 'watch-remote';
+  usage(1);
+}
+
+sub usage {
+print STDERR <<EOF;
+Usage:
+  xclipd start          Start a new daemon (will error if already started)
+  xclipd stop           Stop the running daemon
+  xclipd status         Report the status of the daemon
+  xclipd restart        Restart the current daemon
+  xclipd remote <host>  Connect to a remote daemon
+  xclipd copy < data    Sends data into the clipboard
+  xclipd paste > data   Gets data out of the clipboard
+
+All the commands except `stop` and `status` will start a new daemon if one
+is not already running.
+EOF
+  exit($_[0] || 0);
+}
+
+sub check_inotify {
+  my $out = '';
+  my $ok = run ['which', 'inotifywait'], '&>', \$out;
+  return if $ok;
+  print STDERR "Could not find inotifywait: $out";
+  run ['sudo', 'apt-get', 'install', 'inotify-tools'] or exit 1;
+}
+
+sub check_permissions {
+  return if -d $dir && -w $dir;
+  system 'sudo', 'mkdir', '-p', $dir;
+  system 'sudo', 'chmod', 'a+w', $dir;
+}
+
+sub do_stop {
+  my $pid = daemon_pid();
+  die "Daemon not running" unless $pid;
+  exec 'kill', '-9', $pid;
+}
+
+sub do_status {
+  my $pid = daemon_pid();
+  if ($pid) {
+    print "Daemon running as $pid\n";
+    exit 0;
+  }
+  print "Daemon not running\n";
+  exit 1;
+}
+
+sub do_start {
+  my $pid = daemon_pid();
+  die "Daemon already running at $pid" if $pid;
+  start_daemon();
+  exit 0;
+}
+
+sub do_restart {
+  my $pid = daemon_pid();
+  system 'kill', '-9', $pid if $pid;
+  start_daemon();
+  exit 0;
+}
+
+sub do_copy {
+  maybe_start_daemon();
+  open FIFO, '>>', "$dir/in" or die "Could not open fifo: $!\n";
+  binmode FIFO;
+  binmode STDIN;
+  print FIFO "$$;";
+  while ($_ = <STDIN>) {
+    print FIFO $_;
+  }
+  close FIFO;
+  exit 0;
+}
+
+sub do_paste {
+  maybe_start_daemon();
+  open CB, '<', "$dir/out" or exit 1;
+  my $file = <CB>; chomp $file;
+  $file =~ s/^\d+;// or die "Bad xclipd.out: $file\n";
+  close CB;
+  print_file($file);
+  exit 0;
+}
+
+sub do_remote {
+  maybe_start_daemon();
+  my $host = shift;
+  #my $h = start ['tail', '-F', '/tmp/o'],
+  #my $h = start ['ssh', $host, 'tail -F /tmp/o'],
+  my $h = start ['ssh', $host, 'xclipd watch-remote'],
+    '<pipe', \*SSH_IN, '>pipe', \*SSH_OUT;
+  defined (my $child = fork()) or die "Could not fork: $!\n";
+  note("SSH: forked $$ / $child");
+  if ($child) {
+    # parent, close the OUT, watch .out and write to SSH_IN
+    close SSH_OUT;
+    # TODO -- this is not actually printing,
+    # consider using a scalar ref instead of a glob ref and then
+    # (detecting it) just reading rather than printing???
+    # Or we could pass an object w/ a print method???
+    watch_outfile('ssh_in', $child, \*SSH_IN, $h);
+  } else {
+    # child: close the IN, pipe the OUT to the FIFO
+    close SSH_IN;
+    watch_handle('ssh_out', \*SSH_OUT, $h);
+  }
+  die 'do_remote should not terminate';
+}
+
+sub do_watch_remote {
+  maybe_start_daemon();
+  # Fork myself, parent watches .out file and writes STDOUT;
+  # child watches STDIN and writes .in
+  defined (my $child = fork) or die "Could not fork: $!\n";
+  note("watch-remote: forked $$ / $child");
+  if ($child) {
+    # Parent: set up watch on xclipd.out, send to STDOUT as long
+    # as it didn't come from the child.  If we want to make this
+    # work on Mac, which doesn't have inotifywait, then we could
+    # possibly just truncate the file then use `tail -F` and read
+    # individual lines.
+    watch_outfile('stdout', $child, \*STDOUT);
+  } else {
+    # Child: watch STDIN for clipboards and dump into fifo.
+    watch_handle('stdin', \*STDIN);
+  }
+  die 'do_watch_remote should not terminate';
+}
+
+sub maybe_start_daemon {
+  my $pid = daemon_pid();
+  return if $pid;
+  start_daemon();
+}
+
+sub start_daemon {
+  make_fifo();
+  truncate_out();
+  defined (my $child = fork) or die "Could not fork: $!\n";
+  return if $child;
+  unlink "$dir/pid" if -e "$dir/pid";
+  daemon_init();
+  watch_fifo();
+  die "watch_fifo should never terminate";
+}
+
+sub daemon_init {
+  # Handle the technical details of deamonizing.
+  close STDIN;
+  close STDOUT;
+  close STDERR;
+  setsid() or die "Can't start a new session: $!";
+  umask(0027); # create files with perms -rw-r----- 
+  chdir '/' or die "Can't chdir to /: $!";
+
+  # TODO(sdh): redirect to log files???
+  open STDIN,  '<', '/dev/null' or die $!;
+  open STDOUT, '>', '/dev/null' or die $!;
+  open STDERR, '>>', '/tmp/mysql_install.log';
+
+  defined (my $grandchild = fork) or die "Could not fork: $!\n";
+  exit if $grandchild;
+
+  # Save my PID to /var/run now that we're ready to read
+  open PID, '>', "$dir/pid" or die "Could not write pid: $!\n";
+  print PID "$$\n";
+  close PID;
+}
+
+sub daemon_pid {
+  # Is there a /var/run/xclipd.pid file? Is it up to date?
+  open PID, '<', "$dir/pid" or return 0;
+  my $pid = <PID>; chomp $pid; $pid = int($pid);
+  close PID;
+  return 0 unless $pid > 0;
+  open PS, '-|', "ps hcocomm $pid" or return 0;
+  my $comm = <PS> || ''; chomp $comm;
+  close PS;
+  return 0 unless $comm eq 'xclipd';
+  return $pid;
+}
+
+sub make_fifo {
+  # TODO(sdh): consider how we can have multiple sessions (i.e. running
+  # a local session on localhost but also watching remote?)
+  unlink "$dir/in" if -e "$dir/in";
+  system 'mkfifo', "$dir/in";
+}
+
+sub truncate_out {
+  unlink "$dir/out" if -e "$dir/out";
+}
+
+sub print_file {
+  open DATA, '<', $_[0] or die "Could not open file $_[0]: $!\n";
+  binmode DATA;
+  binmode STDOUT;
+  while ($_ = <DATA>) {
+    print $_;
+  }
+  close DATA;
+}
+
+# TODO(sdh): inotifywait and remote-watch processes both
+# stick around even after the remote process is killed.
+#  - maybe add a signal handler to remote to send a
+#    kill message (00; maybe?) and then shut down gracefully?
+
+# Used by one fork of the remote bit.
+sub watch_outfile {
+  # If we want to make this work on Mac, which doesn't have
+  # inotifywait, then we could possibly just truncate the file
+  # then use `tail -F` and read individual lines.
+  my ($name, $child, $fh) = @_;
+     # try to make this flush better?!?
+     my $old_fh = select($fh);
+     $| = 1;
+     select($old_fh);
+  binmode $fh;
+  system 'touch', "$dir/out" unless -e "$dir/out";
+  open INOTIFY, '-|', 'inotifywait', '--monitor', "$dir/out";
+  my $last = 0;
+  while (<INOTIFY>) {
+    chomp $_;
+    next unless /CLOSE_WRITE/;
+    note("inotify(out): $_");
+    open CB, '<', "$dir/out" or die "Failed to open file: $!\n";
+    my $file = <CB>; chomp $file;
+    $file =~ s/^(\d+);// or die "Bad xclipd.out: $file\n";
+    close CB;
+    note("out updated by $1, child=$child");
+
+    open DATA, '<', $file or die "Could not open file $file: $!\n";
+    binmode DATA;
+    local ($/) = undef;
+    my $message = <DATA>;
+    close DATA;
+
+    if ($ENV{DISPLAY}) {
+      # Best effort attempt to keep xclip in sync
+      open XCLIP, '|-', 'xclip -i';
+      print XCLIP $message;
+      close XCLIP;
+    }
+
+    next if $1 == $child; # don't re-print if came from child
+
+    # dump data to stdout
+    my $length = length $message;
+    note("Watcher: detected data <<<LEN:$length;$message>>>");
+    print $fh "$length;$message\n";
+    note("Watcher: printed to filehandle $name");
+  }
+}
+
+# Used by the other fork of the remote bit.
+sub watch_handle {
+  my ($name, $handle, $harness) = @_;
+  note("Handler: $name");
+  binmode $handle;
+  my $message = '';
+  my $waiting = -1;
+  $_ = '';
+  #note("Handler: pumping $name"), $harness->pump if $harness;
+  #note("Handler: pumping done");
+  while ($_ or $_ = <$handle>) {
+    note("Handler: got line from $name: <<<$_>>>");
+    if ($waiting < 0) {
+      note("Handler: not waiting");
+      s/^\s+//;
+      next unless $_;
+      note("Handler: looking for a number");
+      s/^(\d+);// or die "Bad message over $name: $_";
+      $waiting = $1;
+    }
+    $waiting -= length($_);
+    $message .= $_;
+    $_ = $waiting < 0 ? substr($message, $waiting) : '';
+    next if $waiting > 0;
+    # Maybe put some back...
+    $message = substr($message, 0, $waiting) if $waiting < 0;
+    $waiting = -1;
+    note("Handler: sending message <<<PID:$$;$message>>>");
+    open FIFO, '>>', "$dir/in";
+    print FIFO "$$;$message";
+    close FIFO;
+    $message = '';
+  }
+  die 'watch_handle should not terminate';
+}
+
+# Used by the daemon.
+sub watch_fifo {
+  open IN, '<', "$dir/in" or die "Could not open fifo: $!\n";
+  # Main loop
+  while (1) {
+    my $message = '';
+    binmode IN;
+    while (<IN>) {
+      $message .= $_;
+    }
+    close IN;
+    # Got the whole message, terminated by EOF.  NOTE: don't cross the streams!
+    # First char of $message stores instructions about mode, and will indicate
+    # whether we need to update our local copy, print to stdout, etc.
+    $message =~ s/^(\d+);// or die "Bad message on FIFO: [$message]\n";
+    my $pid = $1;
+    # Make a new clipboard file... (TODO - allow navigating history?)
+    # Save current filename to xclipd.out
+    note("Daemon: got message <<<PID:$pid;$message>>>");
+    my ($fh, $name) = tempfile();
+    open OUT, '>', "$dir/out";
+    print OUT "$pid;$name\n";
+    close OUT;
+    print $fh $message;
+    close $fh;
+    open IN, '<', "$dir/in";
+  }
+}
+
+main(@ARGV);
