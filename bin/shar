@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+# Makes a self-executable "shell archive".  The archive will extract
+# itself into a checksummed directory in /tmp.
+#
+# May need to set up infrastructure to package libraries along with...?
+#  - the perl6 part of this may already exist?
+#  - Q: presumably moarvm is pretty self-contained and can run anywhere?
+#  - args like "-p1" to strip off one level from the paths?
+#  - switch order? => shar files {}/moarvm {}/perl6.moarvm {}/foo.pl6
+#
+# Usage:
+#   shar "{}/moarvm {}/perl6.moarvm {}/foo.pl6" files/
+
+my $cmd = shift;
+my $dir = shift;
+die "Usage: shar COMMAND DIR" unless $cmd and -d $dir
+
+$cmd =~ s/{}/\$DIR/g;
+
+binmode STDOUT;
+
+print <<EOF;
+#!/bin/sh
+
+TMP=\${TMP:-\${TMPDIR:-\${TEMP:-/tmp}}}
+sha1=\$(sha1sum \$0 | cut -f1 -d\\ )
+DIR=\$TMP/\$sha1
+if [ ! -d "\$TMP/\$sha1" ]; then
+  mkdir -p "\$TMP/\$sha1"
+  perl -ne 'binmode STDIN;
+            binmode STDOUT;
+	    <> until \$_ eq "__TAR__";
+	    \$/=undef;
+	    print <>;' \$0 | (cd $DIR; tar x)
+fi
+exec $cmd "\$@"
+# perl -e '@_=@ARGV;for(@_){s/{}/'"\$DIR"'/g}exec @_' $cmd "\$@"
+__TAR__
+EOF
+
+chdir $dir;
+exec qw/tar c ./;

@@ -355,6 +355,7 @@ globalkeys = awful.util.table.join(
     ,awful.key({ modkey }, "F11", function () awful.spawn("pkill -HUP awesome") end)
     ,awful.key({ modkey }, "F12", function () awful.spawn(lock) end)
     ,awful.key({ }, "XF86Favorites", function () awful.spawn("xterm -name prodaccess -e 'prodaccess; updatecert'") end)
+    ,awful.key({ modkey }, "Insert", function () awful.spawn("xclip -o | ~/local/bin/xclipd copy") end)
     -- sdh - laptop only?
     -- ,awful.key({ modkey, "Control" }, "F12",
     --     function ()
@@ -667,3 +668,7 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+-- SDH: Windows-style edge snapping is annoying and I've never wanted it.
+awful.mouse.snap.client_enabled = false
+awful.mouse.snap.edge_enabled = false
