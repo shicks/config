@@ -162,6 +162,11 @@
       (global-set-key (kbd "ESC M-[ c") 'window-jump-right)
       (global-set-key (kbd "ESC M-[ d") 'window-jump-left)))
 
+(if (sdh-try-require 'doremi-cmd)
+    (progn
+      (global-set-key (sdh-kbd "C-c t w") 'doremi-window-height+)
+      ))
+
 ;; Obsolete bindings
 ;(global-set-key "\C-CC-Z" '(replace-regexp "<[^<>]*>" "")) ;; For c++ errors
 ;(global-set-key "\C-x5a" 'beginning-of-buffer)
@@ -205,6 +210,10 @@
 (autoload 'rm-mouse-drag-region "rect-mark"
   "Drag out a rectangular region with the mouse." t)
 
+
+;; TOGGLES - C-c t
+; l: line-move-visual to jump over wrapped lines.
+(global-set-key (kbd "C-c t l") 'sdh-toggle-line-move-visual)
 
 
 (provide 'sdh-keys)

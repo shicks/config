@@ -761,4 +761,12 @@ See also: `xah-copy-to-register-1', `insert-register'."
               (insert chr))
           (error (error "No character at point")))))))
 
+(defun sdh-toggle-line-move-visual (buffer-local)
+  "Toggle line-move-visual."
+  (interactive "P")
+  ;; TODO(sdh): consider switching the default to local?
+  (if buffer-local (make-variable-buffer-local 'line-move-visual))
+  (setq line-move-visual (not line-move-visual)))
+(setq line-move-visual nil)
+
 (provide 'sdh-misc)
