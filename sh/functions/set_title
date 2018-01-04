@@ -1,0 +1,5 @@
+# TODO(sdh): consider using `tput tsl`$title`tput fsl`, except that
+# by default, xterm does not define that capability, and if we don't
+# put anything, we'll get terminal spam.
+local title=${FIXED_TITLE:-$1}
+echo -ne "\033]2;$title\007"

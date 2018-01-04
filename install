@@ -109,7 +109,6 @@ function safe_link {
 function install_files {
   echo "Installing config files from $conf into $home..."
 
-  safe_link Xmodmap
   safe_link Xdefaults
   safe_link tmux.conf
   safe_link alacritty.yml
@@ -122,21 +121,29 @@ function install_files {
   safe_link dot-config .config
 
   # Link everything in the bash directory
-  cd bash
-  mkdir -p $home/.bash.d
-  for a in *.sh; do
-    safe_link bash/$a .bash.d/$a
+  cd sh
+  mkdir -p $home/.sh.d
+  for a in *; do
+    a=${a#*~}
+    [ -f "$a" ] && safe_link sh/$a .sh.d/$a
   done
+
+  if [ ! -e $home/.sh.d/functions ]; then
+    ln -s $PWD/functions $home/.sh.d/
+  fi
 
   # Unlink everything in the disabled directory
   if [ -d disabled ]; then
     cd disabled
-    for a in *.sh; do
-      target="$home/.bash.d/$a"
-      if [ -h $target -a "$(readlink $target)" = "$conf/bash/$a" ]; then
-        rm -f $target
-      elif [ -s "$target" ]; then
-        echo "Refusing to delete non-symlink $target even though disabled."
+    for a in *; do
+      a=${a#*~}
+      if [ -f "$a" ]; then
+        target="$home/.sh.d/$a"
+        if [ -h $target -a "$(readlink $target)" = "$conf/sh/$a" ]; then
+          rm -f $target
+        elif [ -s "$target" ]; then
+          echo "Refusing to delete non-symlink $target even though disabled."
+        fi
       fi
     done
     cd ..
@@ -156,7 +163,7 @@ function install_files {
   done
 
   # Make bash completion dir so somebody doesn't complain
-  mkdir -p $home/.bash.d/completion
+  mkdir -p $home/.sh.d/completion
 
   # Make sure history dir exists
   mkdir -p $home/history
@@ -265,7 +272,7 @@ function install_fzf {
     chmod +x ~/local/bin/fzf-tmux
     # Fix ^T to ^F for inserting a filename.
     sed -i 's/\^T/^F/g' shell/*.zsh
-    sed -i 's/\\C-t/\\C-f/g' shell/*.bash
+    sed -i 's/\\C-t/\\C-f/g' shell/*.sh
   )
 }
 

@@ -1,16 +1,20 @@
-export PATH="$HOME/local/bin:$PATH"
+# If not running interactively, don't do anything (same as [ -z $PS1 ] ?)
+case $- in
+  *i*) ;;
+    *) return;;
+esac
 
-# If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+function whisper {
+  if [ -n "$VERBOSE" ]; then echo "$@"; fi
+}
 
-export SHELL=$(which bash)
-
-# Now run all the startup stuff:
-for a in $HOME/.bash.d/??_*.sh; do
-  . $a
-done
-
-export CLICOLOR=1
-export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+function run_init_scripts {
+  local file
+  for file in $HOME/.sh.d/*; do
+    case "$file" in
+      (*.sh)   whisper "sourcing $file"; source "$file" ;;
+      (*.bash) whisper "sourcing $file"; source "$file" ;;
+    esac
+  done
+}
+run_init_scripts

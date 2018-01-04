@@ -1,9 +1,7 @@
+#!tic -x
+
 # Documentation for this file format:
 #   https://www.mkssoftware.com/docs/man5/terminfo.5.asp
-
-tmux-256color|tmux running on top of rxvt-unicode-256color,
-  sitm=\E[3m,ritm=\E[23m,smso=\E[7m,rmso=\E[27m,
-  use=screen-256color,
 
 # True color:
 #  (emacs) http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e463e57
@@ -42,6 +40,16 @@ alacritty-keyboard|mixin for the keybindings we set in alacritty.yml,
 alacritty-status|mixin for capability to set status line (i.e. title),
   tsl=\E]2;, fsl=^G,
 
+xterm-italic|mixin for proper italic support,
+  sitm=\E[3m, ritm=\E[23m, smso=\E[7m, rmso=\E[27m,
+
+# TODO(sdh): This is unfortunate, and I shouldn't need to do this.
+tmux-italic|mixin for proper italic support in tmux,
+  use=xterm-italic,
+  Ms@,
+
+#  sitm=\EPtmux;\E\E[3m\E\\, ritm=\EPtmux;\E\E[23m\E\\,
+
 # TODO(sdh): Is there any place for termcaps to set and reset the global
 # bg and fg colors for the whole terminal? e.g. \E]11;#rgb^G to set bg,
 # \E]10;#rgb^G for fg, \E]110^G to reset fg and \E]111^G to reset bg...?
@@ -53,17 +61,28 @@ alacritty|alacritty terminal emulator,
   use=true-color,
   use=alacritty-keyboard,
   use=alacritty-status,
+  use=xterm-italic,
   use=xterm-256color,
+
+#  use=xterm+256setaf,
+
+# use=xterm-256color,  # replaces +256setaf
 
 alacritty-256color|alacritty terminal emulator,
   use=alacritty,
 
+# TODO(sdh): previously this was just true-color and screen-256color...
+# I'm adding the alacitty and italic mixins since I think I want them.
 tmux-alacritty|tmux running on top of alacritty,
-  use=true-color,
-  use=screen-256color,
+  use=alacritty,
+  use=screen,
 
 # iTerm2 TERMINFO that adds the escape sequences for italic
 
 xterm-256color-italic|xterm with 256 colors and italic,
-  sitm=\E[3m, ritm=\E[23m,
+  use=xterm-italic,
   use=xterm-256color,
+
+tmux-256color|tmux running on top of rxvt-unicode-256color,
+  use=tmux-italic,
+  use=screen-256color,
