@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -e
+
+fail=''
+
+# TODO(sdh): automate detection
+dir=$(dirname "$0")
+
+ls -1 "$dir" |
+while read f; do
+  bash=false
+  zsh=false
+  case "$f" in
+    (*_test.sh) bash=true; zsh=true ;;
+    (*_test.zsh) zsh=true ;;
+    (*_test.bash) bash=true ;;
+    (run|harness.sh) continue ;;
+    (*~) continue ;;
+    (*) echo -e "\e[1;31mFAIL\e[m - Unexpected file: $f" >&2; exit 1 ;;
+  esac
+  if $bash; then
+    echo "bash $f" >&2
+    SHELL=bash bash "$dir/$f" || fail="  bash:$f
+$fail"
+  fi
+  if $zsh; then
+    echo "zsh $f" >&2
+    SHELL=zsh zsh "$dir/$f" || fail="  zsh:$f
+$fail"
+  fi
+done
+
+if [ -n "$fail" ]; then
+  echo -ne "\e[1;31mFAIL\e[m - The following tests failed:
+$fail" >&2
+  exit 1
+else
+  echo -e "\e[1;32mPASS\e[m - All tests passed!"
+fi

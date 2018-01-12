@@ -27,7 +27,5 @@ function teardown {
   elif [ "$failed" -gt 0 ]; then
     echo -ne "\e[1;31mFAIL\e[m - $failed tests failed" >&2
     exit 1
-  else
-    echo "All tests passed" >&2
   fi
 }

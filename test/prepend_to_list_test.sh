@@ -1,7 +1,7 @@
 set -e
 
 source $(dirname $0)/harness.sh
-source $(dirname $0)/../00_functions.$(basename $SHELL)
+source $(dirname $0)/../sh/00_functions.$(basename $SHELL)
 
 # Basic functionality
 prepend_to_list x foo bar
