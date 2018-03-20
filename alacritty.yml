@@ -16,16 +16,17 @@ env:
 
 # Window dimensions in character columns and lines
 # (changes require restart)
-dimensions:
-  columns: 203
-  lines: 70
+window:
+  dimensions:
+    columns: 203
+    lines: 70
 
-# Adds this many blank pixels of padding around the window
-# Units are physical pixels; this is not DPI aware.
-# (change requires restart)
-padding:
-  x: 2
-  y: 2
+  # Adds this many blank pixels of padding around the window
+  # Units are physical pixels; this is not DPI aware.
+  # (change requires restart)
+  padding:
+    x: 2
+    y: 2
 
 # Display tabs using this many cells (changes require restart)
 tabspaces: 8
@@ -70,11 +71,8 @@ font:
   # Offset is the extra space around each character. offset.y can be thought of
   # as modifying the linespacing, and offset.x as modifying the letter spacing.
   offset:
-    # Note: We seem to need a big negative offset to counteract the fact
-    # that there are double-wide glyphs in the font.  On top of that, we
-    # also add a couple extra pixels to tighten things up and to eliminate
-    # ugly vertical lines between powerline glyphs.
-    x: -13.0
+    # Make the font "condensed".
+    x: -1.0
     y: 0.0
 
   # Glyph offset determines the locations of the glyphs within their cells with
@@ -609,11 +607,12 @@ key_bindings:
   - { key: Key9,  mods: Control|Shift, chars: "\x1b[36~(" }
   # skip tilde and underscore since they have dedicated sequences
   # skip curlies and pipe to just send \x1[bdc] since these are sometimes useful??
-  - { key: Equals,    mods: Control|Shift, chars: "\x1b[36~+" }
-  - { key: Semicolon, mods: Control|Shift, chars: "\x1b[36~:" }
-  - { key: Comma,     mods: Control|Shift, chars: "\x1b[36~<" }
-  - { key: Period,    mods: Control|Shift, chars: "\x1b[36~>" }
-  - { key: Slash,     mods: Control|Shift, chars: "\x1b[36~?" }
+  - { key: Equals,     mods: Control|Shift, chars: "\x1b[36~+" }
+  - { key: Semicolon,  mods: Control|Shift, chars: "\x1b[36~:" }
+  - { key: Apostrophe, mods: Control|Shift, chars: "\x1b[36~\"" }
+  - { key: Comma,      mods: Control|Shift, chars: "\x1b[36~<" }
+  - { key: Period,     mods: Control|Shift, chars: "\x1b[36~>" }
+  - { key: Slash,      mods: Control|Shift, chars: "\x1b[36~?" }
 
 ## [6] Convert C-M-? to insert ESC after the @36 from C-? (cf. [2])
 

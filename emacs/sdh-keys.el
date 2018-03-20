@@ -2,9 +2,7 @@
 ;;
 
 (require 'sdh-misc) ;; many of these functions are defined in sdh-misc
-
-;; TODO(sdh): make a function that applies my own keybindings so that
-;; I can simply write (sdh-kbd "C-M-,") instead of (kbd "ESC M-[ 36~,")
+(require 'sdh-kbd)
 
 ;; We would need to find an automated way to generate and maintain
 ;; all the .Xdefaults and ITerm2 config files.
@@ -41,29 +39,32 @@
 (global-set-key (kbd "C-x w") 'delete-region)
 (global-set-key (kbd "C-x M-d") 'sdh-delete-word)
 (global-set-key (kbd "C-a") 'sdh-beginning-of-line)
-(global-set-key (sdh-kbd "C-x S-C-f") 'sdh-reopen-file-as-root)
+(sdh-global-set-key "C-x S-C-f" 'sdh-find-file-as-root)
+(sdh-global-set-key "C-x S-C-r" 'sdh-reopen-file-as-root)
 
-(global-set-key (sdh-kbd "C-\\") 'toggle-input-method)
-(global-set-key (sdh-kbd "C-,") 'sdh-previous-error)
-(global-set-key (sdh-kbd "C-.") 'sdh-next-error)
-;(global-set-key (sdh-kbd "C-M-,") 'smerge-keep-mine)
-;(global-set-key (sdh-kbd "C-M-.") 'smerge-keep-other)
+(sdh-global-set-key "C-\\" 'toggle-input-method)
+(sdh-global-set-key "C-," 'sdh-previous-error)
+(sdh-global-set-key "C-." 'sdh-next-error)
+;(sdh-global-set-key "C-M-," 'smerge-keep-mine)
+;(sdh-global-set-key "C-M-." 'smerge-keep-other)
 (global-unset-key (kbd "C-/"))
-(global-set-key (sdh-kbd "C-/ C-,") 'smerge-keep-mine)
-(global-set-key (sdh-kbd "C-/ C-.") 'smerge-keep-other)
-(global-set-key (sdh-kbd "C-/ C-/") 'sdh-kill-middle-version)
-;(global-set-key (sdh-kbd "C-/") 'sdh-next-error-new-file) ; never used this...
-;(key-binding (sdh-kbd "C-/ M-[ 3 6 ~")) ; ???
-;(global-set-key (sdh-kbd "C-/ ,") 'sdh-pick-top-version)
-;(global-set-key (sdh-kbd "C-/ .") 'sdh-pick-bottom-version)
+(sdh-global-set-key "C-/ C-," 'smerge-keep-mine)
+(sdh-global-set-key "C-/ C-." 'smerge-keep-other)
+(sdh-global-set-key "C-/ C-/" 'sdh-kill-middle-version)
+;(sdh-global-set-key "C-/" 'sdh-next-error-new-file) ; never used this...
+;(key-binding "C-/ M-[ 3 6 ~") ; ???
+;(sdh-global-set-key "C-/ ," 'sdh-pick-top-version)
+;(sdh-global-set-key "C-/ ." 'sdh-pick-bottom-version)
 
-(global-set-key (sdh-kbd "C--") 'sdh-prev-window)
-(global-set-key (sdh-kbd "C-=") 'sdh-other-window)
-;(global-set-key (sdh-kbd "C-+") 'mode-line-other-buffer)  ;; too distracting
-(global-set-key (sdh-kbd "C-9") 'mode-line-other-buffer)  ;; too distracting
+(sdh-global-set-key "C-S-e" 'kmacro-end-and-call-macro)
+
+(sdh-global-set-key "C--" 'sdh-prev-window)
+(sdh-global-set-key "C-=" 'sdh-other-window)
+;(sdh-global-set-key "C-+" 'mode-line-other-buffer)  ;; too distracting
+(sdh-global-set-key "C-9" 'mode-line-other-buffer)  ;; too distracting
 
 ; Stolen from vim
-(global-set-key (sdh-kbd "C-5") 'forward-or-backward-sexp)
+(sdh-global-set-key "C-5" 'forward-or-backward-sexp)
 
 ;; visual-regexp
 (if (sdh-try-require 'visual-regexp)
@@ -76,25 +77,25 @@
 (if (sdh-try-require 'phi-search)
     (progn
       ; TODO(sdh): consider using C-/ C-s or C-? C-s
-      (global-set-key (sdh-kbd "C-/ C-s") 'phi-search)
-      (global-set-key (sdh-kbd "C-/ C-r") 'phi-search-backward)))
+      (sdh-global-set-key "C-/ C-s" 'phi-search)
+      (sdh-global-set-key "C-/ C-r" 'phi-search-backward)))
 
 (if (sdh-try-require 'phi-replace)
     (progn
-      (global-set-key (sdh-kbd "C-/ %") 'phi-replace)))
+      (sdh-global-set-key "C-/ %" 'phi-replace)))
 
 (if (sdh-try-require 'multiple-cursors)
     (progn
       ;; multiple-cursors mode
-      (global-set-key (sdh-kbd "C-<") 'mc/mark-previous-like-this)
-      (global-set-key (sdh-kbd "C->") 'mc/mark-next-like-this)
-      (global-set-key (sdh-kbd "C-M-<") 'mc/skip-to-previous-like-this)
-      (global-set-key (sdh-kbd "C-M->") 'mc/skip-to-next-like-this)
-      (global-set-key (sdh-kbd "C-? C-?") 'mc/mark-all-like-this)
-      ;(global-set-key (sdh-kbd "C-? C-<") 'mc/skip-to-previous-like-this)
-      ;(global-set-key (sdh-kbd "C-? C->") 'mc/skip-to-next-like-this)
-      ;(global-set-key (sdh-kbd "C-c C->") 'mc/mark-more-like-this-extended)
-      ;(global-set-key (sdh-kbd "C-c C-<") 'mc/edit-lines)
+      (sdh-global-set-key "C-<" 'mc/mark-previous-like-this)
+      (sdh-global-set-key "C->" 'mc/mark-next-like-this)
+      (sdh-global-set-key "C-M-<" 'mc/skip-to-previous-like-this)
+      (sdh-global-set-key "C-M->" 'mc/skip-to-next-like-this)
+      (sdh-global-set-key "C-? C-?" 'mc/mark-all-like-this)
+      ;(sdh-global-set-key "C-? C-<" 'mc/skip-to-previous-like-this)
+      ;(sdh-global-set-key "C-? C->" 'mc/skip-to-next-like-this)
+      ;(sdh-global-set-key "C-c C->" 'mc/mark-more-like-this-extended)
+      ;(sdh-global-set-key "C-c C-<" 'mc/edit-lines)
       (if (sdh-try-require 'phi-search)
           (progn
             ;; multiple-cursors mode doesn't support isearch: use phi-search
@@ -141,7 +142,8 @@
   (interactive)
   (global-set-key (kbd "C-x p") 'sdh-prev-window))
 ;; get rid of perforce bindings...
-(global-set-key (kbd "C-x p C-x p") 'set-prev-window-key)
+(ignore-errors
+  (global-set-key (kbd "C-x p C-x p") 'set-prev-window-key))
 (global-set-key (kbd "C-x p") 'sdh-prev-window)
 (global-set-key (kbd "C-x o") 'sdh-other-window)
 
@@ -152,19 +154,25 @@
 
 (if (sdh-try-require 'window-jump)
     (progn
-      (global-set-key (sdh-kbd "C-M-<up>") 'window-jump-up)
-      (global-set-key (sdh-kbd "C-M-<down>") 'window-jump-down)
-      (global-set-key (sdh-kbd "C-M-<left>") 'window-jump-left)
-      (global-set-key (sdh-kbd "C-M-<right>") 'window-jump-right)
+      (sdh-global-set-key "C-M-<up>" 'window-jump-up)
+      (sdh-global-set-key "C-M-<down>" 'window-jump-down)
+      (sdh-global-set-key "C-M-<left>" 'window-jump-left)
+      (sdh-global-set-key "C-M-<right>" 'window-jump-right)
       ; TODO(sdh): remove these keybindings once old tmux (and iterm?) no longer sends them?
       (global-set-key (kbd "ESC M-[ a") 'window-jump-up)
       (global-set-key (kbd "ESC M-[ b") 'window-jump-down)
       (global-set-key (kbd "ESC M-[ c") 'window-jump-right)
-      (global-set-key (kbd "ESC M-[ d") 'window-jump-left)))
+      (global-set-key (kbd "ESC M-[ d") 'window-jump-left)
+      ; TODO(sdh): these are new iterm bindings...?
+      (global-set-key (kbd "ESC M-O A") 'window-jump-up)
+      (global-set-key (kbd "ESC M-O B") 'window-jump-down)
+      (global-set-key (kbd "ESC M-O C") 'window-jump-right)
+      (global-set-key (kbd "ESC M-O D") 'window-jump-left)
+))
 
 (if (sdh-try-require 'doremi-cmd)
     (progn
-      (global-set-key (sdh-kbd "C-c t w") 'doremi-window-height+)
+      (sdh-global-set-key "C-c t w" 'doremi-window-height+)
       ))
 
 ;; Obsolete bindings
@@ -215,5 +223,18 @@
 ; l: line-move-visual to jump over wrapped lines.
 (global-set-key (kbd "C-c t l") 'sdh-toggle-line-move-visual)
 
+
+;;;;;;;;;
+;; TODO - replace these with better sdh-set-key - for now this is from macbook
+(global-set-key (kbd "M-[ 1 ; 5 D") 'backward-word)  ; C-left
+(global-set-key (kbd "M-[ 1 ; 5 C") 'forward-word)  ; C-right
+(global-set-key (kbd "M-[ 1 ; 5 A") 'my-scroll-down)  ; C-up
+(global-set-key (kbd "M-[ 1 ; 5 B") 'my-scroll-up)  ; C-down
+(global-set-key (kbd "M-[ 1 ; 3 A") 'move-line-or-region-up)  ; M-up
+(global-set-key (kbd "M-[ 1 ; 3 B") 'move-line-or-region-down)  ; M-down
+(global-set-key (kbd "M-[ 1 ; 2 A") 'sdh-previous-line-visual)  ; S-up
+(global-set-key (kbd "M-[ 1 ; 2 B") 'sdh-next-line-visual)  ; S-down
+(global-set-key (kbd "M-[ 1 ~") 'sdh-beginning-of-line)  ; home
+(global-set-key (kbd "<select>") 'end-of-line)  ; end  (M-[ 4 ~)
 
 (provide 'sdh-keys)

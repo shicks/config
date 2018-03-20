@@ -63,6 +63,15 @@ cp ~/dors/dot-gitconfig.d/templates/hooks/{post-rebase-tree,post-commit,pre-reba
 # Install monofur-powerline font
 ~/config/install fonts
 
+# Make a git5 repo for google-config (allows offline access)
+(
+  mkdir -p ~/src/exp
+  cd ~/src/exp
+  git5 start master experimental/users/sdh
+  ln -s ~/src/exp/google3/experimental/users/sdh/config ~/google/config
+  ~/google/config/install
+)
+
 # TODO - install alacritty (note: update-alternatives for x-terminal-emulator??)
 # TODO - rebase tmux changes, push upstream?!?
 

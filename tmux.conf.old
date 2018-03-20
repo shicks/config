@@ -1,0 +1,130 @@
+#set -g default-terminal "screen-256color"
+#set -g default-terminal "tmux-256color"
+set -g default-terminal "tmux-alacritty"
+set -g default-shell "/usr/bin/zsh"
+set -g prefix C-z
+setw -g automatic-rename off
+setw -g mode-mouse on
+
+# Keep lots of history
+set -g history-limit 16384
+
+## See https://gist.github.com/1147532
+set -g mouse-select-pane on
+set -g mouse-resize-pane on
+set -g mouse-select-window on
+
+unbind C-b
+bind C-z send-prefix
+bind z suspend-client
+bind C-r source-file ~/.tmux.conf
+bind | pipe-pane -o 'cat >> ~/tmux-$(date +%y%m%d-%H%M%S)'
+
+## No longer needed w/ bind -n
+#bind P swap-window -t :-1
+#bind N swap-window -t :+1
+
+# This works better on the mac...
+bind C-p swap-window -t :-1
+bind C-n swap-window -t :+1
+
+bind -n C-PgUp previous-window
+bind -n C-PgDn next-window
+bind -n C-S-PgUp swap-window -t :-1
+bind -n C-S-PgDn swap-window -t :+1
+
+# Manage sessions
+bind C-s choose-session "new-session -t '%%'"
+bind S new-session
+bind C-k choose-session "kill-session -t '%%'"
+
+# TODO - these prompts are nasty, but it's doable
+#   - we can make a language to compile them?
+#   - then it's as easy as writing
+
+# choose-list
+#   new-group:
+#     command-prompt -p "session name: " -> %n
+#       new-sesion -s '%n'
+#   new-session-in-group:
+#     choose-session -> %s
+#       command-prompt -p "session name: " -> %n
+#         new-session -s '%n' -t '%s'
+#   kill-session:
+#     choose-session -> %s
+#   kill-group:
+
+#bind + choose-list -l new-group,new-session-in-group "if-shell \"[ '%%' = new-group ]\" \"command-prompt -p \\\"session name\\\" \\\"new-session -s '\\%\\%'\\\"\" \"choose-session \\\"new-session -t '\\%\\%'\\\"\""
+
+# TODO(sdh): consider building up a menu system of "extended commands"
+# easily accessible via (say) C-z C-s, which uses choose-list to present
+# various options, e.g. new-session, new-session-group, kill-session,
+# detach-other, etc
+#   - these would then follow-up with e.g. prompts for names and choose-tree
+#     to find targets.
+
+# TODO(sdh):
+# This essentially moves S-Prior/S-Next to work in tmux
+# The only problem is we need to expose a page-down-and-maybe-cancel
+# function, in which case it will be a win!
+bind -n S-PgUp copy-mode -u
+#bind -n -t emacs-copy S-PgUp page-up # no longer needed w/ cmd-copy-mode patch
+bind -n -t emacs-copy S-PgDn page-down-cancel
+
+# ...?
+bind WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= \"#{pane_in_mode}\" \"send-keys -M\" \"copy-mode -et=\""
+
+# Try this for Mac, where there is no pgup:
+bind -n S-Up copy-mode -u
+bind -n -t emacs-copy S-Up page-up
+bind -n -t emacs-copy S-Down page-down-cancel
+bind -n S-Left previous-window
+bind -n S-Right next-window
+# TODO(sdh): Consider binding these to C-S-Left?
+bind -n M-S-Left swap-window -t :-1
+bind -n M-S-Right swap-window -t :+1
+# TODO(sdh): Consider C-S-Up for create window and C-S-Down for kill (with confirm)?
+
+# TODO(sdh): would prefer shift-space, but currently the terminal can't
+# distinguish this shift.  Likewise, we can't distinguish C-S-Left/Right
+bind -n -t emacs-copy M-Space page-up
+
+
+#set -g terminal-overrides "*:ritm=\e[23m,*:sitm=\e[3m,*:smso=\e[7m,*:rmso=\e27m"
+
+# Highlight current tab
+setw -g window-status-format " #W "  # was: #I:#W#F
+setw -g window-status-current-format " #W "
+setw -g window-status-current-bg colour160  # was: red
+# No right status message
+set -g status-bg colour40  # was: green
+set -g status-right ""
+set -g status-left "#S/#I/#(hostname -s)"
+set -g status-left-length "12"
+
+setw -g aggressive-resize on
+setw -g xterm-keys off     # left[off] = ESC O D   left[on] = ESC [ 1 ; 5 D
+
+#setw -g mouse-scroll-cursor off
+
+# list-keys -t emacs-copy  # to get existing bindings
+bind -t emacs-copy C-Left previous-word
+bind -t emacs-copy C-Right next-word-end
+
+bind -t emacs-copy x copy-pipe "xclipd copy"
+
+# bind -t emacs-choice k kill-session -t "%%"
+
+# bind m \
+#   set -g mode-mouse on \;\
+#   set -g mouse-resize-pane on \;\
+#   set -g mouse-select-pane on \;\
+#   set -g mouse-select-window on \;\
+#   display 'Mouse: ON'
+
+# bind M \
+#   set -g mode-mouse off \;\
+#   set -g mouse-resize-pane off \;\
+#   set -g mouse-select-pane off \;\
+#   set -g mouse-select-window off \;\
+#   display 'Mouse: OFF'

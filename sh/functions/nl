@@ -1,0 +1,2 @@
+echo -e "\e[1;30mnl -ba $@\e[m" >&2
+command nl -ba "$@"

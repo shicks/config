@@ -354,7 +354,13 @@ globalkeys = awful.util.table.join(
     -- TODO(sdh): add naughty notifications with volume levels
     ,awful.key({ modkey }, "F11", function () awful.spawn("pkill -HUP awesome") end)
     ,awful.key({ modkey }, "F12", function () awful.spawn(lock) end)
-    ,awful.key({ }, "XF86Favorites", function () awful.spawn("xterm -name prodaccess -e 'prodaccess; updatecert'") end)
+    ,awful.key({ }, "XF86Favorites", function ()
+                 awful.spawn("xterm -name prodaccess -e 'prodaccess; updatecert'", {
+                                floating = true,
+                                tag = mouse.screen.selected_tag,
+                                placement = awful.placement.under_mouse,
+                 })
+               end)
     ,awful.key({ modkey }, "Insert", function () awful.spawn("xclip -o | ~/local/bin/xclipd copy") end)
     -- sdh - laptop only?
     -- ,awful.key({ modkey, "Control" }, "F12",

@@ -1,4 +1,4 @@
-#!tic -x
+#!/usr/bin/tic -x
 
 # Documentation for this file format:
 #   https://www.mkssoftware.com/docs/man5/terminfo.5.asp
@@ -73,9 +73,25 @@ alacritty-256color|alacritty terminal emulator,
 
 # TODO(sdh): previously this was just true-color and screen-256color...
 # I'm adding the alacitty and italic mixins since I think I want them.
+# I'm also resetting smkx and rmkx so that applications running inside
+# tmux don't tell tmux to enter cursor mode and then cause problems
+# when they don't interpret the different keycodes correctly (I'm looking
+# at you, emacs).
 tmux-alacritty|tmux running on top of alacritty,
   use=alacritty,
   use=screen,
+  smkx=,rmkx=,
+
+# TODO(sdh): we're having some difficulties w/ iTerm2 connecting to tmux
+# over SSH and running emacs.  For some reason, emacs sets smkx (cursor
+# mode) which then tells tmux to send ^[OA instead of ^[[A for up arrow,
+# but then emacs doesn't recognize these keys as cursor keys.  I tried
+# adding these caps to either inside or outside, but neither seems to
+# convince emacs that these are arrows, nor does setting them to \E[A
+# convince tmux not to send them differently in the different mode.
+
+# kUP5=\EOA,kDN5=\EOB,kRIT5=\EOC,kLFT5=\EOD,
+
 
 # iTerm2 TERMINFO that adds the escape sequences for italic
 

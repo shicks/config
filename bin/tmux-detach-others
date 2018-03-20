@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+
+# Usage: tmux-detach-others /dev/pts/20
+# The argument can be expanded from within tmux using #{client_name}
+# Detaches all *other* clients looking at the same pane.
+
+use strict;
+use warnings;
+
+my %clients = ();
+my $pane = '';
+
+open LOG, '>>', '/tmp/tmux-detach-others.log';
+print LOG "\ntmux-detach-others $ARGV[0]\n";
+
+open TMUX, '-|', 'tmux list-clients -F "#{client_name} #{pane_id}"'
+  or die "Could not run tmux";
+while (<TMUX>) {
+  /(\S+)\s(\S+)/ or die "Bad line from tmux: $_";
+  print LOG "client $1 => pane $2\n";
+  $clients{$2} = [] unless defined $clients{$2};
+  push @{$clients{$2}}, $1;
+  $pane = $2 if $1 eq $ARGV[0];
+  print LOG "found pane $pane\n" if $1 eq $ARGV[0];
+}
+close TMUX;
+
+for (@{$clients{$pane}}) {
+  print LOG "detaching $_\n" unless $_ eq $ARGV[0];
+  system 'tmux', 'detach-client', '-t', $_ unless $_ eq $ARGV[0];
+}

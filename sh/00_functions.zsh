@@ -6,14 +6,17 @@ function add_fpath {
     for file in $1/*; do
       file=${file##*/}
       # Skip bash-only and emacs autosave
-      if [ -z "${file##*.bash}" -o -z "${file##*~}" ]; then continue; fi
-      # Check if it's zsh-only and make a wrapper
-      if [ -z "${file##*.zsh}" ]; then
-        local func=${file%.zsh}
-        eval "function $func { autoload -Uz $func.zsh; $func.zsh \"$@\" }"
-      else
-        autoload -Uz "$file"
-      fi
+      case "$file" in
+        (*.bash|*~|.*|\#*) continue ;;
+        (*.zsh)
+          # Check if it's zsh-only and make a wrapper
+          local func=${file%.zsh}
+          eval "function $func { autoload -Uz $func.zsh; $func.zsh \"$@\" }"
+          ;;
+        (*)
+          autoload -Uz "$file"
+          ;;
+      esac
     done
     shift
   done

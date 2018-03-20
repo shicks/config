@@ -199,6 +199,7 @@ function install_fonts {
   (
     sudo mkdir -p /usr/share/fonts/truetype/monofur
     cd /usr/share/fonts/truetype/monofur
+    sudo wget 'https://github.com/kakkoyun/linux.files/blob/master/fonts/Monofur.ttf?raw=true'
     # sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof55.ttf
     # sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof56.ttf
 

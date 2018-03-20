@@ -1,0 +1,5 @@
+if [ "$TERM" != "dumb" ] && [ -x /usr/bin/dircolors ]; then
+  eval "`dircolors -b`"
+fi
+alias ls='ls --group-directories-first --color=auto'
+ls "$@"

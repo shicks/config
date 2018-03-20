@@ -5,6 +5,6 @@ XTerm.vt100.faceName: FuraCode Nerd Font:size=14:antialias=false
 
 URxvt.background: #000000
 URxvt.foreground: #ffffff
-URxvt.font: FuraCode Nerd Font:pixelsize=14;antialias=true
+!URxvt.font: FuraCode Nerd Font:pixelsize=14;antialias=true
 !URxvt.font: Monofur Nerd Font:pixelsize=14;antialias=true
 !URxvt.font: Monospace:pixelsize=14;antialias=true

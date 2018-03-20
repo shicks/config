@@ -411,7 +411,8 @@ the prefix argument in transient mark mode (unless the mark is active)."
   "Tries to require a file, returns t if successful, nil otherwise"
   (condition-case nil
       (require arg)
-    (error nil)))
+    (error (message "WARNING: Could not require %s" arg)
+           nil)))
 
 ;;;;;;;;;;;;;;;;
 ;; Backup files
@@ -632,77 +633,6 @@ See also: `xah-copy-to-register-1', `insert-register'."
               (t (error "Bad binding")))
       (if curwin (select-window curwin)))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Standardize terminal keyboard remappings....?
-
-(defconst sdh-kbd-re
-  (rx string-start
-      (* (| (group-n 1 "S-")
-            (group-n 2 "M-")
-            (group-n 3 "C-")))
-      (| (group-n 4 letter)
-         ; TODO(sdh): match uppercase/lowercase separately?
-         (group-n 5 digit)
-         (group-n 6 (any "-\\`~_=+[{]}\|;:'\",<.>/?!@#$%^&*()"))
-         ; TODO(sdh): F-keys, navigation keys, tab/etc
-         (seq "<" (group-n 7 (| "delete" "left" "right" "up" "down")) ">")
-         (group-n 8 (+ anything)))
-      string-end)
-  "Regex for parsing keyboard sequences")
-
-(defconst sdh-kbd-prefix "M-[ 36~"
-  "Prefix used for most extended keyboard shortcuts")
-
-(defconst sdh-arrow-key-letters
-  '(("up" . "a") ("down" . "b") ("right" . "c") ("left" . "d"))
-  "Lookup table for mapping arrow keys to the right letter")
-
-;; TODO(sdh): conditionally return just (kbd spec) if in a window?
-;; TODO(sdh): consider returning a list so that we can handle
-;;            the X case as well as rxvt/alacritty, etc.
-(defun sdh-kbd (spec)
-  "Parses an extended keysequence specification."
-  (kbd
-   (mapconcat
-    (lambda (term)
-      (if (and (not window-system) (string-match sdh-kbd-re term))
-          (let* ((shift  (match-string 1 term))
-                 (ctrl   (match-string 3 term))
-                 (meta   (match-string 2 term))
-                 (esc    (if meta " ESC " " "))
-                 (letter (match-string 4 term))
-                 (digit  (match-string 5 term))
-                 (symbol (match-string 6 term))
-                 (ds     (or digit symbol))
-                 (named  (match-string 7 term))
-                 (rest   (match-string 8 term))
-                 ; Error cases, fall back on (kbd term)
-                 (err    (or
-                          ; named ; TODO(sdh): handle this later.
-                          rest ; unknown final key
-                          (and shift ds)))) ; use correct symbol
-            (cond
-             ;; 1. error cases (or just don't match them?)
-             (err term)
-             ;; 2. ctrl-shift-letter
-             ((and ctrl shift letter)
-              (format "M-[ 3 6 ~ %s C-%s" esc letter))
-             ;; 3. ctrl-digit, ctrl-symbol
-             ((and ctrl ds)
-              (format "M-[ 3 6 ~ %s %s" esc ds))
-             ;; 4. named symbols - TODO(sdh): flesh this out later
-             ((and (eq named "delete") ctrl shift)
-              term)
-             ((assoc named sdh-arrow-key-letters)
-              (let* ((num (+ 1 (if shift 1 0) (if meta 2 0) (if ctrl 4 0)))
-                     (prefix (if (= num 1) "" (format "1 ; %d " num)))
-                     (code (cdr (assoc named sdh-arrow-key-letters))))
-                (concat "M-[ " prefix code)))
-             ;; 5. all other cases are trivial, just forward as-is
-             (t term)))
-       term))
-    (split-string spec)
-    " ")))
 
 (defun sdh-delete-word ()
   (interactive)
@@ -768,5 +698,21 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (if buffer-local (make-variable-buffer-local 'line-move-visual))
   (setq line-move-visual (not line-move-visual)))
 (setq line-move-visual nil)
+(defun sdh-previous-line-visual ()
+  (interactive)
+  (if (> (point) (point-min)) (progn (backward-char) (forward-char)))
+  (let ((line-move-visual t)) (previous-line)))
+(defun sdh-next-line-visual ()
+  (interactive)
+  (if (> (point) (point-min)) (progn (backward-char) (forward-char)))
+  (let ((line-move-visual t)) (next-line)))
+
+;; Useful for keyboard macros
+(defun sdh-search-register (reg)
+  "Search forward for occurrence of the given register."
+  (interactive "cRegister: ")
+  (condition-case nil
+      (search-forward (get-register reg))
+    (error (message (format "Text not found (register %c): %s" reg (get-register reg))) (ding))))
 
 (provide 'sdh-misc)

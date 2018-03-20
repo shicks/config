@@ -328,7 +328,7 @@ to change individual files."
                             (cond
                              ((eq git-diff-vcs 'hg) "hg root")
                              ((eq git-diff-vcs 'git) "git rev-parse --show-toplevel")
-                             ((eq git-diff-vcs 'p4) "p4 info | sed -n 's/Client root: //p'")))))))
+                             ((eq git-diff-vcs 'p4) "p4 root" "p4 info | sed -n 's/Client root: //p'")))))))
 
 ;; TODO(sdh): set up more keybindings, possibly with
 ;; better/more automatic ediff integration, back and forth, etc

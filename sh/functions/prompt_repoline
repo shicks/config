@@ -1,0 +1,9 @@
+# Calls repoline to set the prompt.
+
+PS1=$(repoline prompt --exit=$_sdh_last_status --left='g!"'$$'@"%h')
+
+# Make sure there's a blank line if nothing was exec'd.
+if [ "$(basename $SHELL)" = zsh -a "$_sdh_repoline_state" = precmd ]; then
+  echo
+fi
+_sdh_repoline_state=precmd

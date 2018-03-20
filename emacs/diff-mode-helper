@@ -9,12 +9,16 @@ use warnings;
 use IPC::Run qw/run/;
 
 # Perform P4DIFF helper functionality
-if ($ENV{P4DIFF} eq $0) {
+if ($ENV{P4DIFF} =~ /^$0/) {
+  my $output = shift;
+  unshift @ARGV, '' if @ARGV == 2;  # Handle non-multidiff case.
   while (@ARGV > 2) {
     shift;
     my $a = shift;
     my $b = shift;
-    system 'diff', '-U0', $a, $b;
+    $a =~ s/'/'\\''/g;
+    $b =~ s/'/'\\''/g;
+    system "diff -U0 '$a' '$b' >> $output";
   }
   exit;
 }
@@ -25,7 +29,6 @@ my @HG_DIFF = qw/hg diff --hidden -U0 -r/;
 my @GIT_TOP = qw/git rev-parse --show-toplevel/;
 my @GIT_DIFF = qw/git diff -U0/;
 
-$ENV{P4DIFF} = $0;
 my @P4_TOP = qw/p4 info/;
 my @P4_TOP_FILTER = ('sed', '-n', 's/Client root: //p');
 my @P4_DIFF = qw/p4 diff/;
@@ -41,12 +44,23 @@ run \@HG_ROOT, '>', \$root, '2>', \$err and $hg = 1
   or die "Could not find root: $err";
 chomp $root;
 
+if ($p4) {
+  use File::Temp qw/tempfile/;
+  my ($fh, $fn) = tempfile('/tmp/p4-diff-XXXXX');
+  close $fh;
+  $p4 = $fn;
+  $ENV{P4DIFF} = "$0 $fn";
+}
+
 my $rev = shift || ($hg ? '.' : $git ? 'HEAD' : $p4 ? '' : die);
 my @command = $hg ? @HG_DIFF : $git ? @GIT_DIFF : $p4 ? @P4_DIFF : die;
 push @command, $rev unless $p4;
 
 my $diff;
+
 run \@command, '>', \$diff or die 'Could not run diff';
+
+$diff = `cat $p4` if $p4;
 
 my ($added, $removed, $file, $mode);
 for (split /\n/, $diff) {
@@ -64,5 +78,3 @@ for (split /\n/, $diff) {
   }
 }
 printf "%s %4d %4d %s\n", $mode, $added, $removed, $file if $mode;
-
-# print "ROOT=$root, hg=$hg, git=$git\n";

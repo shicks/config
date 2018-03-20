@@ -1,0 +1,19 @@
+# Sets the title for interactive prompts
+
+local repo=$(repoline print '%r')
+repo=${repo#\"}
+repo=${repo%\"}
+
+case "${repo}" in
+  (*:*)
+    local fst=${repo:0:1}
+    local rest=${repo#*:}
+    set_title "$fst:$rest"
+    ;;
+  (?*)
+    set_title "$repo"
+    ;;
+  (*)
+    set_title "$(basename "$PWD")"
+    ;;
+esac

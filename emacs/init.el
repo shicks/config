@@ -12,6 +12,10 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
+(require 'sdh-color-theme)
+(require 'sdh-repo)
+
+(sdh-color-theme)
 
 ;; Language-specific settings
 (require 'sdh-perl)
@@ -19,6 +23,23 @@
 (require 'sdh-hg)
 
 (require 'sdh-js)
+
+(load "term/rxvt")  ;; TODO - gnome instead of rxvt?
+(add-to-list 'term-file-aliases '("tmux" . "rxvt"))
+(add-to-list 'term-file-aliases '("alacritty" . "rxvt"))
+(add-to-list 'default-frame-alist '(background-color . "black"))
+;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
+;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
+(add-to-list 'default-frame-alist '(height . 60))
+(add-to-list 'default-frame-alist '(width . 120))
+
+; Note: the nerd font (which has powerline and bold) uses a different name for
+; each font in the family, which breaks italics.  So just use the original.
+(add-to-list 'default-frame-alist '(font . "monofur"))
+
+;;;;;;;(set-face-attribute 'default nil :family "Monofur Nerd Font")
+;(set-face-attribute 'font-lock-comment-face nil :family "Monofuritalic Nerd Font")
+
 
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")

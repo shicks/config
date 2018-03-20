@@ -1,3 +1,44 @@
 local file="$HOME/.fzf.${SHELL##*/}"
 
 [ -f "$file" ] && source "$file"
+
+if bindkey -L 2> /dev/null | grep -q fzf-history-widget; then
+  # zsh-only fixups to slightly unclobber C-r
+  # upshot: use shift-^R to do the fzf one (would be nice to do it the other
+  # way, but we'd need to extend the fzf one to fall back to the builtin for
+  # repeat invocations...)
+  bindkey '\e[36~^R' fzf-history-widget
+  bindkey '^R' history-incremental-search-backward
+
+  # # TODO - experiment with the above
+  # # Need to reset this var at end of search (or at least in precmd)?
+  # _sdh_fzf_mode=fzf
+
+  # function sdh::fzf::history_builtin {
+  #   _sdh_fzf_mode=builtin
+  #   zle history-incremental-search-backward "$@"
+  # }
+  # zle -N sdh::fzf::history_builtin
+
+  # function sdh::fzf::history_fzf {
+  #   if [ "$_sdh_fzf_mode" = fzf ]; then
+  #     fzf-history-widget
+  #   else
+  #     zle history-incremental-search-backward "$@"
+  #   fi
+  # }
+  # zle -N sdh::fzf::history_fzf
+
+  # bindkey '\e[36~^R' sdh::fzf::history_builtin
+  # bindkey '^R' sdh::fzf::history_fzf
+
+  ####### This doesn't work, either:
+
+  # function sdh::fzf::toggle_ctrl_r {
+  #   eval $(bindkey -L | grep 'bindkey "^R"' |
+  #            sed -e 's/fzf-history-widget/history-incremental-search-backward/' \
+  #                -e 's/history-incremental-search-backward/fzf-history-widget/')
+  # }
+  # zle -N sdh::fzf::toggle_ctrl_r
+  # bindkey '^Xf' sdh::fzf::toggle_ctrl_r
+fi

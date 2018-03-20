@@ -5,10 +5,13 @@ function add_fpath {
     for abs in $1/*; do
       rel=${abs##*/}
       # Skip zsh-only and emacs autosave
-      if [ -z "${rel##*.zsh}" -o -z "${rel##*~}" ]; then continue; fi
-      # Check if it's zsh-only and make a wrapper
-      local func=${rel%.bash}
-      eval "function $func { autoload_function \"$func\" \"$abs\" \"\$@\"; }"
+      case "$rel" in
+        (*.zsh|*~|.*|\#*) continue ;;
+        (*)
+          local func=${rel%.bash}
+          eval "function $func { autoload_function \"$func\" \"$abs\" \"\$@\"; }"
+          ;;
+      esac
     done
     shift
   done
