@@ -3,6 +3,8 @@
 ;; This is a short file that loads other files, and is shared
 ;; across all machines.
 
+;; TODO(sdh): look into https://github.com/jwiegley/use-package
+
 ;; Set up load path
 (add-to-list 'load-path "~/config/emacs")
 

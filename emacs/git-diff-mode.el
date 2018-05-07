@@ -496,5 +496,7 @@ to change individual files."
 (define-key git-diff-mode-map (kbd "r") 'git-diff-revert-added-file)
 (define-key git-diff-mode-map (kbd "n") 'git-diff-next-diff)
 (define-key git-diff-mode-map (kbd "p") 'git-diff-prev-diff)
+(define-key git-diff-mode-map (kbd "j") 'git-diff-next-diff)
+(define-key git-diff-mode-map (kbd "k") 'git-diff-prev-diff)
 
 (provide 'git-diff-mode)

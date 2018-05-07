@@ -621,7 +621,8 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (let ((x (symbol-name (event-basic-type event))))
     (if (not (string-match "^mouse-\\([0-9]+\\)" x))
         (error "Not a button event: %S" event))
-    (string-to-int (substring x (match-beginning 1) (match-end 1)))))
+    ;; NOTE: used to be string-to-int ...?
+    (string-to-number (substring x (match-beginning 1) (match-end 1)))))
 
 (defun sdh-mwheel-scroll (event)
   (interactive "e")
@@ -714,5 +715,25 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (condition-case nil
       (search-forward (get-register reg))
     (error (message (format "Text not found (register %c): %s" reg (get-register reg))) (ding))))
+
+
+;; Add useful ediff bindings.
+(defun sdh-ediff-next-and-refine ()
+  (interactive)
+  (ediff-next-difference)
+  (ediff-make-or-kill-fine-diffs 1))
+(defun sdh-ediff-previous-and-refine ()
+  (interactive)
+  (ediff-previous-difference)
+  (ediff-make-or-kill-fine-diffs 1))
+(defun sdh-ediff-hook ()
+  (ediff-setup-keymap)
+  (define-key ediff-mode-map "x" 'ediff-make-or-kill-fine-diffs)
+  (define-key ediff-mode-map "j" 'sdh-ediff-next-and-refine)
+  (define-key ediff-mode-map "k" 'sdh-ediff-previous-and-refine)
+  )
+
+(if (fboundp 'ediff-setup-keymap)
+    (add-hook 'ediff-mode-hook 'sdh-ediff-hook))
 
 (provide 'sdh-misc)

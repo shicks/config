@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+
+# New version of git-log that stops as soon as it sees master.
+# Modeled a bit off of 'hg xl'.
+
+# NOTE: we could maybe do better with
+#   git changes --not master^ master^2 --not --branches --oneline
+
+use strict;
+use warnings;
+use IPC::Run qw/start finish/;
+
+my @cmd = qw/git log --graph --color --decorate --all --oneline/;
+
+my $master = `git rev-parse master`;
+chomp $master;
+
+#my $pager = $ENV{PAGER} || '/usr/bin/less -R';
+#open STDOUT, '|-', $pager;
+
+my $git = start [@cmd, @ARGV], '>pipe', \*GIT;
+while (<GIT>) {
+  print;
+  s/\e[^m]*m//g;
+  if (/^[^0-9a-f]*([0-9a-f]+)/) {
+    my $commit = $1;
+    last if $master =~ /^$commit/;
+  }
+}
+close GIT;
+finish $git;

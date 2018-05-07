@@ -14,6 +14,9 @@ bindkey '\e[1;5D' backward-word  # C-<left>
 bindkey '\e[1;3D' backward-word  # M-<left>
 bindkey '\e\e[D' backward-word  # ESC-<left>
 
+bindkey '\e[1~' beginning-of-line  # HOME
+bindkey '\e[4~' end-of-line  # END
+
 # Unbind ^[[33~ since we use it as a prefix shift.
 function sdh::input::noop { :; }
 zle -N sdh::input::noop

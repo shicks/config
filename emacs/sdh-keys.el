@@ -51,6 +51,7 @@
 (sdh-global-set-key "C-/ C-," 'smerge-keep-mine)
 (sdh-global-set-key "C-/ C-." 'smerge-keep-other)
 (sdh-global-set-key "C-/ C-/" 'sdh-kill-middle-version)
+(sdh-global-set-key "C-/ C-x" 'smerge-refine)
 ;(sdh-global-set-key "C-/" 'sdh-next-error-new-file) ; never used this...
 ;(key-binding "C-/ M-[ 3 6 ~") ; ???
 ;(sdh-global-set-key "C-/ ," 'sdh-pick-top-version)
@@ -236,5 +237,22 @@
 (global-set-key (kbd "M-[ 1 ; 2 B") 'sdh-next-line-visual)  ; S-down
 (global-set-key (kbd "M-[ 1 ~") 'sdh-beginning-of-line)  ; home
 (global-set-key (kbd "<select>") 'end-of-line)  ; end  (M-[ 4 ~)
+
+;;;;;;;
+;; org-mode S-M-arrow bindings
+;; TODO - would be nice to not just deal with tables...? how to delegate to other binding?
+;; TODO - would be nice to not have to actually *load* org-mode and instead just add a hook
+;;        to run when it autoloads
+(if (sdh-try-require 'org)
+    (progn
+      ;(define-key org-mode-map (kbd "M-[ 1 ; 3 a") 'org-table-move-row-up) ; M-up
+      ;(define-key org-mode-map (kbd "M-[ 1 ; 3 b") 'org-table-move-row-down) ; M-down
+      (define-key org-mode-map (kbd "M-[ 1 ; 3 d") 'org-table-move-column-left) ; M-left
+      (define-key org-mode-map (kbd "M-[ 1 ; 3 c") 'org-table-move-column-right) ; M-right
+      (define-key org-mode-map (kbd "M-[ 1 ; 4 a") 'org-table-delete-row) ; S-M-up
+      (define-key org-mode-map (kbd "M-[ 1 ; 4 b") 'org-table-insert-row) ; S-M-down
+      (define-key org-mode-map (kbd "M-[ 1 ; 4 d") 'org-table-delete-column) ; S-M-left
+      (define-key org-mode-map (kbd "M-[ 1 ; 4 c") 'org-table-insert-column) ; S-M-right
+      ))
 
 (provide 'sdh-keys)

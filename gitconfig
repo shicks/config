@@ -11,6 +11,11 @@
   s = status
   statys = status
   statis = status
+  untracked = git ls-files --others --exclude-standard
+  # TODO(sdh): this fails if master doesn't have 2 parents, and misses any extras
+  #   - figure out a way to say "all" direct parents? - could use a script
+  #   - note that this causes gaps in the tree, making things confusing.
+  xx = log --color --graph --decorate --not master^ master^2 --not --branches --oneline
 
 [color]
   ui = auto

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Synchronize debugging statements across git repos.
+
+git reset --hard
+(cd $1; git diff) | patch -p1
