@@ -701,12 +701,12 @@ See also: `xah-copy-to-register-1', `insert-register'."
 (setq line-move-visual nil)
 (defun sdh-previous-line-visual ()
   (interactive)
-  (if (> (point) (point-min)) (progn (backward-char) (forward-char)))
-  (let ((line-move-visual t)) (previous-line)))
+  ;(if (> (point) (point-min)) (progn (backward-char) (forward-char)))
+  (let ((line-move-visual t)) (backward-char) (forward-char) (previous-line)))
 (defun sdh-next-line-visual ()
   (interactive)
-  (if (> (point) (point-min)) (progn (backward-char) (forward-char)))
-  (let ((line-move-visual t)) (next-line)))
+  ;(if (> (point) (point-min)) (progn (backward-char) (forward-char)))
+  (let ((line-move-visual t)) (forward-char) (backward-char) (next-line)))
 
 ;; Useful for keyboard macros
 (defun sdh-search-register (reg)
@@ -735,5 +735,21 @@ See also: `xah-copy-to-register-1', `insert-register'."
 
 (if (fboundp 'ediff-setup-keymap)
     (add-hook 'ediff-mode-hook 'sdh-ediff-hook))
+
+;;;;;;;
+
+(defun sdh-to-lower-camel ()
+  (interactive)
+  (downcase-word 1)
+  (cond
+    ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
+    ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
+
+(defun sdh-const-to-upper-camel ()
+  (interactive)
+  (capitalize-word 1)
+  (cond
+    ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
+    ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
 
 (provide 'sdh-misc)

@@ -48,9 +48,10 @@
 ;(sdh-global-set-key "C-M-," 'smerge-keep-mine)
 ;(sdh-global-set-key "C-M-." 'smerge-keep-other)
 (global-unset-key (kbd "C-/"))
-(global-set-key (kbd "C-/ C-,") 'smerge-keep-mine)
-(global-set-key (kbd "C-/ C-.") 'smerge-keep-other)
-(global-set-key (kbd "C-/ C-/") 'sdh-kill-middle-version)
+(global-set-key (kbd "C-/ C-,") 'smerge-keep-upper)
+(global-set-key (kbd "C-/ C-.") 'smerge-keep-lower)
+(global-set-key (kbd "C-/ C-/") 'smerge-keep-all)
+;(global-set-key (kbd "C-/ C-/") 'sdh-kill-middle-version)
 (global-set-key (kbd "C-/ C-x") 'smerge-refine)
 ;(sdh-global-set-key "C-/" 'sdh-next-error-new-file) ; never used this...
 ;(key-binding "C-/ M-[ 3 6 ~") ; ???
@@ -114,8 +115,9 @@
 
 
 ; C-x C-m C-m -> enable xterm-mouse-mode
-(defun sdh-xterm-mouse-mode-t () "" (interactive) (xterm-mouse-mode t))
+(defun sdh-xterm-mouse-mode-t () "" (interactive) (xterm-mouse-mode t) (sdh-kbd-init))
 (global-set-key (kbd "C-x RET RET") 'sdh-xterm-mouse-mode-t)
+(sdh-xterm-mouse-mode-t)
 
 ;; Mouse wheel scrolling (this used to just work automatically...)
 (global-set-key [mouse-4] 'sdh-mwheel-scroll)

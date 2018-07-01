@@ -678,3 +678,6 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- SDH: Windows-style edge snapping is annoying and I've never wanted it.
 awful.mouse.snap.client_enabled = false
 awful.mouse.snap.edge_enabled = false
+
+-- SDH: Add goobuntu-indicator (the little "G" icon)
+awful.util.spawn_with_shell("/usr/share/goobuntu-indicator/goobuntu_indicator.py")

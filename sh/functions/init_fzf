@@ -10,6 +10,11 @@ if bindkey -L 2> /dev/null | grep -q fzf-history-widget; then
   bindkey '\e[36~^R' fzf-history-widget
   bindkey '^R' history-incremental-search-backward
 
+  # fzf also binds ^T to file-widget, which I also never use, though I'd be open
+  # to trying it out with (say) C-M-T.
+  bindkey '^[^T' fzf-file-widget
+  bindkey '^T' transpose-chars
+
   # # TODO - experiment with the above
   # # Need to reset this var at end of search (or at least in precmd)?
   # _sdh_fzf_mode=fzf

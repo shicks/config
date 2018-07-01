@@ -37,3 +37,6 @@
 [merge "keep"]
   # Custom merge tool allowing to tag lines with MERGE:preserve
   driver = git-merge-keep "%A" "%O" "%B"
+
+[http]
+  cookiefile = ~/.gitcookies

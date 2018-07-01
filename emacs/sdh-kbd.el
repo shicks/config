@@ -8,39 +8,49 @@
 (defconst sdh-kbd-digits "0123456789")
 (defconst sdh-kbd-symbols "-\\`~_=+[{]}\|;:'\",<.>/?!@#$%^&*()")
 (defconst sdh-kbd-arrow-key-codes
-  '(("up" . "a") ("down" . "b") ("right" . "c") ("left" . "d"))
+  '(("up" . "A") ("down" . "B") ("right" . "C") ("left" . "D"))
   "Lookup table for mapping arrow keys to the right letter")
+
+(defun sdh-kbd-map (sequence result)
+  "Map sequence to result"
+  ;(message "(define-key local-function-key-map (kbd \"%s\") (kbd \"%s\"))" sequence result)
+  (define-key local-function-key-map (kbd sequence) (kbd result)))
 
 (defun sdh-kbd-map-ctrl-shift-letter (letter)
   "Map C-S-letter and C-S-M-letter."
   (let ((letter (string letter)))
-    (define-key function-key-map (kbd (format "M-[ 3 6 ~ C-%s" letter)) (kbd (format "C-S-%s" letter)))
-    (define-key function-key-map (kbd (format "M-[ 3 6 ~ ESC C-%s" letter)) (kbd (format "M-C-S-%s" letter)))))
-
-(mapcar 'sdh-kbd-map-ctrl-shift-letter sdh-kbd-uppercase)
+    (sdh-kbd-map (format "M-[ 3 6 ~ C-%s" letter) (format "C-S-%s" letter))
+    (sdh-kbd-map (format "M-[ 3 6 ~ ESC C-%s" letter) (format "M-C-S-%s" letter))))
 
 (defun sdh-kbd-map-ctrl-digit-or-symbol (digit)
   "Map C-digit and C-symbol, with and without meta."
   (let ((digit (string digit)))
-    (define-key function-key-map (kbd (format "M-[ 3 6 ~ %s" digit)) (kbd (format "C-%s" digit)))
-    (define-key function-key-map (kbd (format "M-[ 3 6 ~ ESC %s" digit)) (kbd (format "M-C-%s" digit)))))
+    (sdh-kbd-map (format "M-[ 3 6 ~ %s" digit) (format "C-%s" digit))
+    (sdh-kbd-map (format "M-[ 3 6 ~ ESC %s" digit) (format "M-C-%s" digit))))
 
-(mapcar 'sdh-kbd-map-ctrl-digit-or-symbol sdh-kbd-digits)
-(mapcar 'sdh-kbd-map-ctrl-digit-or-symbol sdh-kbd-symbols)
-
+; NOTE: This was a maddening issue to fix.  It turns out that capitalization
+; sometimes matters in bindings, but not always.  I was binding M-[1;7d to C-M-<left>,
+; but my terminal was sending a capital D instead.  But when Emacs reported the
+; unbound key, it told me "M-[1;7d" was unbound, which was a lie.  To figure out
+; the specific keys, I used "M-x view-lossage" (C-h l).  See also open-dribble-file.
 (defun sdh-kbd-map-modified-arrow-keys (cell)
   "Map various combinations of control keys with arrows."
   (let ((key (car cell))
         (code (cdr cell)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 2 %s" code)) (kbd (format "S-<%s>" key)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 3 %s" code)) (kbd (format "M-<%s>" key)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 4 %s" code)) (kbd (format "M-S-<%s>" key)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 5 %s" code)) (kbd (format "C-<%s>" key)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 6 %s" code)) (kbd (format "C-S-<%s>" key)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 7 %s" code)) (kbd (format "C-M-<%s>" key)))
-    (define-key function-key-map (kbd (format "M-[ 1 ; 8 %s" code)) (kbd (format "C-M-S-<%s>" key)))))
+    (sdh-kbd-map (format "M-[ 1 ; 2 %s" code) (format "S-<%s>" key))
+    (sdh-kbd-map (format "M-[ 1 ; 3 %s" code) (format "M-<%s>" key))
+    (sdh-kbd-map (format "M-[ 1 ; 4 %s" code) (format "M-S-<%s>" key))
+    (sdh-kbd-map (format "M-[ 1 ; 5 %s" code) (format "C-<%s>" key))
+    (sdh-kbd-map (format "M-[ 1 ; 6 %s" code) (format "C-S-<%s>" key))
+    (sdh-kbd-map (format "M-[ 1 ; 7 %s" code) (format "C-M-<%s>" key))
+    (sdh-kbd-map (format "M-[ 1 ; 8 %s" code) (format "C-M-S-<%s>" key))))
 
-(mapcar 'sdh-kbd-map-modified-arrow-keys sdh-kbd-arrow-key-codes)
+(defun sdh-kbd-init ()
+  (interactive)
+  (mapcar 'sdh-kbd-map-ctrl-shift-letter sdh-kbd-uppercase)
+  (mapcar 'sdh-kbd-map-ctrl-digit-or-symbol sdh-kbd-digits)
+  (mapcar 'sdh-kbd-map-ctrl-digit-or-symbol sdh-kbd-symbols)
+  (mapcar 'sdh-kbd-map-modified-arrow-keys sdh-kbd-arrow-key-codes))
 
 
 ;; (defconst sdh-kbd-re

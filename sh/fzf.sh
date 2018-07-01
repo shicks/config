@@ -29,5 +29,13 @@ case "$SHELL" in
       typeset -f zle-line-init >/dev/null && zle zle-line-init
       return $ret
     }
+
+    # Unclobber Alt-C back to capitalize-word.  fzf-cd-widget is useful outside
+    # google source repos, but even so it needs to be a different key!
+    # TODO(sdh): consider making a new widget that switches behavior based on
+    # whether there is anything at the cursor?
+    bindkey '\eC' fzf-cd-widget
+    bindkey '\ec' capitalize-word
+
     ;;
 esac
