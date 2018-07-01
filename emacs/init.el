@@ -27,8 +27,10 @@
 (require 'sdh-js)
 
 (load "term/rxvt")  ;; TODO - gnome instead of rxvt?
-(add-to-list 'term-file-aliases '("tmux" . "rxvt"))
-(add-to-list 'term-file-aliases '("alacritty" . "rxvt"))
+(if (boundp 'term-file-aliases)
+    (progn
+      (add-to-list 'term-file-aliases '("tmux" . "rxvt"))
+      (add-to-list 'term-file-aliases '("alacritty" . "rxvt"))))
 (add-to-list 'default-frame-alist '(background-color . "black"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
 ;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
