@@ -17,7 +17,7 @@
   (interactive)
   (local-set-key (kbd "<tab>") 'js2-indent-bounce))
        
-(add-hook 'js2-mode-hook
+;(add-hook 'js2-mode-hook
 
 (setq-default js2-basic-offset 2)
 (setq-default js2-bounce-indent-p 't)

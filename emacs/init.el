@@ -14,9 +14,10 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
-(require 'sdh-color-theme)
-(require 'sdh-repo)
+(if (not (string= system-type "darwin"))
+    (require 'sdh-repo))
 
+(require 'sdh-color-theme)
 (sdh-color-theme)
 
 ;; Language-specific settings
@@ -33,13 +34,14 @@
       (add-to-list 'term-file-aliases '("alacritty" . "rxvt"))))
 (add-to-list 'default-frame-alist '(background-color . "black"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
-;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
 (add-to-list 'default-frame-alist '(height . 60))
 (add-to-list 'default-frame-alist '(width . 120))
 
 ; Note: the nerd font (which has powerline and bold) uses a different name for
 ; each font in the family, which breaks italics.  So just use the original.
-(add-to-list 'default-frame-alist '(font . "monofur"))
+(if (string= system-type "darwin")
+    (add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
+  (add-to-list 'default-frame-alist '(font . "monofur")))
 
 ;;;;;;;(set-face-attribute 'default nil :family "Monofur Nerd Font")
 ;(set-face-attribute 'font-lock-comment-face nil :family "Monofuritalic Nerd Font")
