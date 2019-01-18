@@ -1,9 +1,20 @@
-# If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+# If not running interactively, don't do anything (same as [ -z $PS1 ] ?)
+case $- in
+  *i*) ;;
+    *) return;;
+esac
 
-export SHELL=$(which bash)
+function whisper {
+  if [ -n "$VERBOSE" ]; then echo "$@"; fi
+}
 
-# Now run all the startup stuff:
-for a in $HOME/.bash.d/??_*.sh; do
-  . $a
-done
+function run_init_scripts {
+  local file
+  for file in $HOME/.sh.d/*; do
+    case "$file" in
+      (*.sh)   whisper "sourcing $file"; source "$file" ;;
+      (*.bash) whisper "sourcing $file"; source "$file" ;;
+    esac
+  done
+}
+run_init_scripts

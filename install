@@ -9,6 +9,12 @@
 
 # TODO(sdh): support a NOCOMMENT directive in patches
 
+# TODO(sdh): automatically download and install monofur-powerline fonts ?
+# TODO(sdh): fallback on apt-get for terminal emulator (maybe switch to alacritty
+#            instead of urxvt?)
+
+# TODO(sdh): merge tmux changes, consider pushing upstream?
+
 verbose=false
 conf=$(dirname "$0")
 conf=${conf-.}
@@ -51,7 +57,6 @@ EOF
   fi
 }
 
-
 function safe_link {
   # First set parameters/defaults
   whisper SAFE_LINK "$@"
@@ -67,7 +72,7 @@ function safe_link {
 
   # Now see if it's a dir, in which case we make a symlink tree
   # TODO(sdh): should probably just flatten with `find`.
-  if [ -d "$source" ]; then
+  if [ -d "$source" -a ! -e "$source/.linkdir" ]; then
     if [ -e "$target" -a ! -d "$target" ]; then
       echo "Cannot symlink tree $source -> $target: file exists." >&2
     fi
@@ -104,32 +109,41 @@ function safe_link {
 function install_files {
   echo "Installing config files from $conf into $home..."
 
-  safe_link Xmodmap
   safe_link Xdefaults
   safe_link tmux.conf
+  safe_link alacritty.yml
   safe_link bashrc
   safe_link zshrc
   safe_link gitconfig
   safe_link gitignore_global
   safe_link aspell.en.pws
   safe_link dot-emacs .emacs
+  safe_link dot-config .config
 
   # Link everything in the bash directory
-  cd bash
-  mkdir -p $home/.bash.d
-  for a in *.sh; do
-    safe_link bash/$a .bash.d/$a
+  cd sh
+  mkdir -p $home/.sh.d
+  for a in *; do
+    a=${a#*~}
+    [ -f "$a" ] && safe_link sh/$a .sh.d/$a
   done
+
+  if [ ! -e $home/.sh.d/functions ]; then
+    ln -s $PWD/functions $home/.sh.d/
+  fi
 
   # Unlink everything in the disabled directory
   if [ -d disabled ]; then
     cd disabled
-    for a in *.sh; do
-      target="$home/.bash.d/$a"
-      if [ -h $target -a "$(readlink $target)" = "$conf/bash/$a" ]; then
-        rm -f $target
-      elif [ -s "$target" ]; then
-        echo "Refusing to delete non-symlink $target even though disabled."
+    for a in *; do
+      a=${a#*~}
+      if [ -f "$a" ]; then
+        target="$home/.sh.d/$a"
+        if [ -h $target -a "$(readlink $target)" = "$conf/sh/$a" ]; then
+          rm -f $target
+        elif [ -s "$target" ]; then
+          echo "Refusing to delete non-symlink $target even though disabled."
+        fi
       fi
     done
     cd ..
@@ -149,14 +163,14 @@ function install_files {
   done
 
   # Make bash completion dir so somebody doesn't complain
-  mkdir -p $home/.bash.d/completion
+  mkdir -p $home/.sh.d/completion
 
   # Make sure history dir exists
   mkdir -p $home/history
   mkdir -p $home/.emacs_backups
 
   # Install urxvt extensions
-  install_urxvt
+  #install_urxvt
 
   # Link all the emacs files
   #cd emacs
@@ -169,6 +183,7 @@ function install_files {
   mkdir -p $home/.gitconfig.d/templates
   if [ -e /usr/share/git-core/templates ]; then
     cp -nr /usr/share/git-core/templates/* $home/.gitconfig.d/templates
+    chmod a-x $home/.gitconfig.d/templates/hooks/*.sample
   fi
   if [ -e git ]; then # this is safe to remove if we ever add a git/ dir
     for a in git/*; do
@@ -177,10 +192,28 @@ function install_files {
   fi
 }
 
+function install_fonts {
+  # Also available at ...
+  # https://github.com/powerline/fonts/raw/master/Monofur/Monofur%20for%20Powerline.ttf
+  # https://github.com/powerline/fonts/raw/master/Monofur/Monofur%20Italic%20for%20Powerline.ttf
+  (
+    sudo mkdir -p /usr/share/fonts/truetype/monofur
+    cd /usr/share/fonts/truetype/monofur
+    sudo wget 'https://github.com/kakkoyun/linux.files/blob/master/fonts/Monofur.ttf?raw=true'
+    # sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof55.ttf
+    # sudo wget https://github.com/rsrsl/ttf-monofur-powerline/raw/master/monof56.ttf
+
+    sudo fc-cache -fv .
+  )
+
+  safe_link dot-fonts .fonts
+}
+
 function install_term {
   # Install the tmux-256color terminfo config
-  echo "Generating tmux-256color.terminfo..."
-  $conf/gen/tmux
+  echo "Installing terminfo..."
+  mkdir -p $HOME/.terminfo
+  tic -x "$(dirname "$0")"/terminfo.src
 }
 
 function install_gtk {
@@ -189,7 +222,9 @@ function install_gtk {
   # NOTE: this only works in we're running locally
   echo "Configuring gtk keybindings..."
   safe_link gtkrc-2.0
+  safe_link dot-config/gtk-3.0 .config/gtk-3.0
   if which gsettings &>/dev/null; then
+    gsettings set org.cinnamon.desktop.interface gtk-key-theme "Emacs"
     gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
     gsettings set org.gnome.desktop.wm.preferences focus-mode sloppy
     gsettings set org.gnome.desktop.wm.preferences auto-raise false
@@ -199,7 +234,8 @@ function install_gtk {
         action-double-click-titlebar 'toggle-shade'
     gsettings set org.gnome.desktop.wm.preferences \
         resize-with-right-button true
-  elif which gconftool-2 &>/dev/null; then
+  fi
+  if which gconftool-2 &>/dev/null; then
     gconftool-2 --set /desktop/gnome/interface/gtk_key_theme Emacs \
         --type string
     gconftool-2 --set /apps/metacity/general/focus_mode sloppy \
@@ -215,12 +251,30 @@ function install_gtk {
   fi
 }
 
-function install_urxvt {
-  # Detects URXVT install dir and installs it - called from install_files
-  if ! which urxvt &> /dev/null; then return; fi
-  local urxvt=$(readlink -f $(which urxvt))
-  local perldir=${urxvt%/bin*}/lib/urxvt/perl
-  safe_link urxvt/mycopy-osc ${perldir}/mycopy-osc
+# function install_urxvt {
+#   # Detects URXVT install dir and installs it - called from install_files
+#   if ! which urxvt &> /dev/null; then return; fi
+#   local urxvt=$(readlink -f $(which urxvt))
+#   local perldir=${urxvt%/bin*}/lib/urxvt/perl
+#   safe_link urxvt/mycopy-osc ${perldir}/mycopy-osc
+# }
+
+function install_fzf {
+  # NOTE: Should happen after git and go are both installed...
+  echo "Installing fzf"
+  (
+    mkdir -p ~/local/opt
+    cd ~/local/opt
+    git clone --depth=1 https://github.com/junegunn/fzf
+    cd fzf
+    yes | ./install
+    # Fix TMUX environment variable overriding (broken)
+    sed 's/TMUX=\$([^)]*) //g' bin/fzf-tmux > ~/local/bin/fzf-tmux
+    chmod +x ~/local/bin/fzf-tmux
+    # Fix ^T to ^F for inserting a filename.
+    sed -i 's/\^T/^F/g' shell/*.zsh
+    sed -i 's/\\C-t/\\C-f/g' shell/*.sh
+  )
 }
 
 function print_usage {
@@ -246,6 +300,8 @@ while [ $# -gt 0 ]; do
     (term)  install_term ;;
     (gtk)   install_gtk ;;
     (all)   install_files; install_term; install_gtk ;;
+    (fzf)   install_fzf ;;
+    (fonts) install_fonts ;;
     (*) if [ -f $1 ]; then
           home=$1
         else

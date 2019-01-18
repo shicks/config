@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+# Strips all ansi sequences out of the input.
+# May need to expand the logic a bit, e.g. for ESC ] sequences?
+
+use strict;
+use warnings;
+use feature 'unicode_strings';
+
+while (<>) {
+  while ($_) {
+    print $1 if s/^([^\033]+)//;
+    !s/^\033//
+      or s/^\[[\d;]*[a-zA-Z]//
+      or s/^.//
+      ;
+  }
+}

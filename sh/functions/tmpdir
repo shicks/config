@@ -1,0 +1,1 @@
+echo ${TMPDIR:-${TMP:-${TEMP:-/tmp}}}

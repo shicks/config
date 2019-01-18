@@ -1,0 +1,6 @@
+#!/bin/sh
+
+local files
+files=$(fzf -m --query="$1" --select-1 --exit-0)
+export DISPLAY=:0
+[ -n "$files" ] && $EDITOR $files

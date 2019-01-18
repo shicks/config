@@ -1,57 +1,80 @@
 #!/bin/sh
 
-set -e
+# I like to use aptitude for installing, since it has better search
+# and keeps better history of what was requested vs what was a dep.
+sudo apt-get install aptitude
 
-TMUX=1.8-sdh
-URXVT=9.18
-# TODO(sdh): rxvt-unicode-256color package just works
+# We need xinput for remapping mouse scroll direction and caps lock.
+sudo aptitude install xinput awesome xterm
 
-sudo aptitude install g++ xclip install autoconf automake
-sudo aptitude build-dep tmux rxvt-unicode
+# Generate an SSH key.
+ssh-keygen -t rsa -b 4096 -C sdh@google.com
+eval $(ssh-agent -s)
+ssh-add ~/.ssh/id_rsa
 
-# Generate ssh keys and paste into github
-if [ ! -e ~/.ssh/id_rsa.pub ]; then
-  cd ~/.ssh
-  echo -e "\n\n\n\n\n" | ssh-keygen -t rsa -C stephenhicks@gmail.com
-  xclip -sel clip < id_rsa.pub
-fi
-echo "Please paste the clipboard into the browser and press enter."
-google-chrome https://github.com/settings/ssh &
+# Need to install the key into github
+echo "Please paste the following key into github:"
+echo "================================================================"
+cat ~/.ssh/id_rsa.pub
+echo "================================================================"
+echo "Press enter when done."
+read unused
 
-# Fetch git repos for tmux and download rxvt-unicode
-mkdir -p ~/Downloads/src
-cd ~/Downloads/src
-git clone git@github.com:shicks/tmux.git
-cd tmux
-git pull origin $TMUX
-git checkout $TMUX 
-./autogen.sh
-./configure --prefix=$HOME/local/opt/tmux-$TMUX
-make && make install
-mkdir -p ~/local/bin
-cd ~/local/opt
-ln -s tmux-$TMUX tmux
-ln -s ../opt/tmux/bin/tmux ../bin/tmux
+# Download config repo
+git clone git@github.com:shicks/config
 
-cd ~/Downloads/src
-wget http://dist.schmorp.de/rxvt-unicode/rxvt-unicode-$URXVT.tar.bz2
-tar jxvf rxvt-unicode-$URXVT.tar.bz2
-cd rxvt-unicode-$URXVT
-./configure --prefix=$HOME/local/opt/urxvt-$URXVT --enable-256-color --enable-xft --enable-font-styles --enable-transparency --enable-fading --enable-mousewheel --enable-selectionscrolling --enable-keepscrolling
-make && make install
-cd ~/local/opt
-ln -s urxvt-$URXVT urxvt
-ln -s ../opt/urxvt/bin/urxvt ../bin/urxvt
+# Set up awesome as the default window manager (now version 4.0 - new configs)
+#   - nothing seems to work!
+#   - greeter-show-manual-login -> set to false to autofill?
+#   - TODO - use run-parts to allow multiple configs in separate files
+cat > ~/.xsessionrc <<EOF
+~/fix-riose-screen
+EOF
+sudo tee /var/lib/AccountsService/users/sdh > /dev/null <<EOF
+[User]
+Language=
+XSession=awesome
+EOF
 
-# Change the config git origin to be writable
-sed -i 's|git://github.com/shicks/config|git@github.com:shicks/config.git|' \
-    ~/config/.git/config
+# Install alacritty
+(
+  mkdir -p ~/local/{opt,bin}
+  cd ~/local/opt
+  # Need rust and a few other prereqs
+  curl https://sh.rustup.rs -sSf | sh
+  rustup override set stable
+  rustup update stable
+  sudo aptitude install cmake libfreetype6-dev libfontconfig1-dev xclip
+  git clone https://github.com/jwilm/alacritty.git
+  cd alacritty
+  cargo build --release
+  ln -s ~/local/opt/alacritty/target/release/alacritty ~/local/bin/
+)
 
-# Change the default terminal
-gconftool --type string --set /desktop/gnome/applications/terminal/exec $HOME/local/bin/urxvt
+# NOTE: Also need ~/local/bin in the path (~/bin is already there).
+ln -s ~/local/bin ~/bin
 
-# Also need to fix
-#  - uninstall global app menu
-#  - use ccsm to disable unity app switcher, enable standard app switcher
-#  - use ubuntu2d because 3d app switcher brings down laptop
-# what else...?
+# .gitconfig.d: install files copies templates from /usr/share/git-core
+# Copy over post-rebase-tree and other hooks in gitconfig directory
+mkdir -p ~/.gitconfig.d/templates/hooks
+cp ~/dors/dot-gitconfig.d/templates/hooks/{post-rebase-tree,post-commit,pre-rebase} \
+    ~/.gitconfig.d/templates/hooks/
+
+# Install monofur-powerline font
+~/config/install fonts
+
+# Make a git5 repo for google-config (allows offline access)
+(
+  mkdir -p ~/src/exp
+  cd ~/src/exp
+  git5 start master experimental/users/sdh
+  ln -s ~/src/exp/google3/experimental/users/sdh/config ~/google/config
+  ~/google/config/install
+)
+
+# TODO - install alacritty (note: update-alternatives for x-terminal-emulator??)
+# TODO - rebase tmux changes, push upstream?!?
+
+# Emacs - add melpa
+#      (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+#   -- packages: lua-mode, many others (get list from dors)

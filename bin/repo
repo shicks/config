@@ -1,0 +1,332 @@
+#!/usr/bin/perl
+
+# Multi-tool for handling repositories.
+
+use strict;
+use warnings;
+
+use Cwd qw/cwd/;
+use File::Basename qw/dirname/;
+use File::Path qw/mkpath/;
+
+sub main {
+  my $cmd = shift;
+  do_root(@_) if $cmd eq 'root';
+  do_colors(@_) if $cmd eq 'colors';
+  do_prompt(@_) if $cmd eq 'prompt';
+  help(1);
+}
+
+sub help {
+  print STDERR <<EOF;
+Usage: repo COMMAND
+
+Commands:
+  root       Print the root directory of the current repo.
+  colors     Prints colors for the current repository.
+             Options:
+               --notouch - does not touch the color files or make new ones
+               --fg|--bg - just return fore/background color (default is fg:bg)
+               --ansi    - return ansi format 8;2;r;g;b (default is #hex)
+  prompt     Print a colored prompt line.
+             Options:
+               --fg=CODE     - use a fixed color instead.
+               --bg=CODE     - use a fixed color instead.
+               --notouch     - does not touch the color files or make new ones.
+               --columns=COL - total number of columns.
+               --left=TEXT   - text for left bubble.
+               --right=TEXT  - text for right bubble.
+               --style=STYLE - style for decoration (diag, box, or flag)
+               --sep=STYLE   - separator (triangle, round, fire...)
+EOF
+  exit $_[0];
+}
+
+# Returns a list of repo directory names that can appear in repo roots.
+sub repo_dirs {
+  # Default to .git and .hg, but can add more with environment variable.
+  return split /:/, ($ENV{REPO_DIRS} || '.git:.hg');
+}
+
+# Finds the root of the current directory's repository.
+sub root {
+  my $dir = cwd();
+  my @repo_dirs = repo_dirs();
+  while (length $dir > 1) {
+    for (@repo_dirs) {
+      return $dir if -e "$dir/$_";
+    }
+    $dir = dirname($dir);
+ }
+  return '';
+}
+
+sub do_root {
+  my $root = root();
+  if ($root) {
+    print "$root\n";
+    exit;
+  } else {
+    print STDERR "Could not find repository\n";
+    exit 1;
+  }
+}
+
+# TODO(sdh): Add more fonts for styles
+#   http://www.fontspace.com/category/patterns
+#    - a number of options here
+#   http://www.fontspace.com/agasilva/maya-tiles-promo
+#    - would need to auto-download and merge with nerd font...
+# Might be able to put together a little font for this...?
+  
+sub do_prompt {
+  # Handle args
+  my $touch = 1;
+  my $columns = 0;
+  my $left = '';
+  my $right = '';
+  my $style = 'DEFAULT';
+  my $flag_fg = '';
+  my $flag_bg = '';
+  my $sep = 'triangle';
+  while ($_ = shift) {
+    unshift @_, $1 if s/^--[^=]+\K=(.*)$//;
+    $touch = 0, next if $_ eq '--notouch';
+    $style = shift, next if $_ eq '--style';
+    $left = shift, next if $_ eq '--left';
+    $right = shift, next if $_ eq '--right';
+    $columns = shift, next if $_ eq '--columns';
+    $flag_fg = shift, next if $_ eq '--fg';
+    $flag_bg = shift, next if $_ eq '--bg';
+    $sep = shift, next if $_ eq '--sep';
+    help(1);
+  }
+  my $root = root();
+  my $colors = $flag_fg && $flag_bg ? '' : find_colors($touch, $root);
+  my ($bg, $fg, $ansi_bg, $ansi_fg) = split / /, $colors;
+  $ansi_bg = $flag_bg if $flag_bg;
+  $ansi_fg = $flag_fg if $flag_fg;
+
+  my %STYLES = (
+    DIAG => sub { my $r = int(rand() * 4); return $r ? chr($r + 0x2570) : ' ';  },
+    BOX => sub { return chr(int(rand() * 10) + 0x2596); },
+    FLAG => sub { return chr(int(rand() * 8) + 9776); },
+    DEFAULT => sub { return ' '; },
+  );
+  die "No such style: $style" unless defined $STYLES{uc $style};
+  $style = $STYLES{uc $style};
+
+  my %SEP = (
+    TRIANGLE => [0xe0b2, 0xe0b0],
+    ROUND => [0xe0b6, 0xe0b4],
+    DOWN => [0xe0be, 0xe0b8],
+    UP => [0xe0ba, 0xe0bc],
+    SPLIT => [0xe0d4, 0xe0d2],
+    #RSPLIT => [0xe0d2, 0xe0d4], # TODO - needs swap fg/bg
+    FIRE => [0xe0c2, 0xe0c0],
+    DISSOLVE => [0xe0c7, 0xe0c6], # smaller one (5,4) ugly at console font size
+    NONE => [0x20, 0x20],
+  );
+  die "No such separator: $sep" unless defined $SEP{uc $sep};
+  my ($open, $close) = @{$SEP{uc $sep}};
+  $open = chr $open; $close = chr $close;
+
+  $columns = `tput cols`, chomp $columns unless $columns;
+  my $dashes = $columns - length($left) - length($right);
+  if ($ansi_bg eq '0') { # NOTE: currently never runs, since we changed the blank default
+    print "\e[1;30m———(\e[32m$left\e[m\e[30m)";
+    print '—' x ($dashes - 10);
+    print "(\e[m\e[37m$right\e[30m)———\e[m";
+  } else {
+    # TODO(sdh): figure out if terminal is running powerline fonts (maybe just a list of
+    # known terminals that do support it?). Fall back on parens or something else?
+    binmode STDOUT, ":utf8";
+    #my ($open, $close) = (chr 0xe0b2, chr 0xe0b0);
+    my $main = "\e[1;3${ansi_fg};4${ansi_bg}m";
+    $open = "\e[m\e[30;4${ansi_bg}m  ${open}";
+    # $close = "\e[1;38;2;0;0;0;4${ansi_bg}m${close}${main} ";
+    $close = "\e[30;4${ansi_bg}m${close}${main} ";
+    $dashes -= 7 if $left;
+    $dashes -= 8 if $right;
+    $left = "${open}\e[m\e[1;32m ${left} \e[m${close}" if $left;
+    $right = "${open}\e[m\e[1;37m ${right} \e[m${close} " if $right;
+    print $main;
+    print $left;
+    print &$style() for (1..$dashes);
+    print $right;
+    print "\e[m";
+  }
+  exit;
+}
+
+sub do_colors {
+  # Handle args
+  my $touch = 1;
+  my $get_fg = 1;
+  my $get_bg = 1;
+  my $ansi = 0;
+  while ($_ = shift) {
+    unshift @_, $1 if s/^--[^=]+\K=(.*)$//;
+    $touch = 0, next if $_ eq '--notouch';
+    $get_fg = 0, next if $_ eq '--bg';
+    $get_bg = 0, next if $_ eq '--fg';
+    $ansi = 1, next if $_ eq '--ansi';
+    help(1);
+  }
+  my $root = root();
+  my $colors = find_colors($touch, $root);
+  my ($bg, $fg, $ansi_bg, $ansi_fg) = split / /, $colors;
+
+  # Now print what was asked for.
+  $fg = $ansi_fg if $ansi;
+  $bg = $ansi_bg if $ansi;
+  print $fg if $get_fg;
+  print ":" if $get_fg and $get_bg;
+  print $bg if $get_bg;
+  print "\n";
+  exit;
+}
+
+# Colors.
+my @COLORS = (
+  ['PaleVioletRed',	'#ff82ab', '#8b475d'],
+  ['MediumOrchid',	'#e066ff', '#7a378b'],
+  ['MediumPurple',	'#ab82ff', '#5d478b'],
+  ['DodgerBlue',  	'#2090ff', '#104e8b'], # 2/256 more red
+  ['SkyBlue',    	'#87ceff', '#4a708b'],
+  ['turquoise', 	'#00f5ff', '#00868b'],
+  ['aquamarine', 	'#7ffcd4', '#458b74'],
+  ['green',     	'#04f900', '#008b00'],
+  ['DarkOliveGreen', 	'#a2cd5a', '#6e8b3d'],
+  ['gold',      	'#ffd700', '#8b7500'],
+  ['burlywood', 	'#ffd39b', '#8b7355'],
+  ['LightSalmon', 	'#ffa07a', '#8b5742'],
+  ['DarkOrange',    	'#ff7f00', '#8b4500'],
+  ['tomato',    	'#ff6347', '#8b3626'],
+);
+
+# Usage: find_colors $touch, $root
+sub find_colors {
+  # Find directory
+  local $_;
+  my ($touch, $root) = @_;
+  # my $blank = '#000000 #666666 0 7';
+  my $blank = '#000000 #666666 ' . to_ansi('#666666') . ' ' . to_ansi('#000000'); #8;2;0;0;0 8;2;255;255;255';
+  return $blank unless $root;
+  (my $root_scrubbed = $root) =~ s|/|!|g; # don't worry about collisions
+  my $dir = $ENV{REPO_COLOR_DIR} || "$ENV{HOME}/.repo_colors";
+  mkpath [$dir], 1, 0755 unless -d $dir;
+  my $file = "$dir/$root_scrubbed";
+  my $color;
+  if (-e $file) {
+    $color = read_file($file);
+    system 'touch', $file;
+  } else {
+    return $blank unless $touch; # if --notouch then don'just return empty.
+    # Make a new file, may need to expire older ones.
+    opendir DIR, $dir;
+    my @files = ();
+    while ($_ = readdir DIR) {
+      next if /^\.\.?/;
+      push @files, ["$dir/$_", -C "$dir/$_"];
+    }
+    closedir DIR;
+    @files = sort { $a->[1] <=> $b->[1] } @files;
+    # Truncate down to 10
+    while (@files > 10) {
+      my $file = (pop @files)->[0];
+      unlink "$dir/$file";
+    }
+    my @colors = map { read_file($_->[0]) } @files;
+    $color = pick_color(@colors);
+    open FILE, '>', $file or die "Could not open $file: $!";
+    print FILE $color;
+    close FILE;
+  }
+  # $color now holds an index into @COLORS
+  my $bg = $COLORS[$color]->[1];
+  my $fg = $COLORS[$color]->[2];
+  my $ansi_bg = to_ansi($bg);
+  my $ansi_fg = to_ansi($fg);
+  return "$bg $fg $ansi_bg $ansi_fg";
+}
+
+sub to_ansi {
+  local($_) = shift;
+  s/^#//;
+  my @parts = ('8;2');
+  while (s/^(..)//) {
+    push @parts, hex $1;
+  }
+  return join ';', @parts;
+}
+
+sub read_file {
+  open FILE, '<', $_[0] or die "Could not open file $_[0]: $!";
+  my $line = <FILE>;
+  chomp $line;
+  close FILE;
+  return $line;
+}
+
+sub pick_color {
+  # Ideally we would parse the colors, map to L*a*b* color space, and then
+  # measure absolute differences.  But given the device-dependence of RGB,
+  # this turns out to be ridiculously hard, so I won't bother.
+  my @PENALTIES = (
+    ['PaleVioletRed', 'MediumOrchid', 2],
+    ['MediumOrchid', 'MediumPurple', 8],
+    ['MediumPurple', 'DodgerBlue', 2],
+    ['MediumPurple', 'SkyBlue', 1],
+    ['DodgerBlue', 'SkyBlue', 1],
+    ['SkyBlue', 'turquoise', 8],
+    ['SkyBlue', 'aquamarine', 2],
+    ['turquoise', 'aquamarine', 8],
+    ['turquoise', 'green', 2],
+    ['aquamarine', 'green', 8],
+    ['aquamarine', 'DarkOliveGreen', 2],
+    ['green', 'DarkOliveGreen', 2],
+    ['DarkOliveGreen', 'gold', 2],
+    ['gold', 'burlywood', 8],
+    ['gold', 'LightSalmon', 1],
+    ['burlywood', 'LightSalmon', 8],
+    ['LightSalmon', 'DarkOrange', 4],
+    ['LightSalmon', 'tomato', 2],
+    ['DarkOrange', 'tomato', 8],
+    ['LightSalmon', 'PaleVioletRed', 1],
+    ['DarkOrange', 'PaleVioletRed', 4],
+    ['tomato', 'PaleVioletRed', 4],
+    ['tomato', 'MediumOrchid', 1],
+  );
+  my %COLORS = ();
+  $COLORS{$_->[0]} = 1 for (@COLORS);
+  my %PENALTIES = ();
+  for (@PENALTIES) {
+    my ($a, $b, $c) = @$_;
+    die "Bad color: $a" unless defined $COLORS{$a};
+    die "Bad color: $b" unless defined $COLORS{$b};
+    $PENALTIES{"$a $b"} = $PENALTIES{"$b $a"} = $c;
+  }
+
+  # Iterate through all the not-picked colors
+  my %options = ();
+  $options{$_} = 0 for (1..$#COLORS);
+  delete $options{$_} for (@_);
+  my @costs = ();
+  for (keys %options) {
+    my $a = $COLORS[$_]->[0];
+    my $cost = 0;
+    my $multiplier = 1024;
+    for my $x (@_) {
+      my $b = $COLORS[$x]->[0];
+      $cost += ($PENALTIES{"$a $b"} || 0) * $multiplier;
+      $multiplier /= 2;
+    }
+    push @costs, [$_, $cost];
+  }
+  @costs = sort { $a->[1] <=> $b->[1] } @costs;
+  return $costs[0]->[0];
+}
+
+# Just do it,
+main(@ARGV);

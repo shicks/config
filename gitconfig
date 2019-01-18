@@ -1,6 +1,6 @@
 [user]
   name = Stephen Hicks
-  email = sdh33@cornell.edu
+  email = stephenhicks@gmail.com
 
 [alias]
   changes = log --color --graph --decorate
@@ -11,6 +11,11 @@
   s = status
   statys = status
   statis = status
+  untracked = git ls-files --others --exclude-standard
+  # TODO(sdh): this fails if master doesn't have 2 parents, and misses any extras
+  #   - figure out a way to say "all" direct parents? - could use a script
+  #   - note that this causes gaps in the tree, making things confusing.
+  xx = log --color --graph --decorate --not master^ master^2 --not --branches --oneline
 
 [color]
   ui = auto
@@ -20,3 +25,18 @@
 
 [init]
   templatedir = ~/.gitconfig.d/templates
+
+[rerere]
+  # TODO(sdh): figure out if/how we want to use this...
+  enabled = true
+  autoupdate = true
+
+[merge]
+  conflictstyle = diff3
+
+[merge "keep"]
+  # Custom merge tool allowing to tag lines with MERGE:preserve
+  driver = git-merge-keep "%A" "%O" "%B"
+
+[http]
+  cookiefile = ~/.gitcookies

@@ -3,6 +3,10 @@
 # b
 # joins/splits lines into delimited chunks
 
+# TODO(sdh): make chunking paragraphs easier
+# TODO(sdh): some reasonable regexes (like /./) are also files
+# TODO(sdh): better interface, better name?
+
 use strict;
 
 sub arg {
@@ -29,7 +33,7 @@ sub chunk {
     }
     if (/$start_delim/) {
       $outputting = 1;
-    }      
+    }
   }
   print "$buffer\n" if $buffer;
 }

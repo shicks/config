@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Branch a new session from the current one.
+
+old=$1
+new=1
+while tmux has-session -t "$new" 2>/dev/null; do
+  let $((new += 1))
+done
+window=$(tmux list-sessions -F "#{?#{==:#{session_name},$old},#{window_id},}")
+
+tmux new-session -Ads "$new" -t "$old"
+tmux new-window -dc "#{pane_current_path}"
+#tmux select-window -t "$window"
+tmux switch-client -t "$new"

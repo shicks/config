@@ -1,0 +1,47 @@
+local check_exists=false
+local unique=false
+
+while true; do
+  case "$1" in
+    (-*) ;; (--) shift; break ;; (*) break ;;
+  esac
+  local arg=$1
+  shift
+  case "$arg" in
+    (-??*) set -- -${arg:2} "$@"; arg=${arg:0:2} ;;
+  esac
+  case "$arg" in
+    (-e) check_exists=true ;;
+    (-u) unique=true ;;
+    # TODO(sdh): change $sep, but will need to not unshift arg
+    (*)  echo "prepend_to_list: bad arg: $arg" >&2; return 1 ;;
+  esac
+done
+
+local name=$1
+shift
+
+while [ $# -gt 0 ]; do
+  local contents=$(eval "echo \$$name")
+  local file=$1
+  shift
+  if $check_exists && [ ! -e "$file" ]; then
+    continue
+  fi
+  if $unique; then
+    while true; do
+      case "$contents" in
+        ($file)     eval "$name=" ;;
+        ($file:*)   eval "$name=\${$name#$file:}" ;;
+        (*:$file)   eval "$name=\${$name%:$file}" ;;
+        (*:$file:*) eval "$name=\${$name%%:$file:*}:\${$name#*:$file:}" ;;
+        (*)         break ;;
+      esac
+      contents=$(eval "echo \$$name")
+    done
+  fi
+  case "$contents" in
+    ('')  eval "$name=$file" ;;
+    (*) eval "$name=$file:$contents" ;;
+  esac
+done

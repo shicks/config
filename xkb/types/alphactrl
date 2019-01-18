@@ -1,0 +1,6 @@
+partial xkb_types "alphactrl" {
+  type "ALPHABETIC_CTRL" {
+    modifiers = Shift+Lock+Ctrl;
+    
+  }
+};

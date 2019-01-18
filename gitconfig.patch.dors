@@ -1,4 +1,0 @@
-#!/usr/bin/perl -p
-
-s/sdh33\@cornell\.edu/sdh\@google.com/;
-print "  ch = log --decorate --graph --color ^p4/importstate\n" if /^  changes/;

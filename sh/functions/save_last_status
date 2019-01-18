@@ -1,0 +1,5 @@
+# Save the last exit status to a variable.
+# This should be run as the first hook in precmd or PROMPT_COMMAND so that
+# it is not overwritten by other hooks.
+ 
+_sdh_last_status=$?

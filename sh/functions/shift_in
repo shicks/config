@@ -1,0 +1,8 @@
+# Send the "shift in" signal to the terminal, which often restores usability
+# after cat'ting a big binary file.  Also switches some font pages back to
+# the normal defaults.
+
+if [ "$TERM" != dumb -a "$TERM" != eterm-color ]; then
+  echo -ne '\017\033(B\033)0';
+  stty opost onlcr  # fix the "staircase" effect
+fi

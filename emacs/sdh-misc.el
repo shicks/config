@@ -30,6 +30,7 @@
 (setq inhibit-splash-screen t)  ; Never show splash screen
 
 (setq delete-active-region nil) ; don't delete active regions on backspace
+(setq set-mark-command-repeat-pop t) ; C-u C-SPC C-SPC... will cycle
 
 ;(setq debugger 'edebug-debug)  ; Use edebug for emacs lisp
 
@@ -51,6 +52,15 @@
   "Returns true if the input char is a space"
   (member x '(10 13 32)))
 
+(defun sdh-find-file-as-root (file)
+  "Finds a file and uses tramp to open it as root"
+  (interactive "FFind file (root): ")
+  (find-file (concat "/sudo:root@localhost:" file)))
+
+(defun sdh-reopen-file-as-root ()
+  "Reopens the current file with tramp to open it as root"
+  (interactive)
+  (find-alternate-file (concat "/sudo:root@localhost:" (buffer-file-name))))
 
 ;;;;;;;;;;;;;;;;
 ;; Clipboard handling
@@ -113,6 +123,8 @@
          (start (if mark-active (min (point) (mark)) (point-at-bol)))
          (end (if mark-active (max (point) (mark)) (+ 1 (point-at-eol))))
          (active mark-active))
+    ; figure out what's at end of both lines - is it end of buffer at either?
+    ;(describe-char end)
     (goto-char (move-region start end n))
     (if active (set-mark (+ (point) mark-index)))))
 
@@ -126,6 +138,9 @@
          (rest-of-target (buffer-substring target-line
                           (progn (goto-char target-line) (point-at-eol))))
          (missing-spaces (string-repeat " " (max 0 (- start-col (length rest-of-target))))))
+    ;; TODO(sdh): either line is missing a newline at end, then add it
+
+
     ;; first trim any extra added spaces
     ;; NOTE: problem - the delete-region throws off the other counts!
     ;;       -> need to use markers instead of indexes
@@ -396,7 +411,8 @@ the prefix argument in transient mark mode (unless the mark is active)."
   "Tries to require a file, returns t if successful, nil otherwise"
   (condition-case nil
       (require arg)
-    (error nil)))
+    (error (message "WARNING: Could not require %s" arg)
+           nil)))
 
 ;;;;;;;;;;;;;;;;
 ;; Backup files
@@ -453,10 +469,30 @@ See also: `xah-copy-to-register-1', `insert-register'."
   ;  )
   (insert-register ?1 t))
 
+(defun sdh-save-position-to-register-1 ()
+  "Save the current cursor position to register 1."
+  (interactive)
+  (set-register ?1 (point-marker)))
+(defun sdh-restore-position-from-register-1 ()
+  "Restore the cursor position from register 1."
+  (interactive)
+  (goto-char (get-register ?1)))
+
 (defun sdh-copy-or-insert-register (arg)
   "Copies or inserts the contents of the '1' register: basically C-x r [si] 1"
   (interactive "P")
-  (if arg (xah-copy-to-register-1) (xah-paste-from-register-1)))
+  (if arg (sdh-save-x-to-register-1) (sdh-restore-x-from-register-1)))
+
+(defun sdh-save-x-to-register-1 ()
+  (interactive)
+  (if (and transient-mark-mode mark-active)
+      (xah-copy-to-register-1)
+    (sdh-save-position-to-register-1)))
+(defun sdh-restore-x-from-register-1 ()
+  (interactive)
+  (if (markerp (get-register ?1))
+      (sdh-restore-position-from-register-1)
+    (xah-paste-from-register-1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compilation buffer navigation
@@ -478,20 +514,27 @@ See also: `xah-copy-to-register-1', `insert-register'."
 (defun sdh-previous-error () (interactive)
   (if (sdh-is-flymake) (flymake-goto-prev-error) (previous-error)))
 
-(provide 'sdh-misc)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Conflict resolution
 
+; NOTE: use smerge-keep-mine
 (defun sdh-pick-top-version (&optional arg)
   "Run from the '========' line of a marked conflict.  Deletes the >>> version and keeps the <<< version."
   (interactive "p")
   (kmacro-exec-ring-item (quote (" >>>>>>>OC<<<<<<<" 0 "%d")) arg))
 
+; NOTE: use smerge-keep-other
 (defun sdh-pick-bottom-version (&optional arg)
   "Run from the '========' line of a marked conflict.  Deletes the <<< version and keeps the >>> version."
   (interactive "p")
   (kmacro-exec-ring-item (quote ("OB <<<<<<<>>>>>>>" 0 "%d")) arg))
+
+; NOTE: use smerge-keep-other
+(defun sdh-kill-middle-version (&optional arg)
+  "Run from the '========' line of a marked conflict.  Deletes the <<< version and keeps the >>> version."
+  (interactive "p")
+  (kmacro-exec-ring-item (quote ("<<<<<<<|||||||OB =======" 0 "%d")) arg))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Line handling
@@ -528,6 +571,11 @@ See also: `xah-copy-to-register-1', `insert-register'."
   "Indents the region rigidly by -1 character [bound to C-(]"
   (interactive "P")
   (sdh-indent-rigidly (- (prefix-numeric-value num))))
+
+(defun sdh-unindent-region ()
+  "Unindents by two."
+  (interactive)
+  (sdh-rigid-left 2))
 
 ;; Transient indent mode: C-x TAB, then < or >
 (define-minor-mode sdh-transient-indent-mode
@@ -573,7 +621,8 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (let ((x (symbol-name (event-basic-type event))))
     (if (not (string-match "^mouse-\\([0-9]+\\)" x))
         (error "Not a button event: %S" event))
-    (string-to-int (substring x (match-beginning 1) (match-end 1)))))
+    ;; NOTE: used to be string-to-int ...?
+    (string-to-number (substring x (match-beginning 1) (match-end 1)))))
 
 (defun sdh-mwheel-scroll (event)
   (interactive "e")
@@ -584,3 +633,123 @@ See also: `xah-copy-to-register-1', `insert-register'."
               ((= button 5) (scroll-up 10))
               (t (error "Bad binding")))
       (if curwin (select-window curwin)))))
+
+
+(defun sdh-delete-word ()
+  (interactive)
+  (save-excursion
+    (let* ((start (point))
+           (end (progn (forward-word) (point))))
+      (delete-region start end))))
+
+(defun forward-or-backward-sexp (&optional arg)
+  "Go to the matching parenthesis character if one is adjacent to point."
+  (interactive "^p")
+  (cond ((looking-at "\\s(") (forward-sexp arg))
+        ((looking-back "\\s)" 1) (backward-sexp arg))
+        ;; Now, try to succeed from inside of a bracket
+        ((looking-at "\\s)") (forward-char) (backward-sexp arg))
+        ((looking-back "\\s(" 1) (backward-char) (forward-sexp arg))))
+
+;; Highlight current line, only when idle.
+(if (sdh-try-require 'hl-line+)
+    (toggle-hl-line-when-idle))
+
+; Use bracketed paste if it's installed (doesn't seem to work...)
+;(if (sdh-try-require 'bracketed-paste)
+;    (bracketed-paste-enable))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Some random functions from the internet
+
+;; From https://emacs.stackexchange.com/questions/20481/incrementing-characters-in-emacs-next-to-numbers/20484
+(defun increment-char-at-point ()
+  "Increment number or character at point."
+  (interactive)
+  (condition-case nil
+      (save-excursion
+        (let ((chr  (1+ (char-after))))
+          (unless (characterp chr) (error "Cannot increment char by one"))
+          (delete-char 1)
+          (insert chr)))
+    (error (error "No character at point"))))
+
+(defun increment-number-or-char-at-point ()
+  "Increment number or character at point."
+  (interactive)
+  (let ((nump  nil))
+    (save-excursion
+      (skip-chars-backward "0123456789")
+      (when (looking-at "[0123456789]+")
+        (replace-match (number-to-string (1+ (string-to-number (match-string 0)))))
+        (setq nump  t)))
+    (unless nump
+      (save-excursion
+        (condition-case nil
+            (let ((chr  (1+ (char-after))))
+              (unless (characterp chr) (error "Cannot increment char by one"))
+              (delete-char 1)
+              (insert chr))
+          (error (error "No character at point")))))))
+
+(defun sdh-toggle-line-move-visual (buffer-local)
+  "Toggle line-move-visual."
+  (interactive "P")
+  ;; TODO(sdh): consider switching the default to local?
+  (if buffer-local (make-variable-buffer-local 'line-move-visual))
+  (setq line-move-visual (not line-move-visual)))
+(setq line-move-visual nil)
+(defun sdh-previous-line-visual ()
+  (interactive)
+  ;(if (> (point) (point-min)) (progn (backward-char) (forward-char)))
+  (let ((line-move-visual t)) (backward-char) (forward-char) (previous-line)))
+(defun sdh-next-line-visual ()
+  (interactive)
+  ;(if (> (point) (point-min)) (progn (backward-char) (forward-char)))
+  (let ((line-move-visual t)) (forward-char) (backward-char) (next-line)))
+
+;; Useful for keyboard macros
+(defun sdh-search-register (reg)
+  "Search forward for occurrence of the given register."
+  (interactive "cRegister: ")
+  (condition-case nil
+      (search-forward (get-register reg))
+    (error (message (format "Text not found (register %c): %s" reg (get-register reg))) (ding))))
+
+
+;; Add useful ediff bindings.
+(defun sdh-ediff-next-and-refine ()
+  (interactive)
+  (ediff-next-difference)
+  (ediff-make-or-kill-fine-diffs 1))
+(defun sdh-ediff-previous-and-refine ()
+  (interactive)
+  (ediff-previous-difference)
+  (ediff-make-or-kill-fine-diffs 1))
+(defun sdh-ediff-hook ()
+  (ediff-setup-keymap)
+  (define-key ediff-mode-map "x" 'ediff-make-or-kill-fine-diffs)
+  (define-key ediff-mode-map "j" 'sdh-ediff-next-and-refine)
+  (define-key ediff-mode-map "k" 'sdh-ediff-previous-and-refine)
+  )
+
+(if (fboundp 'ediff-setup-keymap)
+    (add-hook 'ediff-mode-hook 'sdh-ediff-hook))
+
+;;;;;;;
+
+(defun sdh-to-lower-camel ()
+  (interactive)
+  (downcase-word 1)
+  (cond
+    ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
+    ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
+
+(defun sdh-const-to-upper-camel ()
+  (interactive)
+  (capitalize-word 1)
+  (cond
+    ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
+    ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
+
+(provide 'sdh-misc)

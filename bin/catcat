@@ -1,27 +1,43 @@
 #!/usr/bin/perl
 
-# Usage catcat [lines]
+# Usage catcat [-c count] [lines]
 
-my $lines = shift or `tput lines`; chomp $lines;
+my $count = 2;
+$count = $ARGV[1], shift, shift if $ARGV[0] eq '-c';
+my $lines = shift || (`tput lines` - 2); chomp $lines;
 my $cols = `tput cols`; chomp $cols;
 
-my $target = int($cols / 2) - 1;
+sub ceil {
+  my $i = int($_[0]);
+  return $i if $i == $_[0];
+  return $i + 1;
+}
+
+my @col = map {ceil(($cols + 1) * $_ / $count)} (0..$count);
 
 my @data = ();
-while (@data < 2 * $lines) {
+while (@data < $count * $lines) {
   $_ = <>;
   chomp $_;
   push @data, $_;
   last if eof;
 }
 
+# Trims $_[0] down to $_[1] visible chars, returning (str, visible length)
+sub trim {
+  my ($str, $len) = @_;
+  $str =~ s/(?:(?:\e\[[^m]*m)*[^\e]?+){0,$len}\K.*//;
+  (my $stripped = $str) =~ s/\e\[[0-9;]*[^0-9;]//g;
+  return ($str, length($stripped));
+}
+
 for (my $i = 0; $i < $lines; $i++) {
-  my $left = $data[$i];
-  $left =~ s/(?:(?:\e\[[^m]*m)*[^\e]?+){0,$target}\K.*//;
-  my $stripped = $left;
-  $stripped =~ s/\e\[[^m]*m//g;
-  $left .= ' ' x ($cols - $target - length($stripped));
-  my $right = $data[$i + $lines];
-  $right =~ s/(?:(?:\e[^m]*m)*[^\e]?+){0,$target}\K.*//;
-  print "$left\e[m$right\n";
+  for (my $j = 0; $j < $count; $j++) {
+    print "\e[m " if $j;
+    my $line = $data[$i + $j * $lines];
+    my $target = $col[$j + 1] - $col[$j] - 1;
+    my ($trimmed, $len) = trim($line, $target);
+    print $trimmed . (' ' x ($target - $len));
+  }
+  print "\n";
 }

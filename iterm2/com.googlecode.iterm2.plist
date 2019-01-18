@@ -510,6 +510,13 @@
 					<key>Text</key>
 					<string>[36~.</string>
 				</dict>
+				<key>0x2f-0x40000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[36~/</string>
+				</dict>
 				<key>0x30-0x40000</key>
 				<dict>
 					<key>Action</key>
@@ -601,6 +608,13 @@
 					<key>Text</key>
 					<string>0x1b 0x5b 0x33 0x36 0x7e 0x0f</string>
 				</dict>
+				<key>0x50-0x60000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1b 0x5b 0x33 0x36 0x7e 0x10</string>
+				</dict>
 				<key>0x7f-0x40000</key>
 				<dict>
 					<key>Action</key>
@@ -643,6 +657,20 @@
 					<key>Text</key>
 					<string>0x1b 0x1b 0x5b 0x41</string>
 				</dict>
+				<key>0xf700-0x2a0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[1;4A</string>
+				</dict>
+				<key>0xf700-0x2c0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1b 0x1b 0x4f 0x61</string>
+				</dict>
 				<key>0xf701-0x220000</key>
 				<dict>
 					<key>Action</key>
@@ -671,6 +699,20 @@
 					<key>Text</key>
 					<string>0x1b 0x1b 0x5b 0x42</string>
 				</dict>
+				<key>0xf701-0x2a0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[1;4B</string>
+				</dict>
+				<key>0xf701-0x2c0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1b 0x1b 0x4f 0x62</string>
+				</dict>
 				<key>0xf702-0x220000</key>
 				<dict>
 					<key>Action</key>
@@ -698,6 +740,20 @@
 					<integer>11</integer>
 					<key>Text</key>
 					<string>0x1b 0x1b 0x5b 0x44</string>
+				</dict>
+				<key>0xf702-0x2a0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[1;4D</string>
+				</dict>
+				<key>0xf702-0x2c0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1b 0x1b 0x4f 0x64</string>
 				</dict>
 				<key>0xf702-0x380000</key>
 				<dict>
@@ -733,6 +789,20 @@
 					<integer>11</integer>
 					<key>Text</key>
 					<string>0x1b 0x1b 0x5b 0x43</string>
+				</dict>
+				<key>0xf703-0x2a0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[1;4C</string>
+				</dict>
+				<key>0xf703-0x2c0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1b 0x1b 0x4f 0x63</string>
 				</dict>
 				<key>0xf703-0x380000</key>
 				<dict>
@@ -825,6 +895,20 @@
 					<key>Text</key>
 					<string>[24;2~</string>
 				</dict>
+				<key>0xf729-0x1c0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1a 0x70</string>
+				</dict>
+				<key>0xf729-0x1e0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1a 0x10</string>
+				</dict>
 				<key>0xf729-0x20000</key>
 				<dict>
 					<key>Action</key>
@@ -838,6 +922,20 @@
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[1;5H</string>
+				</dict>
+				<key>0xf72b-0x1c0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1a 0x6e</string>
+				</dict>
+				<key>0xf72b-0x1e0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>11</integer>
+					<key>Text</key>
+					<string>0x1a 0x0e</string>
 				</dict>
 				<key>0xf72b-0x20000</key>
 				<dict>
@@ -881,7 +979,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>Monaco 12</string>
+			<string>MonofurForPowerline 14</string>
 			<key>Option Key Sends</key>
 			<integer>2</integer>
 			<key>Prompt Before Closing 2</key>
@@ -1046,6 +1144,8 @@
 			<false/>
 			<key>Use Italic Font</key>
 			<true/>
+			<key>Use Tab Color</key>
+			<false/>
 			<key>Vertical Spacing</key>
 			<real>1</real>
 			<key>Visual Bell</key>
@@ -1628,7 +1728,7 @@
 			<key>Mouse Reporting</key>
 			<true/>
 			<key>Name</key>
-			<string>Nethack</string>
+			<string>Nethack (alt.org)</string>
 			<key>Non Ascii Font</key>
 			<string>BitstreamVeraSansMono-Roman 18</string>
 			<key>Non-ASCII Anti Aliased</key>

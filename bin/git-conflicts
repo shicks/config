@@ -1,7 +1,16 @@
 #!/usr/bin/perl
 
+my $gitdir = `git rev-parse --git-dir`;
+chomp $gitdir;
+
+if (-e "$gitdir/rebase-merge/done") {
+  # Show some context.
+  system('tail', '-1', "$gitdir/rebase-merge/done");
+  print "\n";
+}
+
 my $conflicts = 0;
-my $root = `realpath \$(git rev-parse --git-dir)/..`;
+my $root = `realpath $gitdir/..`;
 chomp $root;
 chdir $root;
 open GIT, "git status |";
@@ -11,7 +20,7 @@ while (<GIT>) {
   if (s/^((?:added|deleted) by (?:them|us)):\s*// or s/^(both (?:added|modified)):\s*//) {
     my $found = 0;
     if ($1 eq 'both modified' or $1 eq 'both added') {
-      open GREP, "grep -n ======= $root/$_ | cut -d: -f1 |";
+      open GREP, "grep -n ^======= $root/$_ | cut -d: -f1 |";
       while (my $line = <GREP>) {
         chomp $line;
         print "$root/$_:$line: $1\n";

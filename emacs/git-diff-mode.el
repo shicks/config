@@ -11,6 +11,8 @@
 ;; plan: --numstat and --summary - go thru numstat first, assume copies
 ;; then go in and amend it with summary
 
+(require 'cl-lib)
+
 (setq ediff-split-window-function 'split-window-horizontally)
 (setq ediff-keep-variants nil)
 
@@ -49,12 +51,16 @@
   "Face used for marking renamed files."
   :group 'git-diff)
 
+(defconst git-diff-helper
+  (concat (file-name-directory load-file-name) "diff-mode-helper")
+  "Helper script to get diffs across repo types.")
+
 (make-variable-buffer-local
  (defvar git-diff-against nil
    "The branch being diffed against."))
 
 (make-variable-buffer-local
- (defvar git-diff-git-root nil
+ (defvar git-diff-root nil
    "The root directory of the current repo."))
 
 (make-variable-buffer-local
@@ -67,6 +73,10 @@
 
 (defvar git-diff-window nil
   "The window currently displaying the git-diff buffer.")
+
+(make-variable-buffer-local
+ (defvar git-diff-vcs 'git
+   "Which type of VCS is being used ('git, 'hg, or 'p4)."))
 
 (defun git-diff-get-target (file)
   "Returns the target file for a move/copy, or the original file name"
@@ -85,12 +95,11 @@
 (defun git-diff-change-added (change)
   (cadr change))
 (defun git-diff-change-deleted (change)
-  (caddr change))
+  (cl-caddr change))
 (defun git-diff-change-type (change)
-  (cadddr change))
+  (cl-cadddr change))
 (defun git-diff-change-source (change)
-  (cadddr (cdr change)))
-
+  (cl-cadddr (cdr change)))
 
 ;; data structure for hierarchy:
 ;; (("com"
@@ -155,9 +164,9 @@ The key should be a list of strings."
 (defun git-diff-print-file (changes depth)
   "Prints a single file line and updates the map.
 Returns t if the line is indeed a file."
-  (if (and (listp (cdar changes)) (eq 'leaf (caadar changes)))
+  (if (and (listp (cdar changes)) (eq 'leaf (cl-caadar changes)))
       (let* ((file (caar changes))
-             (change (cdadar changes))
+             (change (cl-cdadar changes))
              (type (git-diff-change-type change))
              (face (intern-soft (concat "git-diff-" type)))
              (added (git-diff-change-added change))
@@ -169,10 +178,14 @@ Returns t if the line is indeed a file."
         ;; Add the change stats
         ;(if (member face '(git-diff-rename git-diff-copy git-diff-change))
             (progn
-              (if (> added 0)
+              ; TODO(sdh): for some reason "mode change 100755 => 100644 path/to/file"
+              ; lines are breaking this by making added/deleted be nil.  For now we
+              ; just bypass these lines, but better would be to handle them correctly
+              ; and display the change in the diff view.
+              (if (and (numberp added) (> added 0))
                   (insert (propertize (concat "  +" (number-to-string added))
                                       'face 'git-diff-create)))
-              (if (> deleted 0)
+              (if (and (numberp deleted) (> deleted 0))
                   (insert (propertize (concat "  -" (number-to-string deleted))
                                       'face 'git-diff-delete)))
               )
@@ -222,60 +235,38 @@ Returns t if the line is indeed a file."
 
 ;(setq debug-on-error t)
 
+(defconst git-diff-re
+  ;; (re1 "^\\([-0-9]*\\)\t\\([-0-9]*\\)\t\\([^\n]*\\)")
+  (rx line-start
+      (group-n 1 (or "create" "delete" "change")) (+ space)  ; $mode
+      (group-n 2 (+ digit)) (+ space)                        ; $added
+      (group-n 3 (+ digit)) (+ space)                        ; $removed
+      (group-n 4 (+ not-newline)))                           ; $filename
+  "Regex for 'diff-helper' lines, e.g. 'change   19    2 path/to/file'")
+
 (defun git-diff-parse ()
   "Iterates through the numstat and summary outputs and returns
 a list of changes, using the structure specified above."
   (setq git-diff-files (make-hash-table))
   (setq git-diff-dirs (make-hash-table))
   (let ((changes '())
-        (re1 "^\\([-0-9]*\\)\t\\([-0-9]*\\)\t\\([^\n]*\\)")
-        (re2 (concat
-             "^ \\([a-z]*\\) "           ; $1: create|delete|rename|copy
-             "\\(mode [0-9]\\{6\\} \\)?" ; $2: mode missing in rename/copy
-             "\\([^{[:space:]]*"         ; $3: arbitrary non-braces
-             "\\({[^ ]* => [^}]*}"       ;     possible {foo => bar}
-             "[^([:space:]]*\\)?\\)"))   ;     end of filename, skip "(NN%)"
-        (cur 0)  ; current point in buffer
-
-        )
+        (cur 0))  ; current point in buffer
     (beginning-of-buffer)
     ;; TODO(sdh): iterate backwards is an order of magnitude more efficient
-    (goto-char (or (re-search-forward re2 (point-max) t) (point-max)))
-    (while (progn (setq cur (re-search-backward re1 (point-min) t)) cur)
-      (let* ((added (string-to-number (match-string 1)))
-             (deleted (string-to-number (match-string 2)))
-             (file (match-string 3))
-             (target (git-diff-get-target file))
-             (key (split-string target "/" t))
-             (source (git-diff-get-source file)))
+    (goto-char (point-max))
+    (while (progn (setq cur (re-search-backward git-diff-re (point-min) t)) cur)
+      (let* ((mode (match-string 1))
+             (added (string-to-number (match-string 2)))
+             (deleted (string-to-number (match-string 3)))
+             (file (match-string 4))
+             (key (split-string file "/" t)))
+        (message "Line: %s %s %s %s" mode file added deleted)
         (setq changes
               (git-diff-trie-put key
-                                 (list target added deleted "change" source)
+                                 (list file added deleted mode file)
                                  changes))
         (goto-char cur)))
     (goto-char (point-max))
-    (while (progn (setq cur (re-search-backward re2 (point-min) t)) cur)
-      (let* ((type (match-string 1))
-             (file (match-string 3))
-             (target (git-diff-get-target file))
-             (key (split-string target "/" t))
-             (source (git-diff-get-source file))
-             (source-key (split-string source "/" t))
-             (change (git-diff-trie-get key changes))
-             (added (git-diff-change-added change))
-             (deleted (git-diff-change-deleted change)))
-        (setq changes
-              (git-diff-trie-put key
-                                 (list target added deleted type source)
-                                 changes))
-        (if (string= type "rename")
-            (progn
-            (setq changes
-                  (git-diff-trie-put source-key
-                                     (list source 0 0 "delete" source)
-                                     changes))
-            ))
-        (goto-char cur)))
     ;; now that everything's loaded, delete buffer and write our own structure
     (erase-buffer)
     (remove-overlays)
@@ -286,30 +277,36 @@ a list of changes, using the structure specified above."
   "Iterates through the summary output and stores the change type
 in a hash table."
   (let ((summary-start (re-search-forward "^ " (buffer-size) t))
-        (re (concat
-             "^ \\([a-z]*\\) "           ; $1: create|delete|rename|copy
-             "\\(mode [0-9]\\{6\\} \\)?" ; $2: mode missing in rename/copy
-             "\\([^{[:space:]]*"         ; $3: arbitrary non-braces
-             "\\({[^ ]* => [^}]*}"       ; possible {foo => bar}
-             "[^([:space:]]*\\)?\\)"))   ; end of filename
         (found t))
     (while found
-      (setq found (re-search-forward re (buffer-size) t))
-      (if found (puthash (match-string 3) (match-string 1) table)))
+      (setq found (re-search-forward git-diff-re-numstat-special (buffer-size) t))
+      (if found (puthash (match-string 2) (match-string 1) table)))
     (delete-region summary-start (buffer-size))
 ))
+
 
 (defun git-diff (branch)
   "Runs git diff against the given branch and presents
 a buffer of recursive directory/file diffs, linking to ediff
 to change individual files."
   (interactive "sBranch: ")
+  (git-diff-internal branch 'git))
+
+(defun git-diff-hg (rev)
+  "Version of git-diff for Hg."
+  (interactive "sRev: ")
+  (git-diff-internal rev 'hg))
+
+(defun git-diff-p4 ()
+  "Version of git-diff for P4."
+  (interactive)
+  (git-diff-internal "" 'p4))
+
+(defun git-diff-internal (against vcs)
   (setq debug-on-error t)
   (let ((pwd default-directory)
         (buf (get-buffer-create "*git-diff*"))
-        (cmd (concat "git diff --numstat --summary "
-                     "--find-renames --find-copies "
-                     branch)))
+        (cmd (concat git-diff-helper " " against)))
     (switch-to-buffer buf)
     (setq default-directory pwd)
     (shell-command cmd buf)
@@ -317,37 +314,49 @@ to change individual files."
     (toggle-read-only 0)
     (git-diff-parse)
     (toggle-read-only 1)
-    (setq git-diff-against branch)
-    (setq git-diff-git-root nil)
+    (setq git-diff-against against)
+    (setq git-diff-root nil)
+    (setq git-diff-vcs vcs)
     (goto-char 0)
 ))
 
 (defun git-diff-get-root-dir ()
   "Computes the root dir of the current directory repo"
-  (or git-diff-git-root (setq git-diff-git-root
-                              (git-diff-dirname (shell-command-to-string
-                                                 "git rev-parse --git-dir")))))
+  (or git-diff-root (setq git-diff-root
+                          (replace-regexp-in-string "\n$" ""
+                           (shell-command-to-string
+                            (cond
+                             ((eq git-diff-vcs 'hg) "hg root")
+                             ((eq git-diff-vcs 'git) "git rev-parse --show-toplevel")
+                             ((eq git-diff-vcs 'p4) "p4 root" "p4 info | sed -n 's/Client root: //p'")))))))
 
 ;; TODO(sdh): set up more keybindings, possibly with
 ;; better/more automatic ediff integration, back and forth, etc
-
-(defun git-diff-dirname (name)
-  "Returns the dirname."
-  (replace-regexp-in-string "/[^/]*$" "" name))
 
 (defun git-diff-open-diff (pos)
   "Starts ediff mode for the given change"
   (interactive "d")
   (let* ((change (gethash (line-number-at-pos pos) git-diff-files))
          (root (git-diff-get-root-dir))
-         (rhs-file (concat root "/" (git-diff-change-file change)))
-         (lhs-file (concat "/tmp" root "/" (git-diff-change-source change)))
-         (source-rev (concat git-diff-against ":"
+         (rhs-file (concat (file-name-as-directory root)
+                           (git-diff-change-file change)))
+         (lhs-file (concat "/tmp"
+                           (file-name-as-directory root)
+                           (git-diff-change-source change)))
+         (command-git (concat "git show " git-diff-against ":"
+                              (git-diff-change-source change)))
+         (command-hg (concat "hg cat --hidden -r " git-diff-against " " root "/"
                              (git-diff-change-source change)))
+         (command-p4 (concat "p4 cat " root "/" (git-diff-change-source change)))
+         (command (cond
+                   ((eq git-diff-vcs 'hg) command-hg)
+                   ((eq git-diff-vcs 'git) command-git)
+                   ((eq git-diff-vcs 'p4) command-p4)))
          ;(rhs (find-file rhs-file))
          (lhs (progn
-                (make-directory (git-diff-dirname lhs-file) t)
-                (shell-command (concat "git show " source-rev " > " lhs-file))
+                (message "Open: [%s] %s %s" command lhs-file rhs-file)
+                (make-directory (dirname-no-slash lhs-file) t)
+                (shell-command (concat command " > " lhs-file))
                 ;(find-file lhs-file)
                 ))
          )
@@ -403,12 +412,23 @@ to change individual files."
          (aschange (list (git-diff-change-file change)
                          0 0 "change"
                          (git-diff-change-source change)))
-         (root (or git-diff-git-root (git-diff-get-root-dir)))
-         (rhs-file (concat root "/" (git-diff-change-file change)))
-         (source-rev (concat git-diff-against ":"
+         (root (or git-diff-root (git-diff-get-root-dir)))
+         (rhs-file (concat (file-name-as-directory root)
+                           (git-diff-change-file change)))
+         (command-git (concat "git show " git-diff-against ":"
+                              (git-diff-change-source change)))
+         (command-hg (concat "hg cat --hidden -r " git-diff-against " " root "/"
                              (git-diff-change-source change)))
+         (command-p4 (concat "p4 cat " root "/" (git-diff-change-source change)))
+         (command (cond
+                   ((eq git-diff-vcs 'hg) command-hg)
+                   ((eq git-diff-vcs 'git) command-git)
+                   ((eq git-diff-vcs 'p4) command-p4)))
          ;; changes current buffer
-         (rhs (find-file rhs-file))
+         (rhs (progn
+                (if (not (file-writable-p rhs-file))
+                    (make-directory (dirname-no-slash rhs-file) t))
+                (find-file rhs-file)))
          )
     (with-current-buffer "*git-diff*"
       (puthash line aschange git-diff-files)
@@ -417,7 +437,7 @@ to change individual files."
         (toggle-read-only nil)
         (remove-text-properties (point-at-bol) (point-at-eol) '(face nil))
         (toggle-read-only t)))
-    (shell-command (concat "git show " source-rev) rhs)
+    (shell-command command rhs)
 ))
 
 (defun git-diff-revert-added-file (pos)
@@ -425,8 +445,9 @@ to change individual files."
   (interactive "d")
   (let* ((line (line-number-at-pos pos))
          (change (gethash line git-diff-files))
-         (root (or git-diff-git-root (git-diff-get-root-dir)))
-         (rhs-file (concat root "/" (git-diff-change-file change)))
+         (root (or git-diff-root (git-diff-get-root-dir)))
+         (rhs-file (concat (file-name-as-directory root)
+                           (git-diff-change-file change)))
          )
     (if (string= (git-diff-change-type change) "create") nil
       (error "Can only delete adds"))
@@ -475,5 +496,7 @@ to change individual files."
 (define-key git-diff-mode-map (kbd "r") 'git-diff-revert-added-file)
 (define-key git-diff-mode-map (kbd "n") 'git-diff-next-diff)
 (define-key git-diff-mode-map (kbd "p") 'git-diff-prev-diff)
+(define-key git-diff-mode-map (kbd "j") 'git-diff-next-diff)
+(define-key git-diff-mode-map (kbd "k") 'git-diff-prev-diff)
 
 (provide 'git-diff-mode)

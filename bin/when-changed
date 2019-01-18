@@ -1,0 +1,71 @@
+#!/usr/bin/perl
+
+# The python version of when-changed seems to be broken, so let's
+# rewrite it in perl.
+
+# Usage: when-changed [args to inotifywait] -- [command]
+
+use strict;
+use warnings;
+use Fcntl;
+
+my $bs = 10_000_000;
+my $timeout = 1200; # 20 minutes
+
+sub slurp {
+  local($/) = undef;
+  open OUT, '-|', @_;
+  my $out = <OUT>;
+  close OUT;
+  return $out;
+}
+
+my @inotify = ();
+my @command = ();
+my $arr = \@inotify;
+while (@ARGV) {
+  my $arg = shift;
+  $arr = \@command, next if $arg eq '--' and $arr != \@command;
+  push $arr, $arg;
+}
+
+open INOTIFY, '-|', 'inotifywait', '--monitor', @inotify;
+my $last = 0;
+while (<INOTIFY>) {
+  my $delta = time - $last;
+  if ($delta > 1) {
+    my $out = slurp @command;
+    print "\e[2J$out";
+  }
+  $last = time;
+}
+
+
+# open INOTIFY, '-|', 'inotifywait', '--monitor', @inotify;
+# my $flags = 0;
+# fcntl INOTIFY, F_GETFL, $flags or die $!;
+# $flags |= O_NONBLOCK;
+# fcntl INOTIFY, F_SETFL, $flags or die $!;
+# while (1) {
+#   my $got = 0;
+#   while (<INOTIFY>) {
+#     $got++;
+#   }
+#   print("\e[2J"), system @command if $got;
+#   sleep 1;
+# }
+
+
+# open my $fh, '-|', 'inotifywait', '--monitor', @inotify;
+# my $rfd = '';
+# vec($rfd, fileno($fh), 1) = 1;
+# while (1) {
+#   my $to = $timeout;
+#   while (select($rfd, undef, undef, $to) >= 0 && vec($rfd, fileno($fh), 1)) {
+#     my $buffer;
+#     $to = 0;
+#     read $fh, $buffer, $bs;
+#     print "READ\n";
+#   }
+#   print("\e[2J"), system @command unless $to;
+# }

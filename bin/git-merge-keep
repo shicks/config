@@ -1,0 +1,60 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my ($current, $original, $branch) = @ARGV;
+system 'merge', $current, $original, $branch;
+exit 0 unless $?;  # if exit status is zero, nothing else to do.
+
+# Look for super-abnormal conditions.
+if ($? < 0) {
+  print STDERR "git-merge-keep: failed to execute 'merge': $!\n";
+  exit 255;
+} elsif ($? & 127) {
+  printf STDERR "git-merge-keep: 'merge' exited with signal %s, %s coredump\n",
+      ($? & 127), ($? & 128) ? 'with' : 'without';
+  exit 255;
+}
+
+# Resolve the merge ourselves.
+my $prefix = 'MERGE';
+my @lines = ();
+my @conflict = ();
+my @chunks = (\@lines, [], []);
+my $conflict = 0;
+my $keep = 0;
+my $resolved = 1;
+open CURRENT, '<', $current;
+while (<CURRENT>) {
+  $keep |= $conflict if /$prefix:preserve/;
+  if ($conflict == 0 and /^<<<<<<< $current\s*$/) {
+    push @conflict, $_;
+    $conflict = 1;
+  } elsif ($conflict == 1 and /^=======\s*$/) {
+    push @conflict, $_;
+    $conflict = 2;
+  } elsif ($conflict == 2 and /^>>>>>>> $branch\s*$/) {
+    push @conflict, $_;
+    if ($keep and $keep < @chunks) {
+      push @lines, @{$chunks[$keep]};
+    } else {
+      push @lines, @conflict;
+      $resolved = 0;
+    }
+    $conflict = $keep = 0;
+    @conflict = ();
+    $chunks[1] = [];
+    $chunks[2] = [];
+  } else {
+    push $chunks[$conflict], $_;
+  }
+}
+close CURRENT;
+
+open OUT, '>', $current;
+print OUT @lines;
+close OUT;
+
+print STDERR "merge: conflicts auto-resovled by MERGE:preserve\n" if $resolved;
+exit !$resolved

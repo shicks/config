@@ -1,0 +1,21 @@
+// partial modifier_keys xkb_symbols "sdhemacs" {
+//   name[Group1] = "US";
+//   key <AC01> {  // 'A' key
+//     type = "LOCAL_EIGHT_LEVEL",
+//     symbols[Group1] = [ a, A, a, A, Home, Home, Home, Home ]
+//     //type = "ALPHABETIC",
+//     //symbols[Group1] = [ a, A ]
+//   };
+//   key <AD03> {  // 'E' key
+//     type = "ALPHABETIC",
+//     symbols[Group1] = [ e, E, End ]
+//   };
+// };
+
+partial alphanumeric_keys modifier_keys xkb_symbols "sdhemacs" {
+  key <AC01> {
+    type = "LOCAL_EIGHT_LEVEL",
+    [ A, a, a, A, Home, Home, Home, Home ]
+    //[a, A]
+  };
+};

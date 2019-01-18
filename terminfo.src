@@ -1,0 +1,104 @@
+#!/usr/bin/tic -x
+
+# Documentation for this file format:
+#   https://www.mkssoftware.com/docs/man5/terminfo.5.asp
+
+# True color:
+#  (emacs) http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=e463e57
+#  (tmux)  http://lists.schmorp.de/pipermail/rxvt-unicode/2016q2/002251.html
+# Note that the color count will truncate at 2^15-1, since termcap uses int16.
+#   https://lists.gnu.org/archive/html/bug-ncurses/2013-10/msg00008.html
+# See also
+#   http://invisible-island.net/ncurses/terminfo.src.html
+
+# alacritty|alacritty terminal emulator,
+#   colors#16777216,
+#   setb24=\E[48;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+#   setf24=\E[38;2;%p1%@{65536@}%/%d;%p1%@{256@}%/%@{255@}%&%d;%p1%@{255@}%&%dm,
+#   Tc,
+#   use=xterm-256color,
+
+# TODO(sdh): would be nice to at least use 2^15-1 instead of 256...?
+# TODO(sdh): this doesn't seem to actually trigger emacs! arg...
+# Note: various mailing lists have %@{256@} but my terminfo library seems to
+#       not want the @'s there.  These could have been artifacts from some
+#       poor attempt at XSS prevention?
+# See also: https://linux.die.net/man/5/terminfo
+
+true-color|mixin for true-color,
+  colors#256,
+  setb24=\E[48;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
+  setf24=\E[38;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
+  Tc,
+
+# Note: The keypad versions of the arrow keys don't seem to work nicely with
+# tmux and/or zsh, so just use the same as the cursor versions.
+alacritty-keyboard|mixin for the keybindings we set in alacritty.yml,
+  kb2=\E[E, kcub1=\E[D, kcud1=\E[B, kcuf1=\E[C, kcuu1=\E[A, kent=\E^M,
+  khome=\E[H, kend=\E[F,
+
+alacritty-status|mixin for capability to set status line (i.e. title),
+  tsl=\E]2;, fsl=^G,
+
+xterm-italic|mixin for proper italic support,
+  sitm=\E[3m, ritm=\E[23m, smso=\E[7m, rmso=\E[27m,
+
+# TODO(sdh): This is unfortunate, and I shouldn't need to do this.
+tmux-italic|mixin for proper italic support in tmux,
+  use=xterm-italic,
+  Ms@,
+
+#  sitm=\EPtmux;\E\E[3m\E\\, ritm=\EPtmux;\E\E[23m\E\\,
+
+# TODO(sdh): Is there any place for termcaps to set and reset the global
+# bg and fg colors for the whole terminal? e.g. \E]11;#rgb^G to set bg,
+# \E]10;#rgb^G for fg, \E]110^G to reset fg and \E]111^G to reset bg...?
+
+#  setb24=\E[48;2;%p1%d;%p2%d;%p3%dm,
+#  setf24=\E[38;2;%p1%d;%p2%d;%p3%dm,
+
+alacritty|alacritty terminal emulator,
+  use=true-color,
+  use=alacritty-keyboard,
+  use=alacritty-status,
+  use=xterm-italic,
+  use=xterm-256color,
+
+#  use=xterm+256setaf,
+
+# use=xterm-256color,  # replaces +256setaf
+
+alacritty-256color|alacritty terminal emulator,
+  use=alacritty,
+
+# TODO(sdh): previously this was just true-color and screen-256color...
+# I'm adding the alacitty and italic mixins since I think I want them.
+# I'm also resetting smkx and rmkx so that applications running inside
+# tmux don't tell tmux to enter cursor mode and then cause problems
+# when they don't interpret the different keycodes correctly (I'm looking
+# at you, emacs).
+tmux-alacritty|tmux running on top of alacritty,
+  use=alacritty,
+  use=screen,
+  smkx=,rmkx=,
+
+# TODO(sdh): we're having some difficulties w/ iTerm2 connecting to tmux
+# over SSH and running emacs.  For some reason, emacs sets smkx (cursor
+# mode) which then tells tmux to send ^[OA instead of ^[[A for up arrow,
+# but then emacs doesn't recognize these keys as cursor keys.  I tried
+# adding these caps to either inside or outside, but neither seems to
+# convince emacs that these are arrows, nor does setting them to \E[A
+# convince tmux not to send them differently in the different mode.
+
+# kUP5=\EOA,kDN5=\EOB,kRIT5=\EOC,kLFT5=\EOD,
+
+
+# iTerm2 TERMINFO that adds the escape sequences for italic
+
+xterm-256color-italic|xterm with 256 colors and italic,
+  use=xterm-italic,
+  use=xterm-256color,
+
+tmux-256color|tmux running on top of rxvt-unicode-256color,
+  use=tmux-italic,
+  use=screen-256color,
