@@ -12,6 +12,13 @@
          (setq index (+ 1 (match-end 0)))
          (add-to-list 'js2-additional-externs (match-string 2 buf))))))
 
+(defun sdh-js2-mode-init ()
+  "Applies custom initialization"
+  (interactive)
+  (local-set-key (kbd "<tab>") 'js2-indent-bounce))
+       
+(add-hook 'js2-mode-hook
+
 (setq-default js2-basic-offset 2)
 (setq-default js2-bounce-indent-p 't)
 (setq-default js2-global-externs '("goog" "sdh" "window" "JSON"))

@@ -138,5 +138,10 @@
   "Drag out a rectangular region with the mouse." t)
 
 
+;; Mac rebinds home/end to start/end of file, which is maddening.
+(global-set-key (kbd "<end>") 'end-of-line)
+(global-set-key (kbd "<home>") 'beginning-of-line)
+
+
 
 (provide 'sdh-keys)
