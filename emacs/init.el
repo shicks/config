@@ -15,7 +15,11 @@
 (require 'sdh-tmux)
 (require 'sdh-colors)
 (require 'sdh-color-theme)
-(require 'sdh-repo)
+
+;; non-work computers don't need this as badly, and it's broken.  skip.
+(if (string= system-name "DESKTOP-ONQGME9")
+    (progn)
+  (require 'sdh-repo))
 
 (sdh-color-theme)
 

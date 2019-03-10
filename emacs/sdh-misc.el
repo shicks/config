@@ -752,4 +752,10 @@ See also: `xah-copy-to-register-1', `insert-register'."
     ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
     ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
 
+(defun dirname-no-slash (path)
+  "Given a PATH return the directory name (path up to but not including final slash."
+  (let ((parent (file-name-directory path)))
+    (if parent (directory-file-name parent)
+      "")))
+
 (provide 'sdh-misc)
