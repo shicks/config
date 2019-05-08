@@ -25,7 +25,7 @@
  '(p4-global-key-prefix "p")
  '(package-selected-packages
    (quote
-    (rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
+    (exec-path-from-shell markdown-mode haskell-mode rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(savehist-additional-variables
@@ -55,7 +55,6 @@
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :slant italic))))
  '(font-lock-comment-face ((t (:foreground "chocolate1" :slant italic))))
  '(font-lock-doc-face ((t (:inherit font-lock-string-face :slant italic))))
- '(minibuffer-prompt ((t (:foreground "color-45"))))
  '(print-tag-face ((t (:foreground "brightyellow"))))
  '(region ((((class color)) (:background "skyblue2" :foreground "Black"))))
  '(smerge-base ((t (:background "goldenrod4"))))

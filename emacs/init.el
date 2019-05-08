@@ -14,10 +14,10 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
-(require 'sdh-color-theme)
-(require 'sdh-repo)
+(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
 
-(sdh-color-theme)
+;; Helpful for getting mac path correct - must install the eponymous package.
+(if (fboundp 'exec-path-from-shell-initialize) (exec-path-from-shell-initialize))
 
 ;; Language-specific settings
 (require 'sdh-perl)
@@ -32,6 +32,7 @@
       (add-to-list 'term-file-aliases '("tmux" . "rxvt"))
       (add-to-list 'term-file-aliases '("alacritty" . "rxvt"))))
 (add-to-list 'default-frame-alist '(background-color . "black"))
+(add-to-list 'default-frame-alist '(foreground-color . "white"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
 ;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
 (add-to-list 'default-frame-alist '(height . 60))
@@ -44,14 +45,14 @@
 ;;;;;;;(set-face-attribute 'default nil :family "Monofur Nerd Font")
 ;(set-face-attribute 'font-lock-comment-face nil :family "Monofuritalic Nerd Font")
 
-
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
     (require 'sdh-ledger))
 
 (if (string= system-type "darwin")
     ; TODO(sdh): figure out how to do this more consistently.
-    (progn (require 'sdh-mac)))
+    (progn (require 'sdh-mac))
+  (progn (require 'sdh-linux)))
 
 ;;This was useful for ubuntu laptop...
 ;(set-default-font "DejaVu Sans Mono-8")
@@ -71,11 +72,5 @@
 ;; Custom configuration settings go in their own file.
 (setq custom-file "~/config/emacs/custom.el")
 (load custom-file)
-
-;; kmacro-decision beefs up (C-x q), allowing custom conditional branches
-;;;;;;  - consider fixing this up a bit more, or else binding it to C-x M-q
-;;;;;;    so that we don't lose the normal kbd-macro-query
-;(add-to-list 'load-path "~/config/emacs/kmacro-decision")
-;(require 'kmacro-decision)
 
 (electric-indent-mode 0)

@@ -8,6 +8,8 @@
 ;; all the .Xdefaults and ITerm2 config files.
 
 ;; Basic key Bindings
+(defun sdh-nop () (interactive))
+(global-set-key (kbd "ESC ESC ESC") 'sdh-nop) 
 (global-set-key (kbd "C-c c") 'compile)
 (global-set-key (kbd "C-c r") 'recompile)
 (global-set-key (kbd "C-c k") 'kill-compilation)
@@ -203,6 +205,7 @@
 
 
 ;; rect-mark bindings
+;; copied (and modified) from https://www.emacswiki.org/emacs/RectangleMark
 (define-key ctl-x-map (kbd "r C-@") 'rm-set-mark) ; note: C-@ is C-SPC in terminal
 (define-key ctl-x-map (kbd "r C-SPC") 'rm-set-mark)
 (define-key ctl-x-map (kbd "r C-x") 'rm-exchange-point-and-mark)
@@ -220,6 +223,19 @@
   "Copy a rectangular region to the kill ring." t)
 (autoload 'rm-mouse-drag-region "rect-mark"
   "Drag out a rectangular region with the mouse." t)
+
+
+;; Mark/region helpers - C-x SPC
+;; Something previously bound [C-x SPC] to rectangle-mark-mode.
+;; I thought it was me, but I can't find it, so just unset it here.
+
+(global-unset-key (kbd "C-x SPC"))
+(global-set-key (kbd "C-x SPC r") 'rectangle-mark-mode)
+(defun sdh-activate-mark () (interactive) (activate-mark))
+(global-set-key (kbd "C-x SPC a") 'sdh-activate-mark)
+(global-set-key (kbd "C-x C-a") 'sdh-activate-mark)
+
+
 
 
 ;; TOGGLES - C-c t
