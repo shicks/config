@@ -351,7 +351,7 @@
   (interactive "p")
   (other-window (- win)))
 
-(defvar sdh-dynamic-frame-width 100
+(defvar sdh-dynamic-frame-width nil ; 100
   "*The target width for frames.")
 
 ;; For use in slightly-cramped screens

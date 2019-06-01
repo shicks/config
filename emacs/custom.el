@@ -25,7 +25,7 @@
  '(p4-global-key-prefix "p")
  '(package-selected-packages
    (quote
-    (exec-path-from-shell markdown-mode haskell-mode rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
+    (yasnippet lsp-ui lsp-typescript company-lsp exec-path-from-shell markdown-mode haskell-mode rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(savehist-additional-variables
