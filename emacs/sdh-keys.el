@@ -119,6 +119,13 @@
 (global-set-key (kbd "C-x RET RET") 'sdh-xterm-mouse-mode-t)
 (sdh-xterm-mouse-mode-t)
 
+;; C-j is now emitted by the Enter key since C-m was doing weird things
+;; in the terminal.  I never want electric indent, so change this from
+;; electric-newline-and-maybe-indent to just plain old newline.
+;; NOTE: the underlying issue was `stty -icrnl`: by enabling icrnl
+;;       (with `stty icrnl`) the ^M issue is no longer a problem.
+;; (global-set-key (kbd "C-j") 'newline)
+
 ;; Mouse wheel scrolling (this used to just work automatically...)
 (global-set-key [mouse-4] 'sdh-mwheel-scroll)
 (global-set-key [mouse-5] 'sdh-mwheel-scroll)

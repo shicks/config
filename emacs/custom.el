@@ -9,6 +9,9 @@
  '(flymake-allowed-file-name-masks
    (quote
     (("^/[uhg].+\\(/BUILD\\|\\.\\(java\\|js\\|soy\\|proto\\|html\\)\\)$" sdh-flymake-my-init flymake-simple-cleanup flymake-get-real-file-name))))
+ '(flymake-proc-allowed-file-name-masks
+   (quote
+    (("^/[uhg].+\\(/BUILD\\|\\.\\(java\\|js\\|soy\\|proto\\|html\\)\\)$" sdh-flymake-my-init flymake-simple-cleanup flymake-get-real-file-name))))
  '(google-jdb-port 5005)
  '(google-trailing-newline-modes
    (quote
@@ -25,7 +28,7 @@
  '(p4-global-key-prefix "p")
  '(package-selected-packages
    (quote
-    (rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
+    (dash company-lsp lsp-typescript lsp-ui lsp-mode color-theme rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(savehist-additional-variables
@@ -50,8 +53,8 @@
  '(ediff-even-diff-B ((((class color)) (:background "skyblue" :foreground "black"))))
  '(ediff-odd-diff-A ((((class color)) (:background "plum" :foreground "black"))))
  '(ediff-odd-diff-B ((((class color)) (:background "plum" :foreground "black"))))
- '(flymake-errline ((((class color)) (:background "color-52"))))
- '(flymake-warnline ((((class color)) (:background "color-17"))))
+ '(flymake-errline ((((class color)) (:background "color-52"))) t)
+ '(flymake-warnline ((((class color)) (:background "color-17"))) t)
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :slant italic))))
  '(font-lock-comment-face ((t (:foreground "chocolate1" :slant italic))))
  '(font-lock-doc-face ((t (:inherit font-lock-string-face :slant italic))))

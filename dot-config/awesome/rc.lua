@@ -369,6 +369,11 @@ globalkeys = awful.util.table.join(
     ,awful.key({ }, "XF86AudioRaiseVolume", function() volumearc.up() end)
     ,awful.key({ }, "XF86AudioLowerVolume", function() volumearc.down() end)
     ,awful.key({ }, "XF86AudioMute", function () volumearc.toggle() end)
+    ,awful.key({ "Shift" }, "XF86AudioMute",
+       function() 
+         volumearc.toggle()
+         gears.timer.start_new(30, function() volumearc.toggle() end)
+       end)
     -- See if we can make Super+Shift+Left/right work
     ,awful.key({ modkey, "Shift"  }, "Left",
       function (c)

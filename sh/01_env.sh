@@ -2,6 +2,7 @@ export PATH
 
 prepend_to_list -e PATH ~/.cargo/bin
 prepend_to_list -e PATH ~/local/bin
+prepend_to_list -e PATH ./node_modules/.bin
 
 export SHELL="$(ps -ocomm= -q $$)"
 export CLICOLOR=1

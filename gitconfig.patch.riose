@@ -2,4 +2,4 @@
 
 # s/stephenhicks\@gmail.com/sdh\@google.com/;
 #print "  ch = log --decorate --graph --color ^p4/importstate \n" if /^  changes/;
-print '  ch = log --decorate --graph --color --author=sdh@google.com --author=git5@invalid\n  choa = ch --oneline --all\n' if /^  changes/;
+print '  ch = log --decorate --graph --color --author=sdh@google.com --author=git5@invalid\n  xl = ch --oneline --all\n' if /^  changes/;

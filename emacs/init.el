@@ -16,7 +16,6 @@
 (require 'sdh-colors)
 (require 'sdh-color-theme)
 (require 'sdh-repo)
-
 (sdh-color-theme)
 
 ;; Language-specific settings
