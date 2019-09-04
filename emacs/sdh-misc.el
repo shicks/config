@@ -776,4 +776,10 @@ See also: `xah-copy-to-register-1', `insert-register'."
 (defun sdh-repeat-macro (macro)
   (condition-case nil (funcall macro 0) (error nil)))
 
+(defun dirname-no-slash (path)
+  "Given a PATH return the directory name (path up to but not including final slash."
+  (let ((parent (file-name-directory path)))
+    (if parent (directory-file-name parent)
+      "")))
+
 (provide 'sdh-misc)

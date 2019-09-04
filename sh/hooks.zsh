@@ -16,3 +16,4 @@ add-zsh-hook precmd  set_title_precmd
 add-zsh-hook preexec prompt_repoline_preexec
 add-zsh-hook preexec set_title_preexec
 add-zsh-hook preexec start_timer
+add-zsh-hook preexec record_zsh_pane

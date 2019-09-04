@@ -562,7 +562,12 @@ key_bindings:
 ## [3] Convert C-Enter to C-Shift-J
 ##   - I do not remember why we did this...
 
-  - { key: Return,   mods: Control, chars: "\x1b[36~\x0d"                }
+  - { key: Return,   mods: Control, chars: "\x1b[36~\x0a" } 
+  - { key: Return,   mods: Alt    , chars: "\x1b\x0a" } 
+## Also make sure return sends ^J ???
+## NOTE: the underlying issue is stty -icrnl
+## See https://askubuntu.com/questions/441744/pressing-enter-produces-m-instead-of-a-newline
+##  - { key: Return,                  chars: "\x0a"         }
 
 ## [4] Convert C-Shift-Letter to << @36 control-code >>
 

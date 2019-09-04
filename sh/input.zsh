@@ -1,5 +1,8 @@
 # Input configuration
 
+# Ensure CR -> LF
+stty icrnl
+
 # TODO(sdh): subword-forward and subword-backward???
 
 # Note: previously we bound a bunch of different sequences for C-left and

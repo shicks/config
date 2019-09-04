@@ -14,7 +14,15 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
-(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
+
+;(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
+;(require 'sdh-color-theme)
+
+; non-work computers don't need this as badly, and it's broken.  skip.
+(cond
+ ((string= system-name "DESKTOP-ONQGME9")) ; NOTE: this is the WSL hostname)
+ ((string= system-type "darwin")) ; do nothing on mac
+ (t (require 'sdh-repo)))
 
 ;; Helpful for getting mac path correct - must install the eponymous package.
 (if (fboundp 'exec-path-from-shell-initialize) (exec-path-from-shell-initialize))

@@ -1,0 +1,5 @@
+# Record the PPID for the current tmux pane
+
+if [ -n "$TMUX_PANE" ]; then
+  echo $$ >| "/tmp/tmux-ppid-$TMUX_PANE"
+fi
