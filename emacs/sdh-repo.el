@@ -35,9 +35,11 @@
           (face-remap-add-relative 'mode-line
                                    :background "grey75" :foreground "black"))
          (fg
-          (face-remap-add-relative 'mode-line-inactive :background fg :foreground bg)
-          (face-remap-add-relative 'mode-line :background bg :foreground "black")))
-)))
+          ;; NOTE: This does not appear to work as intended - we end up with invisible
+          ;; parts of the modeline.
+          (face-remap-add-relative 'mode-line :background fg :foreground bg)
+          (face-remap-add-relative 'mode-line-inactive :background bg :foreground "grey50")))))) ;"black"))))))
+
 ; TODO - other modeline faces that might want to change:
 ;   - vc-editied-state => currently hardcodes the background to grey75 - customize to none?
 ;     * also vc-up-to-date-state (w/ fg=black, which is also ugly)
