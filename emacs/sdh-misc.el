@@ -351,7 +351,7 @@
   (interactive "p")
   (other-window (- win)))
 
-(defvar sdh-dynamic-frame-width 100
+(defvar sdh-dynamic-frame-width nil ; 100
   "*The target width for frames.")
 
 ;; For use in slightly-cramped screens
@@ -507,12 +507,23 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (interactive)
   (and (bound-and-true-p flymake-mode) (not (get-buffer-window "*compilation*"))))
 
+(defun sdh-is-flycheck ()
+  (interactive)
+  (and (bound-and-true-p flycheck-mode)))
+
 (defun sdh-next-error-new-file () (interactive) (next-error-new-file))
 
 (defun sdh-next-error () (interactive)
-  (if (sdh-is-flymake) (flymake-goto-next-error) (next-error)))
+  (cond
+   ((sdh-is-flymake) (flymake-goto-next-error))
+   ((sdh-is-flycheck) (flycheck-next-error))
+   (t (next-error))))
+
 (defun sdh-previous-error () (interactive)
-  (if (sdh-is-flymake) (flymake-goto-prev-error) (previous-error)))
+  (cond
+   ((sdh-is-flymake) (flymake-goto-prev-error))
+   ((sdh-is-flycheck) (flycheck-previous-error))
+   (t (previous-error))))
 
 ;; Also turn on hl-line-mode and add a hook to make sure it runs
 
@@ -761,6 +772,19 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (cond
     ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
     ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
+
+(defun sdh-push-point-to-column (col)
+  (interactive "nColumn: ")
+  (let ((count (- col (- (point) (line-beginning-position)))))
+    (if (> count 0)
+        (insert (make-string count ? )))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Repeat the given named macro until it beeps
+;; In order to pass a macro, it should probably be called
+;; with M-: (sdh-repeat-macro foo), hence it is not interactive
+(defun sdh-repeat-macro (macro)
+  (condition-case nil (funcall macro 0) (error nil)))
 
 (defun dirname-no-slash (path)
   "Given a PATH return the directory name (path up to but not including final slash."

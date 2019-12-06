@@ -28,7 +28,7 @@
  '(p4-global-key-prefix "p")
  '(package-selected-packages
    (quote
-    (dash company-lsp lsp-typescript lsp-ui lsp-mode color-theme rust-mode window-jump phi-search-mc doremi-cmd multiple-cursors phi-search visual-regexp hl-line+ flycheck rainbow-mode ledger-mode protobuf-mode tide typescript-mode js2-mode)))
+    (color-theme company-lsp dash doremi-cmd exec-path-from-shell flycheck haskell-mode hl-line+ js2-mode ledger-mode lsp-mode lsp-typescript lsp-ui markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp window-jump yasnippet)))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(savehist-additional-variables
@@ -58,7 +58,6 @@
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :slant italic))))
  '(font-lock-comment-face ((t (:foreground "chocolate1" :slant italic))))
  '(font-lock-doc-face ((t (:inherit font-lock-string-face :slant italic))))
- '(minibuffer-prompt ((t (:foreground "color-45"))))
  '(print-tag-face ((t (:foreground "brightyellow"))))
  '(region ((((class color)) (:background "skyblue2" :foreground "Black"))))
  '(smerge-base ((t (:background "goldenrod4"))))
