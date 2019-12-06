@@ -1,4 +1,4 @@
-(eval-when-compile    (require 'color-theme))
+;(eval-when-compile    (require 'color-theme-modern))
 
 ; For some reason "unspecified-fg" and "unspecified-bg" don't work on my
 ; macbook, and both show up as black, making things very difficult to use.
@@ -7,12 +7,14 @@
 (defvar sdh-unspecified-bg "black")
 (defvar sdh-unspecified-fg "white")
 
-(defun sdh-color-theme ()
-  "Color theme by Steve Hicks, created 2018-01-25."
-  (interactive)
-  (color-theme-install
-   '(sdh-color-theme
-     ((background-color . sdh-unspecified-bg)
+(deftheme sdh-color-theme
+  "Color theme by Steve Hicks, created 2018-01-25.")
+
+(custom-theme-set-faces
+ 'sdh-color-theme
+
+ '(default ((t (:background "black" :foreground "white"))))
+ 
       (background-mode . dark)
       (foreground-color . sdh-unspecified-fg))
      ((apropos-match-face . match)
