@@ -362,6 +362,16 @@ globalkeys = awful.util.table.join(
                  })
                end)
     ,awful.key({ modkey }, "Insert", function () awful.spawn("xclip -o | ~/local/bin/xclipd copy") end)
+
+    -- sdh - resize vertically (only in awesomewm v4)
+    -- ,awful.key({ modkey, "Shift" }, "Next",  function (c) c:relative_move(20, 20, -40, -40) end)
+    -- ,awful.key({ modkey, "Shift" }, "Prior", function (c) c:relative_move(-20, -20, 40, 40) end)
+    -- sdh - resize vertically (only in 3.x)
+    ,awful.key({ modkey, "Shift", "Control" }, "Right", function () awful.tag.incmwfact(-0.01) end)
+    ,awful.key({ modkey, "Shift", "Control" }, "Left",  function () awful.tag.incmwfact( 0.01) end)
+    ,awful.key({ modkey, "Shift", "Control" }, "Down",  function () awful.client.incwfact( 0.01) end)
+    ,awful.key({ modkey, "Shift", "Control" }, "Up",    function () awful.client.incwfact(-0.01) end)
+
     -- sdh - laptop only?
     -- ,awful.key({ modkey, "Control" }, "F12",
     --     function ()

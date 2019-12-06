@@ -514,6 +514,16 @@ See also: `xah-copy-to-register-1', `insert-register'."
 (defun sdh-previous-error () (interactive)
   (if (sdh-is-flymake) (flymake-goto-prev-error) (previous-error)))
 
+;; Also turn on hl-line-mode and add a hook to make sure it runs
+
+(defun sdh-compilation-mode-hook () (interactive)
+  (hl-line-mode 1))
+(add-hook 'compilation-mode-hook 'sdh-compilation-mode-hook)
+
+(defun sdh-next-error-hook () (interactive)
+  (with-current-buffer next-error-last-buffer (when hl-line-mode (hl-line-highlight))))
+(add-hook 'next-error-hook 'sdh-next-error-hook)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Conflict resolution
 
