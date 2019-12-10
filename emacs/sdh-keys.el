@@ -240,7 +240,7 @@
 (global-set-key (kbd "C-x SPC r") 'rectangle-mark-mode)
 (defun sdh-activate-mark () (interactive) (activate-mark))
 (global-set-key (kbd "C-x SPC a") 'sdh-activate-mark)
-(global-set-key (kbd "C-x C-a") 'sdh-activate-mark)
+;(global-set-key (kbd "C-x C-a") 'sdh-activate-mark)
 
 
 
