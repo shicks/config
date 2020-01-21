@@ -109,6 +109,7 @@ function safe_link {
 function install_files {
   echo "Installing config files from $conf into $home..."
 
+  safe_link XCompose
   safe_link Xdefaults
   safe_link tmux.conf
   safe_link alacritty.yml

@@ -72,8 +72,8 @@ font:
   # as modifying the linespacing, and offset.x as modifying the letter spacing.
   offset:
     # Make the font "condensed".
-    x: -1.0
-    y: 0.0
+    x: -1
+    y: 0
 
   # Glyph offset determines the locations of the glyphs within their cells with
   # the default being at the bottom. Increase the x offset to move the glyph to
@@ -83,8 +83,8 @@ font:
     # This has the unfortunate side effect that the > doesn't blend quite
     # as well into the previous space, but it's slightly nicer than having
     # a half-pixel line between them.
-    x: -1.0
-    y: 0.0
+    x: -1
+    y: 0
 
   # OS X only: use thin stroke font rendering. Thin strokes are suitable
   # for retina displays, but for non-retina you probably want this set to
@@ -94,7 +94,7 @@ font:
   #rgba: none
 
 # Should display the render timer
-render_timer: false
+#render_timer: false
 
 # Use custom cursor colors. If true, display the cursor in the cursor.foreground
 # and cursor.background colors, otherwise invert the colors of the cursor.

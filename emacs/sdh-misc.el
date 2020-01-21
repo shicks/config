@@ -247,7 +247,7 @@
            ;; TODO(sdh): consider checking the first N>1 files
            (sdh-filter-individual-file (car file-name-history)))
       (progn
-        (message "Filtering file form history: %s" (car file-name-history))
+        (message "Filtering file from history: %s" (car file-name-history))
         (set-variable 'file-name-history (cdr file-name-history)))))
 
 (defun sdh-filter-individual-file (file)
@@ -279,6 +279,7 @@
   (let ((face (or (get-char-property (point) 'read-face-name)
                   (get-char-property (point) 'face))))
     (if face (message "Face: %s" face) (message "No face at %d" pos))))
+(global-set-key (kbd "C-h C-f") 'what-face)
 
 
 ;;;;;;;;;;;;;;;;
@@ -791,5 +792,68 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (let ((parent (file-name-directory path)))
     (if parent (directory-file-name parent)
       "")))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; JS sexp navigation
+;; The main thing we want to do is navigate function arguments.
+;; Simple balanced paren handling should work fine here.
+
+(defun sdh-forward-js-sexp ()
+  "Jump forward one balanced expression"
+  (interactive)
+  (let (stack result top in-string close next)
+    (save-excursion
+      (if (looking-at "[]}),;]") (forward-char))
+      (while (or stack (not (looking-at "[]}),;]")))
+        (setq top (and stack (car stack)))
+        (setq in-string (and top (or (= top ?`) (= top ?') (= top ?\"))))
+        (setq next (char-after))
+        (setq close (cdr (assoc next '((?\( . ?\)) (?\[ . ?\]) (?{ . ?})
+                                       (?` . ?`) (?' . ?') (?\" . ?\")))))
+        (cond ((and in-string (looking-at "\\\\"))
+               ;;(message "string escape")
+               (forward-char)
+               (cond ((looking-at "x") (forward-char 2))
+                     ((looking-at "u") (forward-char 4))
+                     (t (forward-char))))
+              ((and top (= top ?`) (looking-at "\\${"))
+               ;;(message "template")
+               (forward-char 2)
+               (setq stack (cons ?} stack)))
+              ((looking-at "//")
+               ;;(message "eol comment")
+               (end-of-line)
+               (forward-char))
+              ((looking-at "/\\*")
+               ;;(message "block comment")
+               (re-search-forward "\\*/"))
+              ((and top (= top next))
+               ;;(message (format "pop %c" next))
+               (setq stack (cdr stack))
+               ;; don't advance if closing a top-level block,
+               ;; unless it's followed by semicolon
+               (if (or stack (/= next ?})) (forward-char)))
+              (in-string
+               ;;(message "string advance")
+               (forward-char))
+              (close
+               ;;(message (format "push %c" close))
+               (setq stack (cons close stack))
+               (forward-char))
+              (t (forward-char))))
+      (if (< (point) (point-max)) (setq result (point))))
+    (cond
+     (result
+       (goto-char result)
+       (if (looking-at "};") (forward-char))))
+        ;(progn
+        ;  (goto-char result)
+        ;  (while (looking-at ";") (forward-char)))
+))
+
+;;; NOTE: If we want the reverse direction, we'd really need to build up a full
+;;; map of start to end positions of all elements in the stack, starting at the
+;;; front of the file.  Once we hit point, then jump back to the first
+;;; non-whitespace char after the opening.
 
 (provide 'sdh-misc)
