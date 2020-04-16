@@ -384,6 +384,10 @@ globalkeys = awful.util.table.join(
          volumearc.toggle()
          gears.timer.start_new(30, function() volumearc.toggle() end)
        end)
+    ,awful.key({ }, "XF86AudioPlay",
+       function() awful.spawn(os.getenv("HOME") .. "/local/bin/connect-headset connect") end)
+    ,awful.key({ "Shift" }, "XF86AudioPlay",
+       function() awful.spawn(os.getenv("HOME") .. "/local/bin/connect-headset disconnect") end)
     -- See if we can make Super+Shift+Left/right work
     ,awful.key({ modkey, "Shift"  }, "Left",
       function (c)
@@ -696,3 +700,14 @@ awful.mouse.snap.edge_enabled = false
 
 -- SDH: Add goobuntu-indicator (the little "G" icon)
 awful.util.spawn_with_shell("/usr/share/goobuntu-indicator/goobuntu_indicator.py")
+
+-- SDH: chrome notifications: http://g/awesome-users/N7o8tbqTv94
+naughty.config.defaults.screen = 1
+naughty.config.defaults.timeout = 0
+naughty.config.defaults.font = "sans 10"
+naughty.config.defaults.width = 256
+naughty.config.defaults.icon_size = 32
+naughty.config.presets.low.font = "sans 8"
+naughty.config.presets.critical.font = "sans 12"
+naughty.config.presets.critical.bg = "#dca3a3"
+naughty.config.presets.critical.fg = "#000000"

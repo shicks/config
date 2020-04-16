@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -ex
+
+# Make a work tree for a bare repository.
+# Usage: cd `git inflate`
+
+git=$PWD
+dir=$(mktemp -d)
+
+git config --unset core.bare || true
+cd "$dir"
+ln -s "$git" .git
+
+git reset --hard >&2
+
+echo "$dir"
