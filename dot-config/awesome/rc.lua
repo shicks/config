@@ -13,6 +13,8 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 
+local batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
+
 -- Load Debian menu entries
 require("debian.menu")
 
@@ -131,8 +133,9 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock()
 
--- sdh: Volume widget
+-- sdh: Volume (and battery) widget
 local volumearc = require("volume")
+--local batteryarc = require("battery")
 --local volume = volume_widget:new({})
 
 -- Create a wibox for each screen and add it
@@ -234,6 +237,10 @@ awful.screen.connect_for_each_screen(function(s)
             mykeyboardlayout,
             wibox.widget.systray(),
 	    volumearc, -- sdh
+            -- sdh (TODO - how to disable on non-laptop?)
+	    batteryarc_widget({
+              warning_msg_title = "Houston, we have a problem",
+            }),
 	    --wibox.widget.textbox("hello sailor"),
             mytextclock,
             s.mylayoutbox,

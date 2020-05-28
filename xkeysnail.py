@@ -88,8 +88,8 @@ define_keymap(re.compile(r"Google-chrome"), {
     # Search
     #K("C-s"): [K("C-f"), K("enter")], # K("F3"),
     #K("C-r"): K("Shift-C-g"), # K("Shift-F3"),
-    K("C-s"): K("F3"),
-    K("C-r"): K("Shift-F3"),
+    #K("C-s"): K("F3"),
+    #K("C-r"): K("Shift-F3"),
     K("M-Shift-key_5"): K("C-h"),
     # Cancel
     K("C-g"): [K("esc"), set_mark(False)],

@@ -13,13 +13,17 @@ env:
   # You can verify this by checking for the presence of `smso` and `sitm` in
   # `infocmp xterm-256color`.
   TERM: alacritty
+  # This is necessary to prevent weird window resizing when moving windows
+  # between screens on my laptop, since there's very different DPIS.
+  # See https://github.com/alacritty/alacritty/issues/1501
+  WINIT_X11_SCALE_FACTOR: "1.0"
 
 # Window dimensions in character columns and lines
 # (changes require restart)
 window:
   dimensions:
-    columns: 203
-    lines: 70
+    columns: 140
+    lines: 60
 
   # Adds this many blank pixels of padding around the window
   # Units are physical pixels; this is not DPI aware.
@@ -29,7 +33,7 @@ window:
     y: 2
 
 # Display tabs using this many cells (changes require restart)
-tabspaces: 8
+# tabspaces: 8
 
 # When true, bold text is drawn using the bright variant of colors.
 draw_bold_text_with_bright_colors: true
@@ -55,16 +59,42 @@ draw_bold_text_with_bright_colors: true
 # * file:///usr/share/doc/fontconfig/fontconfig-user.html
 font:
   normal:
-    family: Monofur Nerd Font
-    style: Book
-
+    family: Victor Mono
+    style: Regular
   bold:
-    family: Monofurbold Nerd Font
+    family: Victor Mono
     style: Bold
-
   italic:
-    family: Monofuritalic Nerd Font
+    family: Victor Mono
     style: Italic
+  bold_italic:
+    family: Victor Mono
+    style: Bold Italic
+
+  # normal:
+  #   family: FiraCode Nerd Font
+  #   style: Regular
+  # bold:
+  #   family: FiraCode Nerd Font
+  #   style: Bold
+  # italic:
+  #   family: Fira Mono
+  #   style: Italic
+  # bold_italic:
+  #   family: Fira Mono
+  #   style: Bold Italic
+
+  #normal:
+  #  family: Monofur Nerd Font
+  #  style: Book
+
+  #bold:
+  #  family: Monofurbold Nerd Font
+  #  style: Bold
+
+  #italic:
+  #  family: Monofuritalic Nerd Font
+  #  style: Italic
 
   size: 11.0
 
@@ -73,7 +103,7 @@ font:
   offset:
     # Make the font "condensed".
     x: -1
-    y: 0
+    y: -1
 
   # Glyph offset determines the locations of the glyphs within their cells with
   # the default being at the bottom. Increase the x offset to move the glyph to
