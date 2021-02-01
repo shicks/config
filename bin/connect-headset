@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Toggles connection to bluetooth headset
+
+id=$(cat ~/.headset)
+if [ -z "$id" ]; then
+  echo "Could not find address in ~/.headset; please scan with bluetoothctl" >&2
+  exit 1
+fi
+
+cmd=$1
+case "$cmd" in
+  (""|"toggle")
+    if echo "paired-devices" | bluetoothctl | grep -q "$id"; then
+      cmd=disconnect
+    else
+      cmd=connect
+    fi
+    ;;
+esac
+
+echo "$cmd $id" | bluetoothctl

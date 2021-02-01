@@ -516,12 +516,14 @@ See also: `xah-copy-to-register-1', `insert-register'."
 
 (defun sdh-next-error () (interactive)
   (cond
+   ((get-buffer "*compilation*") (next-error))
    ((sdh-is-flymake) (flymake-goto-next-error))
    ((sdh-is-flycheck) (flycheck-next-error))
    (t (next-error))))
 
 (defun sdh-previous-error () (interactive)
   (cond
+   ((get-buffer "*compilation*") (previous-error))
    ((sdh-is-flymake) (flymake-goto-prev-error))
    ((sdh-is-flycheck) (flycheck-previous-error))
    (t (previous-error))))
