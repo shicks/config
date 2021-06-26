@@ -858,4 +858,50 @@ See also: `xah-copy-to-register-1', `insert-register'."
 ;;; front of the file.  Once we hit point, then jump back to the first
 ;;; non-whitespace char after the opening.
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Terminal clipboard integration!
+
+(defun sdh-osc-52-copy (str)
+  "Uses OSC 52 to send text to window system.
+Does nothing if already in the window system."
+  (if (not window-system)
+      (send-string-to-terminal (format "\033]52;c;%s\007" (base64-encode-string str)))))
+
+(defun sdh-after-kill-advice (&rest unused)
+  "Uses OSC 52 to copy the last-killed text."
+  (sdh-osc-52-copy (substring-no-properties (current-kill 0))))
+
+(advice-add 'kill-ring-save :after #'sdh-after-kill-advice)
+
+(defun sdh-around-mouse-yank-advice (orig-fun &rest args)
+  "Uses OSC 52 with special '?' argument to paste from window clipboard."
+  (if (window-system)
+      (apply orig-fun args)
+    (send-string-to-terminal "\033]52;c;?\007")))
+
+(advice-add 'mouse-yank-primary :around #'sdh-around-mouse-yank-advice)
+
+;; Bind this to M-]52;c; to catch the response from above.
+(defun sdh-paste-base64 ()
+  (interactive)
+  (let ((str "") ch (ok t))
+    (while ok
+      (setq ch (read-event nil nil 0.01))
+      (cond
+       ;; Timeout => cancel
+       ((not ch)
+        (setq ok nil)) ; str ""))
+       ;; Alarm => done
+       ((= ch 7)
+        (setq ok nil))
+       ;; Otherwise, copy the character
+       (t
+        (setq str (format "%s%c" str ch)))))
+    ;; We reached the end, now base64-decode it and insert
+    (insert (base64-decode-string str))))
+
+(global-set-key (kbd "M-] 5 2 ; c ;") 'sdh-paste-base64)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (provide 'sdh-misc)

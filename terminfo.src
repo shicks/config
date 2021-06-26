@@ -46,8 +46,8 @@ xterm-italic|mixin for proper italic support,
 # TODO(sdh): This is unfortunate, and I shouldn't need to do this.
 tmux-italic|mixin for proper italic support in tmux,
   use=xterm-italic,
-  Ms@,
 
+#  Ms@,
 #  sitm=\EPtmux;\E\E[3m\E\\, ritm=\EPtmux;\E\E[23m\E\\,
 
 # TODO(sdh): Is there any place for termcaps to set and reset the global
@@ -57,12 +57,28 @@ tmux-italic|mixin for proper italic support in tmux,
 #  setb24=\E[48;2;%p1%d;%p2%d;%p3%dm,
 #  setf24=\E[38;2;%p1%d;%p2%d;%p3%dm,
 
+# Enable OSC 52.  Ms specifies the clipboard command, e.g.
+# Example: ESC ] 52 ; c ; $(echo hello | base64-encode) BEL
+#   p1 = the storage unit (c=clipboard, s=selection, also cut buffer?)
+#   p2 = base64-encoded content
+xterm-clipboard|mixin for clipboard capability,
+  Ms=\E]52;%p1%s;%p2%s\007,
+
+# Enable OSC 12.  Cs is set and Cr is reset for cursor color.
+# Example: ESC ] 12 ; rgb:00/ff/00 BEL  (turns cursor green)
+#          ESC ] 112 BEL  (resets cursor)
+xterm-cursor-color|mixin for cursor color capability,
+  Cs=\E]12;%p1%s\007,Cr=\E]112\007,
+
 alacritty|alacritty terminal emulator,
   use=true-color,
   use=alacritty-keyboard,
   use=alacritty-status,
   use=xterm-italic,
+  use=xterm-clipboard,
+  use=xterm-cursor-color,
   use=xterm-256color,
+# NOTE: xterm-256color MUST GO LAST since it's not a mixin!
 
 #  use=xterm+256setaf,
 
