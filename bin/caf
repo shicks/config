@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+
+# How to checkpoint a shell script?
+# Could parse it like a generator and add a yield at
+# any potential failure point.
+
+
+# CAF - "Command Automation Framework"
+# Generalized analogue to the git-interactive-rebase TODO.
+# Usage is as a shebang interpreter for TODO files.  Example:
+#
+# #!/usr/bin/env caf
+# version=1.2
+# tmp="$(mktemp -d)"
+# hook ABORT rm -rf "$tmp"
+#
+# # Install foo
+# pushd "$tmp"
+# curl -o "out-$version.zip" \
+#         "http://google.com/$version"
+# unzip "out-$version.zip"
+# cd "out-$version"
+# pause
+# ./configure --prefix="$tmp"
+# make install
+# popd
+#
+# # Use bar
+# ...
+
+# Things getting special handling:
+# foo=...  <- keep track of variable in env
+# hook SIG ...  <- add a hook
+# run-hook SIG  <- run a hook
+# cd, pushd, popd  <- keep track of own stack
+# pause  <- pause execution, wait for --continue
+# shell  <- run an interactive nested shell
+#           (how to distinguish success from fail?)
+# edit-hook SIG  <- open an interactive editor ???
+
+# Running a shell:
+#  - expect -c "spawn $SHELL" -c "send \". $tmpfile\n\"" -c interact
+# Initialize e.g. pause, abort, etc.
+
+
+# expect could also help, but we probably don't want to
+# integrate directly with it.
+
+# Self-modifying bash script?
+# c.f. generator/yield transformation...?
+# State: {env, cwd, dirstack, position}
+

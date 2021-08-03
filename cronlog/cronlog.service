@@ -1,0 +1,26 @@
+# NOTE: This is a configuration file for systemd to run 'cronlog'
+# automatically on startup.  It should be installed (as root)
+# into /etc/systemd/system/ with User= replaced with your own
+# ldap.  Then reload the daemon and enable and start the service:
+#  $ sudo systemctl daemon-reload
+#  $ sudo systemctl enable cronlog
+#  $ sudo service cronlog start
+
+[Unit]
+Description=Cronlog Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=USER
+ExecStartPre=
+ExecStart=/usr/local/bin/cronlog --daemon
+ExecStartPost=
+ExecStop=
+ExecReload=
+
+[Install]
+WantedBy=multi-user.target
