@@ -5,9 +5,13 @@
 # special with some extra buttons eventually (e.g. Thumb1=8, Thumb2=9),
 # but for now we'll keep it simple.
 
+# The final number in the Up/Down lines is speed.  4 is a little too
+# fast, so we go with 3, which is a little slower than we'd like.
+# Shift is also useful for slowing it down even more.
+
 "^google-chrome$"
-None, Up, Button4, 4
-None, Down, Button5, 4
+None, Up, Button4, 3
+None, Down, Button5, 3
 Control_L, Up, Control_L|Button4
 Control_L, Down, Control_L|Button5
 Control_R, Up, Control_R|Button4

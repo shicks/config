@@ -27,7 +27,6 @@ define_modmap({
 #     # To use this example, you can't remap capslock with define_modmap.
 # )
 
-
 # # Keybindings for Firefox/Chrome
 # define_keymap(re.compile("Firefox|Google-chrome"), {
 #     # Ctrl+Alt+j/k to switch next/previous tab
@@ -121,6 +120,13 @@ define_keymap(re.compile(r"Google-chrome"), {
     #    K("C-v"): K("C-v"),
     #},
     # Suppress bad things I never want to do
-    K("Shift-C-w"): None,
-    K("C-w"): K("C-f4"), # more effective
+    K("Shift-C-w"): None, # close window !!
+    K("M-q"): None,       # close all windows !!
+    K("C-w"): K("C-f4"),  # more effective
+    K("M-Shift-x"): K("M-Shift-key_5"), # strike-through in docs
 }, "Emacs-like keys")
+
+# NOTE: this doesn't really work, since it depends too heavily on mouse position
+#define_keymap(re.compile(r".*"), {
+#    K("Shift-Insert"): K("BTN_MIDDLE"),
+#}, "keyboard paste")

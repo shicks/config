@@ -122,6 +122,10 @@ function install_files {
   safe_link dot-emacs .emacs
   safe_link dot-config .config
 
+  sudo rm /etc/udev/rules.d/10-uinput.rules
+  sudo rm /etc/udev/rules.d/85-usb.rules
+  sudo ln -s $PWD/udev/*.rules /etc/udev/rules.d/
+
   # Link everything in the bash directory
   cd sh
   mkdir -p $home/.sh.d

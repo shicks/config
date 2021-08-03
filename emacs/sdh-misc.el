@@ -13,7 +13,8 @@
    'package-archives
    '("melpa" . "http://melpa.org/packages/")
    t)
-  (package-initialize))
+  ;(package-initialize) ;; NOTE: unnecessary???
+  )
 
 ;;;;;;;;;;;;;;;;
 ;; Misc global config

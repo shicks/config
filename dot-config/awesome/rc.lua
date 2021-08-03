@@ -51,7 +51,8 @@ beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 terminal = os.getenv("HOME") .. "/local/bin/alacritty" -- "x-terminal-emulator"
 -- lock = "xflock4"
 -- lock = "gnome-screensaver-command -l"
-lock = "dm-tool lock"
+-- lock = "dm-tool lock"
+lock = "xsecurelock"
 chrome = "google-chrome-stable"
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
@@ -395,6 +396,13 @@ globalkeys = awful.util.table.join(
        function() awful.spawn(os.getenv("HOME") .. "/local/bin/connect-headset connect") end)
     ,awful.key({ "Shift" }, "XF86AudioPlay",
        function() awful.spawn(os.getenv("HOME") .. "/local/bin/connect-headset disconnect") end)
+
+    -- Brightness
+    ,awful.key({ }, "XF86MonBrightnessDown", function ()
+        awful.util.spawn("bright -") end)
+    ,awful.key({ }, "XF86MonBrightnessUp", function ()
+        awful.util.spawn("bright +") end)
+
     -- See if we can make Super+Shift+Left/right work
     ,awful.key({ modkey, "Shift"  }, "Left",
       function (c)
@@ -718,3 +726,11 @@ naughty.config.presets.low.font = "sans 8"
 naughty.config.presets.critical.font = "sans 12"
 naughty.config.presets.critical.bg = "#dca3a3"
 naughty.config.presets.critical.fg = "#000000"
+
+-- SDH: do some things when we first start
+awesome.connect_signal(
+   "startup",
+   function(args)
+      awful.util.spawn("/home/sdh/local/bin/startup")
+   end
+)

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ "$(whoami)" = root ]; then
+  echo "$0" | sudo -u sdh at now
+  exit
+fi
+
+exec &>> ~/fix-mouse.log
+
+echo "-----"
+echo "Running fix-mouse $(date) as $(whoami) pid $$"
+export DISPLAY=:0
+
+"$(dirname "$0")/fix-mouse.pl"
+
+# Note: we need our own config for this, not root's
+echo "Restarting IMWheel.";
+/usr/bin/imwheel -kb '4 5'
