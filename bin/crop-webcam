@@ -47,6 +47,8 @@ fi
 # NOTE: to debug...
 #exec &> /tmp/crop-webcam.log
 
+echo ffmpeg -i /dev/video$n -f v4l2 -pix_fmt yuv420p -filter:v scale=720:568,crop=640:360:40:60 "${chroma[@]}" /dev/video5 > /tmp/ffmpeg.args
+
 exec ffmpeg -i /dev/video$n -f v4l2 -pix_fmt yuv420p -filter:v scale=720:568,crop=640:360:40:60 "${chroma[@]}" /dev/video5
 
 # TODO - exec??? but then we can't find it as easily
