@@ -128,10 +128,12 @@ if ($text) {
 }
 push @args, '-i', $in, qw/-f v4l2 -pix_fmt yuv420p/;
 if ($crop) {
-  push @args, '-filter:v', 'scale=720:568,crop=640:360:40:60';
+  #push @args, '-filter:v', 'scale=720:568,crop=640:360:40:60';
+  push @args, '-filter:v', 'scale=1440:1136,crop=1280:720:80:120';
   # "${chroma[@]}" /dev/video5
 } else {
-  push @args, '-filter:v', 'scale=640:360';
+  #push @args, '-filter:v', 'scale=640:360';
+  push @args, '-filter:v', 'scale=1280:720';
 }
 push @args, $out;
 
