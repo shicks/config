@@ -6,7 +6,7 @@
 font=16
 input=$1
 width=$(identify -format %w $input)
-caption=$2
+caption=$(echo "$2" | perl -MHTML::Entities -pe 'decode_entities($_);')
 output=$3
 type=caption
 textsize=$(convert -background white -size "$width" \
