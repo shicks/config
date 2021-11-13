@@ -14,8 +14,8 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
-(require 'sdh-color-theme)
-(sdh-color-theme)
+;(require 'sdh-color-theme)
+;(sdh-color-theme)
 
 ;(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
 ;(require 'sdh-color-theme)
