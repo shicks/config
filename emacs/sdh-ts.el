@@ -17,17 +17,12 @@
 (make-variable-buffer-local 'sdh-ts-root)
 (defun sdh-ts-find-root ()
   (unless sdh-ts-root
-    (let ((dir (sdh-dirname file-name-directory)))
+    (let ((dir (sdh-dirname buffer-file-name)))
       (while (not (string= dir "/"))
         (when (file-exists-p (concat dir "/tsconfig.json"))
-          (setq 
-                  
-        ; check...
-        (setq dir (sdh-dirname dir))))
-                                      
-)
-  
-      (file-name-directory (directory-file-name (file-name-directory load-file-name))))
+          (setq sdh-ts-root dir)
+          (setq dir "/"))
+        (setq dir (sdh-dirname dir))))))
 
 (setq exec-path (cons (concat (getenv "HOME") "/local/bin") exec-path))
 
@@ -44,8 +39,7 @@
                              (next-line)
                              (point))))
     (save-excursion
-      (shell-command-on-region start end
-                               (concat sdh-ts-root "/scripts/sort-imports")
+      (shell-command-on-region start end sdh-ts-sort-imports-file
                                nil t))))
 
 ;;; NOTE: UNCOMMENT AND RUN THIS LINE???
@@ -113,6 +107,7 @@ See URL `http://www.typescriptlang.org/'."
 
 (defun sdh-ts-init ()
   ; TODO - tide seems to be clobbering flycheck, and unneeded for company...
+  (sdh-ts-find-root)
   (tide-setup)
   (tide-mode)
   (company-mode t)

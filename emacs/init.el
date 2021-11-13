@@ -14,6 +14,7 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
+(require 'sdh-ts)
 ;(require 'sdh-color-theme)
 ;(sdh-color-theme)
 
