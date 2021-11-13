@@ -7,9 +7,11 @@ fi
 
 exec &>> ~/fix-keyboard.log
 
+export PATH=$(dirname $0):$PATH
+
 echo "-----"
 echo "Running fix-keyboard at $(date) as $(whoami) pid $$"
-export DISPLAY=:0
+#export DISPLAY=:0
 
 #set -o noclobber
 echo $$ > ~/fixkbd
@@ -22,10 +24,10 @@ fi
 ################################################################
 # Goal: caps lock is control
 
-DISPLAY=:0 /usr/bin/setxkbmap -option caps:ctrl_modifier,compose:menu
+xrun /usr/bin/setxkbmap -option caps:ctrl_modifier,compose:menu
 
 killall xkeysnail
-nohup /usr/local/bin/xkeysnail ~/config/xkeysnail.py &>> ~/xkeysnail.log &
+nohup xrun /usr/local/bin/xkeysnail ~/config/xkeysnail.py &>> ~/xkeysnail.log &
 # /usr/local/bin/xkeysnail /home/sdh/config/xkeysnail.py &
 
 rm ~/fixkbd

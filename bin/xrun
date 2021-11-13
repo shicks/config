@@ -6,13 +6,20 @@
 
 # This should be linked via /usr/local/bin/xrun for easy access.
 
+ENVFILE=/var/run/user/$UID/awesome.env
 if [ "$*" = '--save' ]; then
   case "$SHELL" in
     (bash|*/bash) ;;
     (*) export SHELL=$(which bash)
   esac
-  export -p >| /var/run/user/$UID/awesome.env
+  export -p >| "$ENVFILE"
   exit
 fi
 
-exec env -i bash -c '. /var/run/user/$UID/awesome.env; "$@"' -- "$@"
+if [ "$#" -gt 0 ]; then
+  exec env -i bash -c ". $ENVFILE"'; "$@"' -- "$@"
+else
+  # No args, just merge the environment (assume we're sourced)
+  . "$ENVFILE"
+fi
+

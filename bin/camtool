@@ -119,6 +119,7 @@ if ($text) {
   # Pick an image, caption it.
   my $img = `ls ~/bg/??*/*.jpg | shuf | head -1`;
   chomp $img;
+  print "Selected image $img\n";
   system 'convert', $img, qw/-font Arial -pointsize 64 -draw/,
     "gravity center fill black text 0,4 \'$text\' fill white text 4,0 \'$text\' ",
     '/tmp/cam.jpg';
