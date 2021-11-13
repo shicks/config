@@ -164,7 +164,7 @@
 (global-set-key (kbd "M-[ H") 'move-beginning-of-line)
 (global-set-key (kbd "M-[ F") 'move-end-of-line)
 
-(if (sdh-try-require 'window-jump)
+(if (or (sdh-try-require 'window-jump) (fboundp 'window-jump-up))
     (progn
       (global-set-key (kbd "C-M-<up>") 'window-jump-up)
       (global-set-key (kbd "C-M-<down>") 'window-jump-down)

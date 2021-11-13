@@ -20,16 +20,14 @@
  '(history-delete-duplicates t)
  '(history-length t)
  '(js-indent-level 2)
- '(js2-basic-offset 2)
  '(js2-include-node-externs t)
+ '(js2-mode-assume-strict t)
  '(js2-skip-preprocessor-directives t)
  '(js2-strict-trailing-comma-warning nil)
- '(js2-mode-assume-strict t)
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "p")
- '(menu-bar-mode nil)
  '(package-selected-packages
-   '(ada-mode scala-mode go-mode fsharp-mode elixir-mode julia-mode cobol-mode kotlin-mode lua-mode company-lsp dash doremi-cmd exec-path-from-shell flycheck haskell-mode hl-line+ js2-mode ledger-mode lsp-mode lsp-typescript lsp-ui markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp window-jump yasnippet))
+   '(company company-lsp doremi-cmd exec-path-from-shell flycheck go-mode haskell-mode hl-line+ js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp window-jump yasnippet))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(savehist-additional-variables
