@@ -1,0 +1,168 @@
+#!/usr/bin/perl
+
+# Usage: camtool OPTIONS
+# Options:
+#   --out REGEX     Regex for output device ["dummy video"]
+#   --in REGEX      Regex for input device ["game capture"]
+#   --nocrop        Don't crop the video
+#   --text TEXT     Display a message
+
+use strict;
+use warnings;
+
+my $in_regex = 'game capture';
+my $out_regex = 'dummy video';
+my $crop = 1;
+my $text = '';
+
+while (@ARGV) {
+  $_ = shift;
+  if ($_ eq '--out') {
+    $out_regex = shift;
+  } elsif ($_ eq '--in') {
+    $in_regex = shift;
+  } elsif ($_ eq '--nocrop') {
+    $crop = 0;
+  } elsif ($_ eq '--text') {
+    $text = shift;
+    $in_regex = 'ABCDEFGHIJKLMNOP'; # should never match
+  } else {
+    die "Bad option: $_";
+  }
+}
+$in_regex = lc($in_regex);
+$out_regex = lc($out_regex);
+
+# TODO - for debugging, it's nice to auto-clean
+#   killall ffmpeg
+
+# TODO - chroma key
+#        - this doesn't quite work right yet...
+#        - the chroma key options seem off, possibly
+#          due to inconsistent lighting on the screen?
+#   -i
+#   "$2"
+#   -filter_complex
+#   "[1:v]scale=720:568,crop=640:360:40:60,chromakey=0x074a32:0.17:0.23[o1];[0:v]scale=640:360[o2];[o2][o1]overlay[o]"
+#   -map
+#   [o]
+#   -map
+#   1:a
+
+sub is_running {
+  open PS, '-|', qw/ps -ef/;
+  my $re = $_[0];
+  my $out = 0;
+  while (<PS>) {
+    if (/$re/) {
+      $out = 1;
+      last;
+    }
+  }
+  close PS;
+  return $out;
+}
+
+sub is_video {
+  my $found = 0;
+  open INFO, '-|', 'v4l2-ctl', '--device', $_[0], '--all';
+  while (<INFO>) {
+    if (/Format Video/) {
+      $found = 1;
+      last;
+    }
+  }
+  close INFO;
+  return $found;
+}
+
+# First order of business: make sure the loopback module is installed
+my $needs_module = 1;
+open LSMOD, '-|', 'lsmod';
+while (<LSMOD>) {
+  if (/^v4l2loopback/) {
+    $needs_module = 0;
+    last;
+  }
+}
+close LSMOD;
+system qw/sudo modprobe v4l2loopback video_nr=5 exclusive_caps=1/
+  if $needs_module;
+
+# Now figure out which device is which
+open V4L2, '-|', 'v4l2-ctl', '--list-devices';
+my @cams = ();
+my $current_cam = '';
+my $in = '';
+my $out = '';
+while (<V4L2>) {
+  if (/^(\S[^(]*) \(/) {
+    $current_cam = lc($1);
+  } elsif (/\s+(\/dev\/video\d+)/) {
+    my $dev = $1;
+    next unless is_video $dev;
+    $out = $dev if $current_cam =~ /$out_regex/i;
+    $in = $dev if $current_cam =~ /$in_regex/i;
+    push @cams, $current_cam;
+  }
+}
+close V4L2;
+
+# TODO - scene configuration? multiple dummies? different cams?
+my $cams = join(', ', @cams);
+die "Could not find /$in_regex/ in [$cams]" unless $in or $text;
+die "Could not find /$out_regex/ in [$cams]" unless $out;
+
+my @args = ();
+
+if ($text) {
+  # Pick an image, caption it.
+  my $img = `ls ~/bg/??*/*.jpg | shuf | head -1`;
+  chomp $img;
+  system 'convert', $img, qw/-font Arial -pointsize 64 -draw/,
+    "gravity center fill black text 0,4 \'$text\' fill white text 4,0 \'$text\' ",
+    '/tmp/cam.jpg';
+  $crop = 0;
+  $in = '/tmp/cam.jpg';
+  push @args, qw/-loop 1/;
+}
+push @args, '-i', $in, qw/-f v4l2 -pix_fmt yuv420p/;
+if ($crop) {
+  #push @args, '-filter:v', 'scale=720:568,crop=640:360:40:60';
+  push @args, '-filter:v', 'scale=1440:1136,crop=1280:720:80:120';
+  # "${chroma[@]}" /dev/video5
+} else {
+  #push @args, '-filter:v', 'scale=640:360';
+  push @args, '-filter:v', 'scale=1280:720';
+}
+push @args, $out;
+
+# See if ffmpeg is already running?
+if (is_running('ffmpeg')) {
+  system qw/killall ffmpeg/;
+  sleep 1;
+}
+die "Existing process could not be killed." if is_running('ffmpeg');
+
+system 'fuser', $in or die "Device $in already in use";
+
+@args = map {
+  if (m([^-:=/_a-zA-Z0-9])) {
+    s/'/'"'"'/g;
+    $_ = "'$_'";
+  }
+  $_
+} @args;
+
+print STDERR join("\n", @args);
+#system "echo 'nohup ffmpeg @args > /tmp/ffmpeg.out 2> /tmp/ffmpeg.err' | at now";
+my $args = join(' ', @args);
+system "echo 'nohup ffmpeg $args > /dev/null 2> /dev/null' | at now";
+sleep 1;
+
+die "ffmpeg failed to start" unless is_running('ffmpeg');
+
+# TODO - exec??? but then we can't find it as easily
+# note: 48 could be as high as 88? (or 104 above) but 48 works better w/ tripod
+#exec ffmpeg -i /dev/video0 -f v4l2 -pix_fmt yuv420p -filter:v scale=608:480,crop=540:304:34:48 /dev/video5
+#exec ffmpeg -i /dev/video0 -f v4l2 -pix_fmt yuv420p -filter:v crop=640:360:30:50 /dev/video5

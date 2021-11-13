@@ -6,3 +6,4 @@
 (package-initialize)
 
 (load-file "~/config/emacs/init.el")
+(put 'narrow-to-region 'disabled nil)

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Invoked by awesome's rc.lua at startup.
+# Reruns itself via `at`, saves the environment first.
+# The saved environment can be used by arbitrary scripts
+# to ensure they behave like an interactive xterm, even
+# when run from (e.g.) a cron job.
+
+if [ "$STARTUP_RUN_AS_AT" != 1 ]; then
+  xrun --save
+  echo "STARTUP_RUN_AS_AT=1 $0" | at now
+fi
+
+xrun fix-mouse
+xrun fix-keyboard
+# xrun rotate-bg
+xrun nm-applet

@@ -14,20 +14,7 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
-(require 'sdh-color-theme)
-(sdh-color-theme)
-
-;(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
-;(require 'sdh-color-theme)
-
-; non-work computers don't need this as badly, and it's broken.  skip.
-(cond
- ((string= system-name "DESKTOP-ONQGME9")) ; NOTE: this is the WSL hostname)
- ((string= system-type "darwin")) ; do nothing on mac
- (t (require 'sdh-repo)))
-
-;; Helpful for getting mac path correct - must install the eponymous package.
-(if (fboundp 'exec-path-from-shell-initialize) (exec-path-from-shell-initialize))
+(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
 
 ;; Language-specific settings
 (require 'sdh-perl)
@@ -44,17 +31,17 @@
 (add-to-list 'default-frame-alist '(background-color . "black"))
 (add-to-list 'default-frame-alist '(foreground-color . "white"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
+;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
 (add-to-list 'default-frame-alist '(height . 60))
 (add-to-list 'default-frame-alist '(width . 120))
 
 ; Note: the nerd font (which has powerline and bold) uses a different name for
 ; each font in the family, which breaks italics.  So just use the original.
-(if (string= system-type "darwin")
-    (add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
-  (add-to-list 'default-frame-alist '(font . "monofur")))
+(add-to-list 'default-frame-alist '(font . "monofur"))
 
 ;;;;;;;(set-face-attribute 'default nil :family "Monofur Nerd Font")
 ;(set-face-attribute 'font-lock-comment-face nil :family "Monofuritalic Nerd Font")
+
 
 (if (string= system-name "daneel")
     ;(load-file "/usr/share/emacs/site-lisp/ledger/ledger.el")
@@ -83,5 +70,11 @@
 ;; Custom configuration settings go in their own file.
 (setq custom-file "~/config/emacs/custom.el")
 (load custom-file)
+
+;; kmacro-decision beefs up (C-x q), allowing custom conditional branches
+;;;;;;  - consider fixing this up a bit more, or else binding it to C-x M-q
+;;;;;;    so that we don't lose the normal kbd-macro-query
+;(add-to-list 'load-path "~/config/emacs/kmacro-decision")
+;(require 'kmacro-decision)
 
 (electric-indent-mode 0)

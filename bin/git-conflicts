@@ -10,7 +10,7 @@ if (-e "$gitdir/rebase-merge/done") {
 }
 
 my $conflicts = 0;
-my $root = `realpath $gitdir/..`;
+my $root = `git rev-parse --show-toplevel`;
 chomp $root;
 chdir $root;
 open GIT, "git status |";

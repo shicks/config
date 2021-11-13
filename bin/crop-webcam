@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# TODO - for debugging, it's nice to auto-clean
+# killall ffmpeg
+
+chroma=()
+if [ "$1" = "--bg" ]; then
+  # TODO - this doesn't quite work right yet...
+  #      - the chroma key options seem off, possibly
+  #        due to inconsistent lighting on the screen?
+  chroma=(-i "$2" -filter_complex "[1:v]scale=720:568,crop=640:360:40:60,chromakey=0x074a32:0.17:0.23[o1];[0:v]scale=640:360[o2];[o2][o1]overlay[o]" -map [o] -map 1:a)
+  shift 2
+fi
+
+n=${1:-0}
+
+if ! lsmod | grep -q ^v4l2loopback; then
+  sudo modprobe v4l2loopback video_nr=5 exclusive_caps=1
+fi
+
+# if ps -ef | grep -q ffmpeg; then
+#   killall ffmpeg
+#   sleep 1
+# fi
+
+# if ps -ef | grep ffmpeg; then
+#   echo "Existing process could not be killed." >&2
+#   exit 1
+# fi
+
+if fuser /dev/video$n; then
+  echo "Camera already in use." >&2
+  exit 1
+fi
+
+# NOTE: this wants to run uninterrupted.
+if [ "$CROP_WEBCAM_NOHUP" != 1 ]; then
+  echo "CROP_WEBCAM_NOHUP=1 nohup $0 $@ > /dev/null 2> /dev/null" | at now
+  sleep 1
+  if ! ps -ef | grep -q ffmpeg; then
+    echo "ffmpeg failed to start" >&2
+    exit 1
+  fi
+  exit 0
+fi
+
+# NOTE: to debug...
+#exec &> /tmp/crop-webcam.log
+
+echo ffmpeg -i /dev/video$n -f v4l2 -pix_fmt yuv420p -filter:v scale=720:568,crop=640:360:40:60 "${chroma[@]}" /dev/video5 > /tmp/ffmpeg.args
+
+exec ffmpeg -i /dev/video$n -f v4l2 -pix_fmt yuv420p -filter:v scale=720:568,crop=640:360:40:60 "${chroma[@]}" /dev/video5
+
+# TODO - exec??? but then we can't find it as easily
+# note: 48 could be as high as 88? (or 104 above) but 48 works better w/ tripod
+#exec ffmpeg -i /dev/video0 -f v4l2 -pix_fmt yuv420p -filter:v scale=608:480,crop=540:304:34:48 /dev/video5
+#exec ffmpeg -i /dev/video0 -f v4l2 -pix_fmt yuv420p -filter:v crop=640:360:30:50 /dev/video5

@@ -1,0 +1,37 @@
+#!/usr/local/bin/xrun /usr/bin/perl
+
+# TODO - rate limiting? check for how long ago the most recent pic was pulled?
+
+use File::Path qw/make_path/;
+
+# Working directory is ~/bg/bing/ - ensure it exists
+my $d = "$ENV{HOME}/bg/win10";
+make_path($d);
+
+# Pull the current JSON
+my $root = 'https://windows10spotlight.com';
+my $html = `curl -Lo- "$root" 2>/dev/null`;
+
+my @articles = split /<article/, $html;
+$_ = $articles[1]; # ignore the frontmatter
+/\bpost-(\d+)\b/ or die "Could not find a post number";
+my $num = $1;
+/\bentry-title\b[^"]*"[^>]*>([^<]+)<\/span>/ or die "Could not find title";
+my $title = $1;
+m|\bsrc="(https://windows10spotlight\.com/wp-content[^"]*)"|
+  or die "Could not find url";
+my $url = $1;
+$url =~ s/-\d+x\d+\././; # remove size annotation to get original
+$url = "$root$url" if $url =~ m|^/|;
+
+my $txtfile = "$d/$num.txt";
+my $jpgfile = "$d/$num.jpg";
+open F, '>', $txtfile;
+print F "$title\n";
+close F;
+system 'curl', '-Lo', "$d/$num.jpg", $url unless -e $jpgfile;
+
+# add caption to bottom (just overwrite the same file every time)
+system 'caption', $jpgfile, $title, '/tmp/bg.jpg';
+
+exec 'feh', '--bg-scale', '/tmp/bg.jpg';

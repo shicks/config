@@ -13,13 +13,17 @@ env:
   # You can verify this by checking for the presence of `smso` and `sitm` in
   # `infocmp xterm-256color`.
   TERM: alacritty
+  # This is necessary to prevent weird window resizing when moving windows
+  # between screens on my laptop, since there's very different DPIS.
+  # See https://github.com/alacritty/alacritty/issues/1501
+  WINIT_X11_SCALE_FACTOR: "1.0"
 
 # Window dimensions in character columns and lines
 # (changes require restart)
 window:
   dimensions:
-    columns: 203
-    lines: 70
+    columns: 140
+    lines: 60
 
   # Adds this many blank pixels of padding around the window
   # Units are physical pixels; this is not DPI aware.
@@ -29,7 +33,7 @@ window:
     y: 2
 
 # Display tabs using this many cells (changes require restart)
-tabspaces: 8
+# tabspaces: 8
 
 # When true, bold text is drawn using the bright variant of colors.
 draw_bold_text_with_bright_colors: true
@@ -55,36 +59,63 @@ draw_bold_text_with_bright_colors: true
 # * file:///usr/share/doc/fontconfig/fontconfig-user.html
 font:
   normal:
-    family: Monofur Nerd Font
-    style: Book
-
+    family: Victor Mono
+    style: Regular
   bold:
-    family: Monofurbold Nerd Font
+    family: Victor Mono
     style: Bold
-
   italic:
-    family: Monofuritalic Nerd Font
+    family: Victor Mono
     style: Italic
+  bold_italic:
+    family: Victor Mono
+    style: Bold Italic
+
+  # normal:
+  #   family: FiraCode Nerd Font
+  #   style: Regular
+  # bold:
+  #   family: FiraCode Nerd Font
+  #   style: Bold
+  # italic:
+  #   family: Fira Mono
+  #   style: Italic
+  # bold_italic:
+  #   family: Fira Mono
+  #   style: Bold Italic
+
+  #normal:
+  #  family: Monofur Nerd Font
+  #  style: Book
+
+  #bold:
+  #  family: Monofurbold Nerd Font
+  #  style: Bold
+
+  #italic:
+  #  family: Monofuritalic Nerd Font
+  #  style: Italic
 
   size: 11.0
 
-  ## Offset is the extra space around each character. offset.y can be thought of
-  ## as modifying the linespacing, and offset.x as modifying the letter spacing.
-  #offset:
-  #  # Make the font "condensed".
-  #  x: -1
-  #  y: 0
+  # Offset is the extra space around each character. offset.y can be thought of
+  # as modifying the linespacing, and offset.x as modifying the letter spacing.
+  # Note: on the mac, we commented both this and glyph_offset out.
+  offset:
+    # Make the font "condensed".
+    x: -1
+    y: -1
 
-  ## Glyph offset determines the locations of the glyphs within their cells with
-  ## the default being at the bottom. Increase the x offset to move the glyph to
-  ## the right, increase the y offset to move the glyph upward.
-  #glyph_offset:
-  #  # Move everything over by one to eliminate artifact before powerline >.
-  #  # This has the unfortunate side effect that the > doesn't blend quite
-  #  # as well into the previous space, but it's slightly nicer than having
-  #  # a half-pixel line between them.
-  #  x: -1
-  #  y: 0
+  # Glyph offset determines the locations of the glyphs within their cells with
+  # the default being at the bottom. Increase the x offset to move the glyph to
+  # the right, increase the y offset to move the glyph upward.
+  glyph_offset:
+    # Move everything over by one to eliminate artifact before powerline >.
+    # This has the unfortunate side effect that the > doesn't blend quite
+    # as well into the previous space, but it's slightly nicer than having
+    # a half-pixel line between them.
+    x: -1
+    y: 0
 
   # OS X only: use thin stroke font rendering. Thin strokes are suitable
   # for retina displays, but for non-retina you probably want this set to
@@ -94,7 +125,7 @@ font:
   #rgba: none
 
 # Should display the render timer
-render_timer: false
+#render_timer: false
 
 # Colors (Tomorrow Night Bright)
 colors:
@@ -354,6 +385,8 @@ shell:
 ## TODO(sdh): Consider being more consistent with modifiers - maybe use a
 ##            bitmask?  \e[4x~ where x is 1..7 for diff modifiers?
 
+## TODO(sdh): Consider binding separate keys to keypad0..9 w/ various modifiers?
+
 key_bindings:
   #- { key: V,        mods: Control|Shift,    action: Paste               }
   #- { key: C,        mods: Control|Shift,    action: Copy                }
@@ -556,7 +589,12 @@ key_bindings:
 ## [3] Convert C-Enter to C-Shift-J
 ##   - I do not remember why we did this...
 
-  - { key: Return,   mods: Control, chars: "\x1b[36~\x0d"                }
+  - { key: Return,   mods: Control, chars: "\x1b[36~\x0a" } 
+  - { key: Return,   mods: Alt    , chars: "\x1b\x0a" } 
+## Also make sure return sends ^J ???
+## NOTE: the underlying issue is stty -icrnl
+## See https://askubuntu.com/questions/441744/pressing-enter-produces-m-instead-of-a-newline
+##  - { key: Return,                  chars: "\x0a"         }
 
 ## [4] Convert C-Shift-Letter to << @36 control-code >>
 
@@ -589,24 +627,26 @@ key_bindings:
 
 ## [5] Convert C-Shift-? (for ? digit or symbol) to << @36 shifted-symbol >>
 
-  - { key: Key0,  mods: Control|Shift, chars: "\x1b[36~)" }
-  - { key: Key1,  mods: Control|Shift, chars: "\x1b[36~!" }
-  - { key: Key2,  mods: Control|Shift, chars: "\x1b[36~@" }
-  - { key: Key3,  mods: Control|Shift, chars: "\x1b[36~#" }
-  - { key: Key4,  mods: Control|Shift, chars: "\x1b[36~$" }
-  - { key: Key5,  mods: Control|Shift, chars: "\x1b[36~%" }
-  - { key: Key6,  mods: Control|Shift, chars: "\x1b[36~^" }
-  - { key: Key7,  mods: Control|Shift, chars: "\x1b[36~&" }
-  - { key: Key8,  mods: Control|Shift, chars: "\x1b[36~*" }
-  - { key: Key9,  mods: Control|Shift, chars: "\x1b[36~(" }
+  - { key: 11,  mods: Control|Shift, chars: "\x1b[36~)" } # key0/rparen
+  - { key: 2,   mods: Control|Shift, chars: "\x1b[36~!" } # key1/bang
+  - { key: 3,   mods: Control|Shift, chars: "\x1b[36~@" } # key2/at
+  - { key: 4,   mods: Control|Shift, chars: "\x1b[36~#" } # key3/hash
+  - { key: 5,   mods: Control|Shift, chars: "\x1b[36~$" } # key4/dollar
+  - { key: 6,   mods: Control|Shift, chars: "\x1b[36~%" } # key5/percent
+  - { key: 7,   mods: Control|Shift, chars: "\x1b[36~^" } # key6/carat
+  - { key: 8,   mods: Control|Shift, chars: "\x1b[36~&" } # key7/and
+  - { key: 9,   mods: Control|Shift, chars: "\x1b[36~*" } # key8/star
+  - { key: 10,  mods: Control|Shift, chars: "\x1b[36~(" } # key9/lparen
   # skip tilde and underscore since they have dedicated sequences
   # skip curlies and pipe to just send \x1[bdc] since these are sometimes useful??
-  - { key: Equals,     mods: Control|Shift, chars: "\x1b[36~+" }
-  - { key: Semicolon,  mods: Control|Shift, chars: "\x1b[36~:" }
-  - { key: Apostrophe, mods: Control|Shift, chars: "\x1b[36~\"" }
-  - { key: Comma,      mods: Control|Shift, chars: "\x1b[36~<" }
-  - { key: Period,     mods: Control|Shift, chars: "\x1b[36~>" }
-  - { key: Slash,      mods: Control|Shift, chars: "\x1b[36~?" }
+  # NOTE: due to https://github.com/alacritty/alacritty/issues/2125 we need to
+  # use scancodes instead of names.
+  - { key: 13,    mods: Control|Shift, chars: "\x1b[36~+" } # equals/add
+  - { key: 39,    mods: Control|Shift, chars: "\x1b[36~:" } # semicolon/colon
+  - { key: 40,    mods: Control|Shift, chars: "\x1b[36~\"" } # apostrophe/quote
+  - { key: 51,    mods: Control|Shift, chars: "\x1b[36~<" } # comma/less
+  - { key: 52,    mods: Control|Shift, chars: "\x1b[36~>" } # period/greater
+  - { key: 53,    mods: Control|Shift, chars: "\x1b[36~?" } # slash/question
 
 ## [6] Convert C-M-? to insert ESC after the @36 from C-? (cf. [2])
 
@@ -665,24 +705,24 @@ key_bindings:
 ## [8] Convert C-M-Shift-? (for ? digit or symbol) to [5] w/ extra ESC
 ## TODO(sdh): add remaining C-M-S keys?
 
-  - { key: Key0,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b)" }
-  - { key: Key1,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b!" }
-  - { key: Key2,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b@" }
-  - { key: Key3,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b#" }
-  - { key: Key4,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b$" }
-  - { key: Key5,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b%" }
-  - { key: Key6,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b^" }
-  - { key: Key7,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b&" }
-  - { key: Key8,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b*" }
-  - { key: Key9,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b(" }
-  - { key: Equals,    mods: Control|Shift|Alt, chars: "\x1b[36~\x1b+" }
-  - { key: Semicolon, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b:" }
-  - { key: Comma,     mods: Control|Shift|Alt, chars: "\x1b[36~\x1b<" }
-  - { key: Period,    mods: Control|Shift|Alt, chars: "\x1b[36~\x1b>" }
-  - { key: Slash,     mods: Control|Shift|Alt, chars: "\x1b[36~\x1b?" }
-  - { key: LBracket,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b{" }
-  - { key: RBracket,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b}" }
-  - { key: Backslash, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b|" }
+  - { key: 11,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b)" } # key0/rparen
+  - { key: 2,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b!" } # key1/bang
+  - { key: 3,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b@" } # key2/at
+  - { key: 4,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b#" } # key3/hash
+  - { key: 5,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b$" } # key4/dollar
+  - { key: 6,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b%" } # key5/percent
+  - { key: 7,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b^" } # key6/carat
+  - { key: 8,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b&" } # key7/and
+  - { key: 9,   mods: Control|Shift|Alt, chars: "\x1b[36~\x1b*" } # key8/star
+  - { key: 10,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b(" } # key9/lparen
+  - { key: 13,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b+" } # equals/add
+  - { key: 39,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b:" } # semicolon/colon
+  - { key: 51,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b<" } # comma/less
+  - { key: 52,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b>" } # period/greater
+  - { key: 53,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b?" } # slash/question
+  - { key: 26,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b{" } # lbracket/lbrace
+  - { key: 27,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b}" } # rbracket/rbrace
+  - { key: 43,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b|" } # backslash/pipe
   # skip tilde and underscore since they have dedicated sequences
   # - { key: Subtract, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b_" }
   # - { key: Grave, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b~" }

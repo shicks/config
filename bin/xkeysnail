@@ -1,0 +1,8 @@
+#!/bin/sh
+
+xhost +
+sudo true
+sudo nohup /usr/local/bin/xkeysnail /home/sdh/config/xkeysnail.py &> /home/sdh/xkeysnail.log &
+
+sleep 5s
+ps -ef | grep xkeysnail

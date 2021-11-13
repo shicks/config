@@ -1,0 +1,13 @@
+[Unit]
+Description=xkeysnail key mapping service
+
+[Service]
+KillMode=process
+ExecStart=/usr/local/bin/xkeysnail %h/config/xkeysnail.py
+Type=simple
+Restart=always
+
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=default.target

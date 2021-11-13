@@ -1,0 +1,49 @@
+#!/usr/local/bin/xrun /usr/bin/perl
+
+use File::Path qw/make_path/;
+use JSON::PP qw/decode_json/;
+
+# Working directory is ~/bg/bing/ - ensure it exists
+my $d = "$ENV{HOME}/bg/bing";
+make_path($d);
+
+# If the current day is already pulled, just use it
+my $today = `date +\%Y\%m\%d`;
+my $jpgfile;
+my $data;
+chomp $today;
+if (-e "$d/$today.jpg" and -e "$d/$today.json") {
+  $jpgfile = "$d/$today.jpg";
+  my $json = `cat $d/$today.json`;
+  $data = decode_json $json;
+} else {
+  # Pull the current JSON
+  my $root = 'http://www.bing.com';
+  my $url = "$root/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
+  my $json = `curl -Lo- "$url" 2>/dev/null`;
+  print STDERR "Fetched $url\n";
+
+  # Find the relevant data
+  $data = decode_json $json;
+  my $date = $data->{images}->[0]->{startdate};
+  $jpgfile = "$d/$date.jpg";
+  my $jsonfile = "$d/$date.json";
+  $url = $data->{images}->[0]->{url};
+  $url = "$root$url" if $url =~ m|^/|;
+
+  # Save the JSON and the image (for now, assume always jpg)
+  if (!-e $jsonfile) {
+    open F, '>', $jsonfile;
+    print F $json;
+    close F;
+  }
+  if (!-e $jpgfile) {
+    system 'curl', '-Lo', $jpgfile, $url;
+    print STDERR "Fetched $url\n";
+  }
+}
+
+# add caption to bottom (just overwrite the same file every time)
+system 'caption', $jpgfile, $data->{images}->[0]->{copyright}, '/tmp/bg.jpg';
+
+exec 'feh', '--bg-scale', '/tmp/bg.jpg';

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Simple utility to make parent directories.  Allows simpler one-liners
+# e.g. for redirection:
+#   do_something > $(mkparent /maybe/nonexistent/path/to/target)
+
+if [ $# -ne 1 ]; then
+  echo "usage: mkparent FILE" >& 2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$1")"
+echo "$1"

@@ -13,7 +13,8 @@
    'package-archives
    '("melpa" . "http://melpa.org/packages/")
    t)
-  (package-initialize))
+  ;(package-initialize) ;; NOTE: unnecessary???
+  )
 
 ;;;;;;;;;;;;;;;;
 ;; Misc global config
@@ -247,7 +248,7 @@
            ;; TODO(sdh): consider checking the first N>1 files
            (sdh-filter-individual-file (car file-name-history)))
       (progn
-        (message "Filtering file form history: %s" (car file-name-history))
+        (message "Filtering file from history: %s" (car file-name-history))
         (set-variable 'file-name-history (cdr file-name-history)))))
 
 (defun sdh-filter-individual-file (file)
@@ -279,6 +280,7 @@
   (let ((face (or (get-char-property (point) 'read-face-name)
                   (get-char-property (point) 'face))))
     (if face (message "Face: %s" face) (message "No face at %d" pos))))
+(global-set-key (kbd "C-h C-f") 'what-face)
 
 
 ;;;;;;;;;;;;;;;;
@@ -351,7 +353,7 @@
   (interactive "p")
   (other-window (- win)))
 
-(defvar sdh-dynamic-frame-width 100
+(defvar sdh-dynamic-frame-width nil ; 100
   "*The target width for frames.")
 
 ;; For use in slightly-cramped screens
@@ -507,12 +509,35 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (interactive)
   (and (bound-and-true-p flymake-mode) (not (get-buffer-window "*compilation*"))))
 
+(defun sdh-is-flycheck ()
+  (interactive)
+  (and (bound-and-true-p flycheck-mode)))
+
 (defun sdh-next-error-new-file () (interactive) (next-error-new-file))
 
 (defun sdh-next-error () (interactive)
-  (if (sdh-is-flymake) (flymake-goto-next-error) (next-error)))
+  (cond
+   ((get-buffer "*compilation*") (next-error))
+   ((sdh-is-flymake) (flymake-goto-next-error))
+   ((sdh-is-flycheck) (flycheck-next-error))
+   (t (next-error))))
+
 (defun sdh-previous-error () (interactive)
-  (if (sdh-is-flymake) (flymake-goto-prev-error) (previous-error)))
+  (cond
+   ((get-buffer "*compilation*") (previous-error))
+   ((sdh-is-flymake) (flymake-goto-prev-error))
+   ((sdh-is-flycheck) (flycheck-previous-error))
+   (t (previous-error))))
+
+;; Also turn on hl-line-mode and add a hook to make sure it runs
+
+(defun sdh-compilation-mode-hook () (interactive)
+  (hl-line-mode 1))
+(add-hook 'compilation-mode-hook 'sdh-compilation-mode-hook)
+
+(defun sdh-next-error-hook () (interactive)
+  (with-current-buffer next-error-last-buffer (when hl-line-mode (hl-line-highlight))))
+(add-hook 'next-error-hook 'sdh-next-error-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Conflict resolution
@@ -752,9 +777,132 @@ See also: `xah-copy-to-register-1', `insert-register'."
     ((looking-at "_") (delete-char 1) (sdh-const-to-upper-camel))
     ((looking-at "[a-zA-Z]") (sdh-const-to-upper-camel))))
 
+(defun sdh-push-point-to-column (col)
+  (interactive "nColumn: ")
+  (let ((count (- col (- (point) (line-beginning-position)))))
+    (if (> count 0)
+        (insert (make-string count ? )))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Repeat the given named macro until it beeps
+;; In order to pass a macro, it should probably be called
+;; with M-: (sdh-repeat-macro foo), hence it is not interactive
+(defun sdh-repeat-macro (macro)
+  (condition-case nil (funcall macro 0) (error nil)))
+
 (defun dirname-no-slash (path)
+  "Given a PATH return the directory name (path up to but not including final slash."
   (let ((parent (file-name-directory path)))
     (if parent (directory-file-name parent)
       "")))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; JS sexp navigation
+;; The main thing we want to do is navigate function arguments.
+;; Simple balanced paren handling should work fine here.
+
+(defun sdh-forward-js-sexp ()
+  "Jump forward one balanced expression"
+  (interactive)
+  (let (stack result top in-string close next)
+    (save-excursion
+      (if (looking-at "[]}),;]") (forward-char))
+      (while (or stack (not (looking-at "[]}),;]")))
+        (setq top (and stack (car stack)))
+        (setq in-string (and top (or (= top ?`) (= top ?') (= top ?\"))))
+        (setq next (char-after))
+        (setq close (cdr (assoc next '((?\( . ?\)) (?\[ . ?\]) (?{ . ?})
+                                       (?` . ?`) (?' . ?') (?\" . ?\")))))
+        (cond ((and in-string (looking-at "\\\\"))
+               ;;(message "string escape")
+               (forward-char)
+               (cond ((looking-at "x") (forward-char 2))
+                     ((looking-at "u") (forward-char 4))
+                     (t (forward-char))))
+              ((and top (= top ?`) (looking-at "\\${"))
+               ;;(message "template")
+               (forward-char 2)
+               (setq stack (cons ?} stack)))
+              ((looking-at "//")
+               ;;(message "eol comment")
+               (end-of-line)
+               (forward-char))
+              ((looking-at "/\\*")
+               ;;(message "block comment")
+               (re-search-forward "\\*/"))
+              ((and top (= top next))
+               ;;(message (format "pop %c" next))
+               (setq stack (cdr stack))
+               ;; don't advance if closing a top-level block,
+               ;; unless it's followed by semicolon
+               (if (or stack (/= next ?})) (forward-char)))
+              (in-string
+               ;;(message "string advance")
+               (forward-char))
+              (close
+               ;;(message (format "push %c" close))
+               (setq stack (cons close stack))
+               (forward-char))
+              (t (forward-char))))
+      (if (< (point) (point-max)) (setq result (point))))
+    (cond
+     (result
+       (goto-char result)
+       (if (looking-at "};") (forward-char))))
+        ;(progn
+        ;  (goto-char result)
+        ;  (while (looking-at ";") (forward-char)))
+))
+
+;;; NOTE: If we want the reverse direction, we'd really need to build up a full
+;;; map of start to end positions of all elements in the stack, starting at the
+;;; front of the file.  Once we hit point, then jump back to the first
+;;; non-whitespace char after the opening.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Terminal clipboard integration!
+
+(defun sdh-osc-52-copy (str)
+  "Uses OSC 52 to send text to window system.
+Does nothing if already in the window system."
+  (if (not window-system)
+      (send-string-to-terminal (format "\033]52;c;%s\007" (base64-encode-string str)))))
+
+(defun sdh-after-kill-advice (&rest unused)
+  "Uses OSC 52 to copy the last-killed text."
+  (sdh-osc-52-copy (substring-no-properties (current-kill 0))))
+
+(advice-add 'kill-ring-save :after #'sdh-after-kill-advice)
+
+(defun sdh-around-mouse-yank-advice (orig-fun &rest args)
+  "Uses OSC 52 with special '?' argument to paste from window clipboard."
+  (if (window-system)
+      (apply orig-fun args)
+    (send-string-to-terminal "\033]52;c;?\007")))
+
+(advice-add 'mouse-yank-primary :around #'sdh-around-mouse-yank-advice)
+
+;; Bind this to M-]52;c; to catch the response from above.
+(defun sdh-paste-base64 ()
+  (interactive)
+  (let ((str "") ch (ok t))
+    (while ok
+      (setq ch (read-event nil nil 0.01))
+      (cond
+       ;; Timeout => cancel
+       ((not ch)
+        (setq ok nil)) ; str ""))
+       ;; Alarm => done
+       ((= ch 7)
+        (setq ok nil))
+       ;; Otherwise, copy the character
+       (t
+        (setq str (format "%s%c" str ch)))))
+    ;; We reached the end, now base64-decode it and insert
+    (insert (base64-decode-string str))))
+
+(global-set-key (kbd "M-] 5 2 ; c ;") 'sdh-paste-base64)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide 'sdh-misc)
