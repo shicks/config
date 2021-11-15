@@ -5,8 +5,8 @@ function source_if_exists {
 # Mac-specific customizations
 if [ -d /Users/sdh ]; then
   # TODO(sdh): are there bash versions of this?
-  case "$SHELL" in
-    (*zsh*)
+  case "$(basename "$SHELL")" in
+    (zsh)
       # The next line updates PATH for the Google Cloud SDK.
       source_if_exists '/Users/sdh/local/opt/google-cloud-sdk/path.zsh.inc'
 
