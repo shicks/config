@@ -14,14 +14,13 @@
 (require 'sdh-sh)
 (require 'sdh-tmux)
 (require 'sdh-colors)
-(require 'sdh-color-theme)
+
+;(require 'sdh-color-theme)
+;(sdh-color-theme)
 
 ;; non-work computers don't need this as badly, and it's broken.  skip.
-(if (string= system-name "DESKTOP-ONQGME9")
-    (progn)
-  (require 'sdh-repo))
+(if (string= system-name "riose") (require 'sdh-repo))
 
-(sdh-color-theme)
 
 ;; Language-specific settings
 (require 'sdh-perl)
@@ -38,8 +37,8 @@
 (add-to-list 'default-frame-alist '(background-color . "black"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
 ;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
-(add-to-list 'default-frame-alist '(height . 60))
-(add-to-list 'default-frame-alist '(width . 120))
+(add-to-list 'default-frame-alist '(height . 45))
+(add-to-list 'default-frame-alist '(width . 100))
 
 ; Note: the nerd font (which has powerline and bold) uses a different name for
 ; each font in the family, which breaks italics.  So just use the original.
