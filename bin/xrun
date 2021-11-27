@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Runs its argument as if it were in an xterm.
+# Requires 'xrun --save' to have run first to save the environment.
+# This is normally run as part of the 'startup' script.
+
+# This should be linked via /usr/local/bin/xrun for easy access.
+
+ENVFILE=/var/run/user/$UID/awesome.env
+if [ "$*" = '--save' ]; then
+  case "$(basename "$SHELL")" in
+    (bash|*/bash) ;;
+    (*) export SHELL=$(which bash)
+  esac
+  export -p >| "$ENVFILE"
+  exit
+fi
+
+if [ "$#" -gt 0 ]; then
+  exec env -i bash -c ". $ENVFILE"'; "$@"' -- "$@"
+else
+  # No args, just merge the environment (assume we're sourced)
+  . "$ENVFILE"
+fi
+

@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+# Remove whitespace-only diffs from a unified diff patch file.
+
+$/ = undef;
+$_ = <>;
+
+# Split the input up into sections.  Each section is either a preamble
+#     ```
+#     diff a b
+#     --- /path/to/a
+#     +++ /path/to/b
+#     ```
+# or a hunk
+#     ```
+#     @@ -1,5 +6,9
+#      some context
+#     -removed line
+#     +added line
+#      some more context
+#     ```
+# The preambles are emitted as-is, while the hunks are filtered to only
+# print if the whitespace is actually different.
+#
+# Note: we also ignore leading '*' in a line to revert reflowed comments.
+ 
+my @hunks = split /^(?=[^-+@ ].*\n(?:[^@ ].*\n)+|\@\@)/m, $_;
+
+for (@hunks) {
+  #print STDERR "HUNK:\n>>>>>>>\n$_\n<<<<<<<<<\n";
+  unless (/^\@/) {
+    print;
+    next;
+  }
+  my $added = $_;
+  $added =~ s/^[^+].*//mg;
+  $added =~ s/^\+\s*\*?|\s+//mg;
+  my $deleted = $_;
+  $deleted =~ s/^[^-].*//mg;
+  $deleted =~ s/^-\s*\*?|\s+//mg;
+  #print STDERR "ADDED:\n$added\nDELETED:\n$deleted\n";
+  print if $added ne $deleted;
+}

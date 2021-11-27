@@ -1,9 +1,6 @@
 export PATH
 
-#prepend_to_list -e PATH ~/.cargo/bin
-#prepend_to_list -e PATH ~/local/bin
-
-# Find path components from .sh.d/paths
+# Find path components from .sh.d/paths (which is symlinks to dirs)
 if [ -d ~/.sh.d/paths ]; then
   for d in $(ls -rd ~/.sh.d/paths/*); do
     if [ -d "$d" ]; then
@@ -12,7 +9,22 @@ if [ -d ~/.sh.d/paths ]; then
   done
 fi
 
-export SHELL="$(ps -ocomm= -q $$)"
+prepend_to_list -e PATH ~/.cargo/bin
+prepend_to_list -e PATH ~/local/bin
+prepend_to_list -e PATH ./node_modules/.bin
+
+if [ "$(uname)" = Darwin ]; then
+  export SHELL="$(ps -ocomm= -p $$)"
+  SHELL=${SHELL/-/} # note: not a fully qualified name.
+else
+  export SHELL=$(which "$(ps -ocomm= -q $$)")
+fi
+
+if [ "$(hostname)" = briannas-mbp.lan ]; then
+  # for whatever reason this doesn't work right now.
+  export REPO_SEP=NONE
+fi
+
 export CLICOLOR=1
 export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
 
@@ -21,7 +33,7 @@ export GIT_EDITOR=$EDITOR
 export P4_EDITOR=$EDITOR
 export VISUAL=$EDITOR
 
-export COLUMNS
+export COLUMNS # needed for mac
 
 # Export the display for WSL
 case "$(uname -a)" in
@@ -33,3 +45,11 @@ esac
 if which rbenv > /dev/null 2> /dev/null; then
   eval "$(rbenv init -)"
 fi
+
+# Init NVM if it's installed
+export NVM_DIR="$HOME/.nvm"
+source_if_exists "$NVM_DIR/nvm.sh"
+source_if_exists "$NVM_DIR/bash_completion"
+
+export PREZTO_DIR="$HOME/.zprezto"
+source_if_exists "$PREZTO/init.zsh"

@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+# Usage: paragrep [-d delimiter_regex] [-v] regex file...
+# TODO - implement -d and -v
+
+# TODO - does not work...
+
+use strict;
+use warnings;
+
+my $regex = shift;
+#my $delim = qr/\n([ \t]*\n)+/;
+#my $delim = qr/\n\n+/;
+
+$/ = undef;
+my $sep = '';
+while (<>) {
+  #print "LINE: $_";
+  while (s/^(.*?)(\n\n+)//) { # $delim)//) {
+    my $prefix = $1;
+    my $newsep = $2;
+    next unless $prefix =~ /$regex/;
+    print STDERR "MATCH\n"; # $sep$prefix";
+    $sep = $newsep;
+  }
+}

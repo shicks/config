@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Kill the process for the given tmux pane
+
+ppid="$(cat "/tmp/tmux-ppid-$1")"
+if [ -n "$ppid" ]; then
+  shift
+  kill "$@" "$(ps kstart_time --ppid "$ppid" -o pid= | tail -q)"
+fi

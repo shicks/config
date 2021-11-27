@@ -7,6 +7,11 @@
 ; '(flymake-warnline ((((class color)) (:background "LightBlue2")))))
 
 
+;; customize-themes gives a list of options, but most are not great.
+;;   most don't have good contrast for basic things like minibuffer-prompt
+;;   those that do don't have a solid-black background, which is crummy
+
+
 ; Terminal mode: also consider (:inverse-video t :bold t) or maybe just specify foreground too?
 (custom-set-faces
 ; '(region ((((class color)) (:inverse-video t))))

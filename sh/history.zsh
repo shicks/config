@@ -1,5 +1,5 @@
 permanent_history_file() {
-  echo $HOME/history/$(basename $SHELL)-$(date +%y%m%d)-$$
+  echo $HOME/history/$(basename "$SHELL")-$(date +%y%m%d)-$$
 }
 
 function permanent_history_save_command {

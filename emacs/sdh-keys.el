@@ -8,6 +8,8 @@
 ;; all the .Xdefaults and ITerm2 config files.
 
 ;; Basic key Bindings
+(defun sdh-nop () (interactive))
+(global-set-key (kbd "ESC ESC ESC") 'sdh-nop) 
 (global-set-key (kbd "C-c c") 'compile)
 (global-set-key (kbd "C-c r") 'recompile)
 (global-set-key (kbd "C-c k") 'kill-compilation)
@@ -126,6 +128,13 @@
 (global-set-key (kbd "C-x RET RET") 'sdh-xterm-mouse-mode-t)
 (sdh-xterm-mouse-mode-t)
 
+;; C-j is now emitted by the Enter key since C-m was doing weird things
+;; in the terminal.  I never want electric indent, so change this from
+;; electric-newline-and-maybe-indent to just plain old newline.
+;; NOTE: the underlying issue was `stty -icrnl`: by enabling icrnl
+;;       (with `stty icrnl`) the ^M issue is no longer a problem.
+;; (global-set-key (kbd "C-j") 'newline)
+
 ;; Mouse wheel scrolling (this used to just work automatically...)
 (global-set-key [mouse-4] 'sdh-mwheel-scroll)
 (global-set-key [mouse-5] 'sdh-mwheel-scroll)
@@ -162,7 +171,7 @@
 (global-set-key (kbd "M-[ H") 'move-beginning-of-line)
 (global-set-key (kbd "M-[ F") 'move-end-of-line)
 
-(if (sdh-try-require 'window-jump)
+(if (or (sdh-try-require 'window-jump) (fboundp 'window-jump-up))
     (progn
       (global-set-key (kbd "C-M-<up>") 'window-jump-up)
       (global-set-key (kbd "C-M-<down>") 'window-jump-down)
@@ -210,6 +219,7 @@
 
 
 ;; rect-mark bindings
+;; copied (and modified) from https://www.emacswiki.org/emacs/RectangleMark
 (define-key ctl-x-map (kbd "r C-@") 'rm-set-mark) ; note: C-@ is C-SPC in terminal
 (define-key ctl-x-map (kbd "r C-SPC") 'rm-set-mark)
 (define-key ctl-x-map (kbd "r C-x") 'rm-exchange-point-and-mark)
@@ -227,6 +237,21 @@
   "Copy a rectangular region to the kill ring." t)
 (autoload 'rm-mouse-drag-region "rect-mark"
   "Drag out a rectangular region with the mouse." t)
+
+
+;; Mac rebinds home/end to start/end of file, which is maddening.
+(global-set-key (kbd "<end>") 'end-of-line)
+(global-set-key (kbd "<home>") 'beginning-of-line)
+
+;; Mark/region helpers - C-x SPC
+;; Something previously bound [C-x SPC] to rectangle-mark-mode.
+;; I thought it was me, but I can't find it, so just unset it here.
+(global-unset-key (kbd "C-x SPC"))
+(global-set-key (kbd "C-x SPC r") 'rectangle-mark-mode)
+(defun sdh-activate-mark () (interactive) (activate-mark))
+(global-set-key (kbd "C-x SPC a") 'sdh-activate-mark)
+;(global-set-key (kbd "C-x C-a") 'sdh-activate-mark)
+
 
 
 ;; TOGGLES - C-c t

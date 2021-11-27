@@ -1,6 +1,6 @@
 # Sets the title for running processes
 
-local command=$1
+local command="$1"
 if [ -z "${command##emacs*}" ]; then
   set_title "+"
 else

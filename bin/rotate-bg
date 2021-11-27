@@ -4,4 +4,9 @@ date >| /tmp/rotate-bg
 
 feh --bg-scale $HOME/bg/0/$(ls $HOME/bg/0 | shuf | head -1)
 
+if [ "$1" = "-r" ]; then
+  sleep 20m
+  exec "$0" -r
+fi
+
 # Used to use awsetbg -r

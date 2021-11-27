@@ -355,7 +355,7 @@ to change individual files."
          ;(rhs (find-file rhs-file))
          (lhs (progn
                 (message "Open: [%s] %s %s" command lhs-file rhs-file)
-                (make-directory (dirname-no-slash lhs-file) t)
+                (make-directory (file-name-directory lhs-file) t)
                 (shell-command (concat command " > " lhs-file))
                 ;(find-file lhs-file)
                 ))
@@ -427,7 +427,7 @@ to change individual files."
          ;; changes current buffer
          (rhs (progn
                 (if (not (file-writable-p rhs-file))
-                    (make-directory (dirname-no-slash rhs-file) t))
+                    (make-directory (file-name-directory rhs-file) t))
                 (find-file rhs-file)))
          )
     (with-current-buffer "*git-diff*"

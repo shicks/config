@@ -1,12 +1,22 @@
-(eval-when-compile    (require 'color-theme))
-(defun sdh-color-theme ()
-  "Color theme by Steve Hicks, created 2018-01-25."
-  (interactive)
-  (color-theme-install
-   '(sdh-color-theme
-     ((background-color . "unspecified-bg")
+;(eval-when-compile    (require 'color-theme-modern))
+
+; For some reason "unspecified-fg" and "unspecified-bg" don't work on my
+; macbook, and both show up as black, making things very difficult to use.
+; Instead, just swap them out for black and white, but keep track of where
+; they were.
+(defvar sdh-unspecified-bg "black")
+(defvar sdh-unspecified-fg "white")
+
+(deftheme sdh-color-theme
+  "Color theme by Steve Hicks, created 2018-01-25.")
+
+(custom-theme-set-faces
+ 'sdh-color-theme
+
+ '(default ((t (:background "black" :foreground "white"))))
+ 
       (background-mode . dark)
-      (foreground-color . "unspecified-fg"))
+      (foreground-color . sdh-unspecified-fg))
      ((apropos-match-face . match)
       (compilation-message-face . underline)
       (cperl-here-face . font-lock-string-face)
@@ -27,7 +37,7 @@
       (tags-tag-face . default)
       (view-highlight-face . highlight)
       (widget-mouse-face . highlight))
-     (default ((t (:stipple nil :background "unspecified-bg" :foreground "unspecified-fg" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 1 :width normal :foundry "default" :family "default"))))
+     (default ((t (:stipple nil :background sdh-unspecified-bg :foreground sdh-unspecified-fg :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 1 :width normal :foundry "default" :family "default"))))
      (Info-quoted ((t (:family "courier"))))
      (apropos-function-button ((t (:foreground "LightSkyBlue"))))
      (apropos-keybinding ((t (:underline t))))
@@ -42,7 +52,7 @@
      (buffer-menu-buffer ((t (:bold t :weight bold))))
      (button ((t (:underline t :foreground "cyan1"))))
      (c-annotation-face ((t (:foreground "Aquamarine"))))
-     (c-nonbreakable-space-face ((t (:bold t :weight bold :background "unspecified-fg" :foreground "unspecified-bg"))))
+     (c-nonbreakable-space-face ((t (:bold t :weight bold :background sdh-unspecified-fg :foreground sdh-unspecified-bg))))
      (closure-template-tag ((t (:bold t :foreground "PaleGreen" :weight bold))))
      (comint-highlight-input ((t (:bold t :weight bold))))
      (comint-highlight-prompt ((t (:foreground "cyan"))))
@@ -214,7 +224,7 @@
      (italic ((t (:italic t :slant italic))))
      (js2-error ((t (:foreground "red"))))
      (js2-external-variable ((t (:foreground "orange"))))
-     (js2-function-call ((t (:family "default" :foundry "default" :width normal :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground "unspecified-fg" :background "unspecified-bg" :stipple nil :height 1))))
+     (js2-function-call ((t (:family "default" :foundry "default" :width normal :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground sdh-unspecified-fg :background sdh-unspecified-bg :stipple nil :height 1))))
      (js2-function-param ((t (:foreground "SeaGreen"))))
      (js2-instance-member ((t (:foreground "DarkOrchid"))))
      (js2-jsdoc-html-tag-delimiter ((t (:foreground "green"))))
@@ -222,7 +232,7 @@
      (js2-jsdoc-tag ((t (:foreground "SlateGray"))))
      (js2-jsdoc-type ((t (:foreground "SteelBlue"))))
      (js2-jsdoc-value ((t (:foreground "PeachPuff3"))))
-     (js2-object-property ((t (:family "default" :foundry "default" :width normal :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground "unspecified-fg" :background "unspecified-bg" :stipple nil :height 1))))
+     (js2-object-property ((t (:family "default" :foundry "default" :width normal :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground sdh-unspecified-fg :background sdh-unspecified-bg :stipple nil :height 1))))
      (js2-private-function-call ((t (:foreground "goldenrod"))))
      (js2-private-member ((t (:foreground "PeachPuff3"))))
      (js2-warning ((t (:underline "orange"))))
@@ -335,7 +345,7 @@
      (speedbar-separator-face ((t (:background "blue" :foreground "white" :overline "gray"))))
      (speedbar-tag-face ((t (:foreground "yellow"))))
      (success ((t (:bold t :foreground "Green1" :weight bold))))
-     (term ((t (:family "default" :foundry "default" :width normal :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground "unspecified-fg" :background "unspecified-bg" :stipple nil :height 1))))
+     (term ((t (:family "default" :foundry "default" :width normal :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground sdh-unspecified-fg :background sdh-unspecified-bg :stipple nil :height 1))))
      (term-bold ((t (:bold t :weight bold))))
      (term-color-black ((t (:background "black" :foreground "black"))))
      (term-color-blue ((t (:background "blue2" :foreground "blue2"))))

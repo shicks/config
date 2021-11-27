@@ -6,3 +6,6 @@
 (package-initialize)
 
 (load-file "~/config/emacs/init.el")
+(put 'narrow-to-region 'disabled nil)
+(if (file-exists-p "~/google-config/emacs/init.el")
+    (load-file "~/google-config/emacs/init.el"))

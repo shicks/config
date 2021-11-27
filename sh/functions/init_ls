@@ -1,5 +1,9 @@
 if [ "$TERM" != "dumb" ] && [ -x /usr/bin/dircolors ]; then
   eval "`dircolors -b`"
 fi
-alias ls='ls --group-directories-first --color=auto'
+if [ "$(uname)" = Darwin ]; then
+  unalias ls
+else
+  alias ls='ls --group-directories-first --color=auto'
+fi
 ls "$@"

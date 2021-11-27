@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Caption an image
+# Usage: caption [options] photo.jpg 'caption here' photo-c.jpg
+
+font=16
+input=$1
+width=$(identify -format %w $input)
+caption=$(echo "$2" | perl -MHTML::Entities -pe 'decode_entities($_);')
+output=$3
+type=caption
+textsize=$(convert -background white -size "$width" \
+                   -pointsize "$font" caption:"$caption"\
+                   -trim -format %wx%h info: 2> /dev/null)
+textheight=$((${textsize#*x} + 6))
+
+case "$type" in
+  (fancy)
+    # Note: doesn't work if there's any wrapping?
+    # Example size was 100x14 for one line?  needs extra ±3px?
+    convert -size "$textsize" xc:none -gravity center \
+            -stroke black -strokewidth 2 -annotate 0 "$caption"
+    ;;
+  (caption)
+    convert -background '#0008' -fill white -gravity center \
+            -size "$width"x"$textheight" -pointsize "$font" caption:"$caption" \
+            "$input" +swap -gravity southeast -composite "$output"
+    ;;
+esac

@@ -8,20 +8,24 @@
 (defun update-buffer-repo-color () (interactive))
 
 (defvar sdh-update-buffer-repo-color-running nil)
+(defvar sdh-repo-last-time 0)
+(make-local-variable 'sdh-repo-last-time)
 
 (defun update-buffer-repo-color ()
   (interactive)
   "Updates the modeline to indicate the current repo."
-  (if (not sdh-update-buffer-repo-color-running)
-      (let* ((sdh-update-buffer-repo-color-running t)
-             (bf (buffer-file-name))
-             (maybe-dir (if bf (dirname-no-slash bf)))
+  (if (and (> (float-time) (+ sdh-repo-last-time 15))
+           (not sdh-update-buffer-repo-color-running))
+      (let* ((bf (buffer-file-name))
+             (sdh-update-buffer-repo-color-running t)
+             (maybe-dir (if bf (file-name-directory bf)))
              (dir (if (and maybe-dir (file-directory-p maybe-dir)) maybe-dir))
              (cmd (if dir (format "repoline colors --notouch --path=%s" dir)))
              (col (if cmd (shell-command-to-string cmd)))
              (spl (if col (split-string col ":")))
              (fg (if spl (car spl)))
              (bg (if spl (cadr spl))))
+        (setq sdh-repo-last-time (float-time))
         (cond
          ((eq fg "#666666")
           ; TODO(sdh): consider adding additional colors to the list, so that each theme

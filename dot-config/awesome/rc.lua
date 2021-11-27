@@ -13,6 +13,8 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 
+local batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
+
 -- Load Debian menu entries
 require("debian.menu")
 
@@ -49,7 +51,8 @@ beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 terminal = os.getenv("HOME") .. "/local/bin/alacritty" -- "x-terminal-emulator"
 -- lock = "xflock4"
 -- lock = "gnome-screensaver-command -l"
-lock = "dm-tool lock"
+-- lock = "dm-tool lock"
+lock = "xsecurelock"
 chrome = "google-chrome-stable"
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
@@ -131,8 +134,9 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock()
 
--- sdh: Volume widget
+-- sdh: Volume (and battery) widget
 local volumearc = require("volume")
+--local batteryarc = require("battery")
 --local volume = volume_widget:new({})
 
 -- Create a wibox for each screen and add it
@@ -234,6 +238,10 @@ awful.screen.connect_for_each_screen(function(s)
             mykeyboardlayout,
             wibox.widget.systray(),
 	    volumearc, -- sdh
+            -- sdh (TODO - how to disable on non-laptop?)
+	    batteryarc_widget({
+              warning_msg_title = "Houston, we have a problem",
+            }),
 	    --wibox.widget.textbox("hello sailor"),
             mytextclock,
             s.mylayoutbox,
@@ -362,6 +370,16 @@ globalkeys = awful.util.table.join(
                  })
                end)
     ,awful.key({ modkey }, "Insert", function () awful.spawn("xclip -o | ~/local/bin/xclipd copy") end)
+
+    -- sdh - resize vertically (only in awesomewm v4)
+    -- ,awful.key({ modkey, "Shift" }, "Next",  function (c) c:relative_move(20, 20, -40, -40) end)
+    -- ,awful.key({ modkey, "Shift" }, "Prior", function (c) c:relative_move(-20, -20, 40, 40) end)
+    -- sdh - resize vertically (only in 3.x)
+    ,awful.key({ modkey, "Shift", "Control" }, "Right", function () awful.tag.incmwfact(-0.01) end)
+    ,awful.key({ modkey, "Shift", "Control" }, "Left",  function () awful.tag.incmwfact( 0.01) end)
+    ,awful.key({ modkey, "Shift", "Control" }, "Down",  function () awful.client.incwfact( 0.01) end)
+    ,awful.key({ modkey, "Shift", "Control" }, "Up",    function () awful.client.incwfact(-0.01) end)
+
     -- sdh - laptop only?
     -- ,awful.key({ modkey, "Control" }, "F12",
     --     function ()
@@ -369,6 +387,22 @@ globalkeys = awful.util.table.join(
     ,awful.key({ }, "XF86AudioRaiseVolume", function() volumearc.up() end)
     ,awful.key({ }, "XF86AudioLowerVolume", function() volumearc.down() end)
     ,awful.key({ }, "XF86AudioMute", function () volumearc.toggle() end)
+    ,awful.key({ "Shift" }, "XF86AudioMute",
+       function() 
+         volumearc.toggle()
+         gears.timer.start_new(30, function() volumearc.toggle() end)
+       end)
+    ,awful.key({ }, "XF86AudioPlay",
+       function() awful.spawn(os.getenv("HOME") .. "/local/bin/connect-headset connect") end)
+    ,awful.key({ "Shift" }, "XF86AudioPlay",
+       function() awful.spawn(os.getenv("HOME") .. "/local/bin/connect-headset disconnect") end)
+
+    -- Brightness
+    ,awful.key({ }, "XF86MonBrightnessDown", function ()
+        awful.util.spawn("bright -") end)
+    ,awful.key({ }, "XF86MonBrightnessUp", function ()
+        awful.util.spawn("bright +") end)
+
     -- See if we can make Super+Shift+Left/right work
     ,awful.key({ modkey, "Shift"  }, "Left",
       function (c)
@@ -681,3 +715,22 @@ awful.mouse.snap.edge_enabled = false
 
 -- SDH: Add goobuntu-indicator (the little "G" icon)
 awful.util.spawn_with_shell("/usr/share/goobuntu-indicator/goobuntu_indicator.py")
+
+-- SDH: chrome notifications: http://g/awesome-users/N7o8tbqTv94
+naughty.config.defaults.screen = 1
+naughty.config.defaults.timeout = 0
+naughty.config.defaults.font = "sans 10"
+naughty.config.defaults.width = 256
+naughty.config.defaults.icon_size = 32
+naughty.config.presets.low.font = "sans 8"
+naughty.config.presets.critical.font = "sans 12"
+naughty.config.presets.critical.bg = "#dca3a3"
+naughty.config.presets.critical.fg = "#000000"
+
+-- SDH: do some things when we first start
+awesome.connect_signal(
+   "startup",
+   function(args)
+      awful.util.spawn("/home/sdh/local/bin/startup")
+   end
+)

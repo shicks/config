@@ -4,3 +4,6 @@
 [submodule "submodules/zsh-users"]
 	path = submodules/zsh-users
 	url = https://github.com/zsh-users/zsh.git
+[submodule "dot-config/awesome/awesome-wm-widgets"]
+	path = dot-config/awesome/awesome-wm-widgets
+	url = https://github.com/streetturtle/awesome-wm-widgets

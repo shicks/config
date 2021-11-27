@@ -5,4 +5,5 @@
 if [ "$TERM" != dumb -a "$TERM" != eterm-color ]; then
   echo -ne '\017\033(B\033)0';
   stty opost onlcr  # fix the "staircase" effect
+  stty icrnl        # fix ^M not sending "enter"
 fi
