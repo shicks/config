@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// NOTE: the corresponding binary should be copied to bin/fix-uinput
+// NOTE: the corresponding binary should be copied to ~/local/bin/fix-uinput
 //       and setuid with `chown root:uinput`, `chmod ug+s`
 func main() {
 	u, err := user.Lookup("root")
@@ -33,5 +33,3 @@ func main() {
 		log.Fatal("Could not chmod /dev/uinput")
 	}
 }
-
-// NO LONGER NEEDED:
