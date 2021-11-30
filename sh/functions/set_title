@@ -3,7 +3,7 @@
 # put anything, we'll get terminal spam.
 local title=${FIXED_TITLE:-$1}
 
-case "$SHELL" in
+case "$(basename "$SHELL")" in
   # In zsh only, add colors to the first character inside a repo.  Usually this
   # will be the "g" in "g:config".
   zsh) local c=`repoline colors`

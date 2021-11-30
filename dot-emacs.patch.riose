@@ -1,5 +1,0 @@
-#!/bin/sh
-# COMMENT=;;
-
-cat $1
-echo '(load-file "~/google-config/emacs/init.el")'
