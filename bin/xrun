@@ -8,7 +8,7 @@
 
 ENVFILE=/var/run/user/$UID/awesome.env
 if [ "$*" = '--save' ]; then
-  case "$SHELL" in
+  case "$(basename "$SHELL")" in
     (bash|*/bash) ;;
     (*) export SHELL=$(which bash)
   esac

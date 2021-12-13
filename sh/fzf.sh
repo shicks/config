@@ -2,8 +2,8 @@
 
 init_fzf
 
-case "$SHELL" in
-  (*zsh*)
+case "$(basename "$SHELL")" in
+  (zsh)
     # Redefine fzf-history-widget
     # CTRL-R - Paste the selected command from history into the command line
     #   - enter runs, tab edits
