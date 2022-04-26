@@ -1,5 +1,14 @@
 export PATH
 
+# Find path components from .sh.d/paths (which is symlinks to dirs)
+if [ -d ~/.sh.d/paths ]; then
+  for d in $(ls -rd ~/.sh.d/paths/*); do
+    if [ -d "$d" ]; then
+      PATH=$(readlink -e "$d"):$PATH
+    fi
+  done
+fi
+
 prepend_to_list -e PATH ~/.cargo/bin
 prepend_to_list -e PATH ~/local/bin
 prepend_to_list -e PATH ./node_modules/.bin
@@ -25,6 +34,17 @@ export P4_EDITOR=$EDITOR
 export VISUAL=$EDITOR
 
 export COLUMNS # needed for mac
+
+# Export the display for WSL
+case "$(uname -a)" in
+  (*Microsoft*)
+    export DISPLAY=:0
+    ;;
+esac
+
+if which rbenv > /dev/null 2> /dev/null; then
+  eval "$(rbenv init -)"
+fi
 
 # Init NVM if it's installed
 export NVM_DIR="$HOME/.nvm"

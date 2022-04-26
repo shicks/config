@@ -27,6 +27,7 @@ fi
 xrun /usr/bin/setxkbmap -option caps:ctrl_modifier,compose:menu
 
 killall xkeysnail
+~/local/bin/fix-uinput
 nohup xrun /usr/local/bin/xkeysnail ~/config/xkeysnail.py &>> ~/xkeysnail.log &
 # /usr/local/bin/xkeysnail /home/sdh/config/xkeysnail.py &
 

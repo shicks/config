@@ -800,6 +800,14 @@ See also: `xah-copy-to-register-1', `insert-register'."
     (if parent (directory-file-name parent)
       "")))
 
+(defun sdh-suspend-frame ()
+  "In a GUI environment, do nothing; otherwise `suspend-frame'.
+See https://stackoverflow.com/questions/28202546"
+  (interactive)
+  (if (display-graphic-p)
+      (message "suspend-frame disabled for graphical displays.")
+    (suspend-frame)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; JS sexp navigation
 ;; The main thing we want to do is navigate function arguments.

@@ -70,6 +70,13 @@
 ; Stolen from vim
 (global-set-key (kbd "C-5") 'forward-or-backward-sexp)
 
+; suspend-frame is bad: open up C-z as a prefix and bind C-zC-z to my
+; own version of it.
+(global-unset-key (kbd "C-z"))
+(global-set-key (kbd "C-z C-z") 'sdh-suspend-frame)
+
+
+
 ;; visual-regexp
 (if (sdh-try-require 'visual-regexp)
     (progn
