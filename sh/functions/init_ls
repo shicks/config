@@ -6,4 +6,4 @@ if [ "$(uname)" = Darwin ]; then
 else
   alias ls='ls --group-directories-first --color=auto'
 fi
-ls "$@"
+ls --group-directories-first --color=auto "$@"
