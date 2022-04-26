@@ -515,6 +515,10 @@ See also: `xah-copy-to-register-1', `insert-register'."
 
 (defun sdh-next-error-new-file () (interactive) (next-error-new-file))
 
+;(setq flycheck-standard-error-navigation nil)
+(if (boundp 'flycheck-mode-hook)
+    (add-hook 'flycheck-mode-hook (lambda () (setq next-error-function nil))))
+
 (defun sdh-next-error () (interactive)
   (cond
    ((get-buffer "*compilation*") (next-error))
