@@ -25,11 +25,11 @@
  '(js2-include-node-externs t)
  '(js2-mode-assume-strict t)
  '(js2-skip-preprocessor-directives t)
- '(js2-strict-trailing-comma-warning nil)
+ '(js2-strict-trailing-comma-warning nil t)
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "p")
  '(package-selected-packages
-   '(fira-code-mode company company-lsp doremi-cmd exec-path-from-shell flycheck go-mode haskell-mode hl-line+ js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp window-jump yasnippet))
+   '(company company-lsp doremi-cmd exec-path-from-shell fira-code-mode flycheck go-mode haskell-mode hl-line+ js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp wc-mode window-jump yasnippet))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(rust-indent-offset 2)
