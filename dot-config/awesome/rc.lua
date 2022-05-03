@@ -71,14 +71,14 @@ awful.layout.layouts = {
     awful.layout.suit.tile.left,
     awful.layout.suit.tile.bottom,
     awful.layout.suit.tile.top,
-    -- awful.layout.suit.fair,
-    -- awful.layout.suit.fair.horizontal,
-    -- awful.layout.suit.spiral,
-    -- awful.layout.suit.spiral.dwindle,
-    -- awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
-    -- awful.layout.suit.magnifier,
-    -- awful.layout.suit.corner.nw,
+    awful.layout.suit.fair.horizontal, -- sdh: This one is awesome!
+    awful.layout.suit.fair, -- sdh: I'm dubious on this
+    awful.layout.suit.spiral, -- sdh: Testing this provisionally?
+    awful.layout.suit.spiral.dwindle, -- sdh: Testing this provisionally?
+    awful.layout.suit.max,
+    -- awful.layout.suit.max.fullscreen, -- sdh: Covers top bar
+    -- awful.layout.suit.magnifier, -- sdh: I don't find this useful
+    -- awful.layout.suit.corner.nw, -- sdh: I dislike how inflexible this is
     -- awful.layout.suit.corner.ne, -- sdh: commented out by default
     -- awful.layout.suit.corner.sw, -- sdh: commented out by default
     -- awful.layout.suit.corner.se, -- sdh: commented out by default
