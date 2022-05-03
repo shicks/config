@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# NOTE: The pipewire rollout seems to have caused problems.
+# The workaround is as follows:
+rm -r ~/.config/pulse/*
+systemctl --user start pulseaudio
+
 # Basically, we want to make sure the device is set to the A2DP (high fidelity)
 # profile, rather than the HSP/HFP (headset) profile.  See available profiles
 # with
@@ -7,7 +12,7 @@
 # Sometimes apparently the A2DP profile becomes unavailable, restarting the
 # bluetooth stack seems to fix this, but then we need to reconnect.
 
-systemctl restart bluetooth
-echo 'connect 70:88:6B:92:A4:A3' | bluetoothctl
-pacmd set-card-profile bluez_card.70_88_6B_92_A4_A3 a2dp_sink
+#systemctl restart bluetooth
+#echo 'connect 70:88:6B:92:A4:A3' | bluetoothctl
+#pacmd set-card-profile bluez_card.70_88_6B_92_A4_A3 a2dp_sink
 
