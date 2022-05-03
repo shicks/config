@@ -515,6 +515,10 @@ See also: `xah-copy-to-register-1', `insert-register'."
 
 (defun sdh-next-error-new-file () (interactive) (next-error-new-file))
 
+;(setq flycheck-standard-error-navigation nil)
+(if (boundp 'flycheck-mode-hook)
+    (add-hook 'flycheck-mode-hook (lambda () (setq next-error-function nil))))
+
 (defun sdh-next-error () (interactive)
   (cond
    ((get-buffer "*compilation*") (next-error))
@@ -795,6 +799,14 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (let ((parent (file-name-directory path)))
     (if parent (directory-file-name parent)
       "")))
+
+(defun sdh-suspend-frame ()
+  "In a GUI environment, do nothing; otherwise `suspend-frame'.
+See https://stackoverflow.com/questions/28202546"
+  (interactive)
+  (if (display-graphic-p)
+      (message "suspend-frame disabled for graphical displays.")
+    (suspend-frame)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; JS sexp navigation

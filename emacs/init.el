@@ -18,10 +18,7 @@
 ;(require 'sdh-color-theme)
 ;(sdh-color-theme)
 
-;(if (fboundp 'dirname-no-slash) (require 'sdh-repo))
-;(require 'sdh-color-theme)
-
-; non-work computers don't need this as badly, and it's broken.  skip.
+;; non-work computers don't need this as badly, and it's broken.  skip.
 (cond
  ((string= system-name "DESKTOP-ONQGME9")) ; NOTE: this is the WSL hostname)
  ((string= system-type "darwin")) ; do nothing on mac
@@ -45,8 +42,8 @@
 (add-to-list 'default-frame-alist '(background-color . "black"))
 (add-to-list 'default-frame-alist '(foreground-color . "white"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
-(add-to-list 'default-frame-alist '(height . 60))
-(add-to-list 'default-frame-alist '(width . 120))
+(add-to-list 'default-frame-alist '(height . 45))
+(add-to-list 'default-frame-alist '(width . 90))
 
 ; Note: the nerd font (which has powerline and bold) uses a different name for
 ; each font in the family, which breaks italics.  So just use the original.
