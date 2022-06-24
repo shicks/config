@@ -6,9 +6,19 @@ function permanent_history_save_command {
   let _permanent_history_line++
   local cmd="$1"
   if [ -z "$cmd" ]; then return; fi
-  _permanent_history_cmd="$(sed ':a;N;$!ba;s/\\/\\\\/g;s/\n/\\n/g' <<<"$cmd")"
-  _permanent_history_dir="$(sed ':a;N;$!ba;s/\\/\\\\/g;s/\n/\\n/g;s/$/\\$/g' \
-    <<<"$PWD")"
+  # NOTE: newer MacOS sed doesn't like semicolons to terminate labels,
+  # so we use newlines instead.
+  _permanent_history_cmd="$(sed ':a
+N
+$!ba
+s/\\/\\\\/g
+s/\n/\\n/g' <<<"$cmd")"
+  _permanent_history_dir="$(sed ':a
+N
+$!ba
+s/\\/\\\\/g
+s/\n/\\n/g
+s/$/\\$/g' <<<"$PWD")"
   _permanent_history_start="$(date +%s)"
   _permanent_history_file="$(permanent_history_file)"
 }
