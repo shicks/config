@@ -26,6 +26,9 @@ fi
 
 xrun /usr/bin/setxkbmap -option caps:ctrl_modifier,compose:menu
 
+# Make sure caps lock isn't stuck on.
+xrun `which python3` -c 'from ctypes import *; X11 = cdll.LoadLibrary("libX11.so.6"); display = X11.XOpenDisplay(None); X11.XkbLockModifiers(display, c_uint(0x0100), c_uint(2), c_uint(0)); X11.XCloseDisplay(display)'
+
 killall xkeysnail
 ~/local/bin/fix-uinput
 nohup xrun /usr/local/bin/xkeysnail ~/config/xkeysnail.py &>> ~/xkeysnail.log &
