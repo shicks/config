@@ -58,6 +58,7 @@ define_keymap(re.compile(r"Google-chrome"), {
     # K("M-f"): with_mark(K("C-right")),
     # Beginning/End of line
     K("C-a"): with_mark(K("home")),
+    K("C-Shift-a"): K("C-Shift-a"), # don't override this one
     K("C-e"): with_mark(K("end")),
     ## Page up/down
     #K("M-v"): with_mark(K("page_up")),
