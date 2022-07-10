@@ -764,6 +764,8 @@ See also: `xah-copy-to-register-1', `insert-register'."
 
 (if (fboundp 'ediff-setup-keymap)
     (add-hook 'ediff-mode-hook 'sdh-ediff-hook))
+;; Don't allow ediff to make a new frame
+(defun ediff-window-display-p () nil)
 
 ;;;;;;;
 
