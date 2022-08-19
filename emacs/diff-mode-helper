@@ -9,7 +9,7 @@ use warnings;
 use IPC::Run qw/run/;
 
 # Perform P4DIFF helper functionality
-if ($ENV{P4DIFF} =~ /^$0/) {
+if (($ENV{P4DIFF} || '') =~ /^$0/) {
   my $output = shift;
   unshift @ARGV, '' if @ARGV == 2;  # Handle non-multidiff case.
   while (@ARGV > 2) {
@@ -22,6 +22,11 @@ if ($ENV{P4DIFF} =~ /^$0/) {
   }
   exit;
 }
+
+system 'which hg > /dev/null';
+my $has_hg = !$?;
+system 'which p4 > /dev/null';
+my $has_p4 = !$?;
 
 my @HG_ROOT = qw/hg root/;
 my @HG_DIFF = qw/hg diff --hidden -U0 -r/;
@@ -38,9 +43,9 @@ my $hg = 0;
 my $git = 0;
 my $p4 = 0;
 
-run \@HG_ROOT, '>', \$root, '2>', \$err and $hg = 1
+$has_hg and run \@HG_ROOT, '>', \$root, '2>', \$err and $hg = 1
   or run \@GIT_TOP, '>', \$root, '2>>', \$err and $git = 1
-  or run \@P4_TOP, '|', \@P4_TOP_FILTER, '>', \$root, '2>>', \$err and $p4 = 1
+  or $has_p4 and run \@P4_TOP, '|', \@P4_TOP_FILTER, '>', \$root, '2>>', \$err and $p4 = 1
   or die "Could not find root: $err";
 chomp $root;
 

@@ -13,7 +13,7 @@
  '(cperl-indent-parens-as-block t)
  '(css-indent-offset 2)
  '(custom-enabled-themes '(tango-dark))
- '(fira-code-mode-disabled-ligatures (quote ("[]" "x")))
+ '(fira-code-mode-disabled-ligatures '("[]" "x"))
  '(google-jdb-port 5005)
  '(google-trailing-newline-modes
    '(html-mode javascript-mode closure-template-html-mode cperl-mode js2-mode protobuf-mode cc-mode c++-mode google3-build-mode python-mode emacs-lisp-mode make-mode borg-mode js-mode css-mode html-mode nxhtml-mode java-mode shell-script-mode jde-mode ess-mode Rd-mode go-mode))
@@ -33,10 +33,7 @@
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(rust-indent-offset 2)
- '(savehist-additional-variables
-   (cons
-    (quote gud-gdb-history)
-    savehist-additional-variables))
+ '(savehist-additional-variables (cons 'gud-gdb-history savehist-additional-variables))
  '(tool-bar-mode nil)
  '(typescript-indent-level 2))
 
@@ -47,13 +44,16 @@
 ;;;   (quote
 ;;;    (google3-build-log-parser-info google3-build-log-parser-warning google3-build-log-parser-error google3-build-log-parser-python-traceback google3-build-log-parser-info google3-build-log-parser-warning google3-build-log-parser-error google3-build-log-parser-python-traceback google-blaze-error google-blaze-warning google-log-error google-log-warning google-log-info google-log-fatal-message google-forge-python gunit-stack-trace absoft ada aix ant bash borland python-tracebacks-and-caml cmake cmake-info comma cucumber msft edg-1 edg-2 epc ftnchek iar ibm irix java jikes-file maven jikes-line clang-include clang-include gcc-include ruby-Test::Unit gnu lcc makepp mips-1 mips-2 msft omake oracle perl php rxp sparc-pascal-file sparc-pascal-line sparc-pascal-example sun sun-ada watcom 4bsd gcov-file gcov-header gcov-nomark gcov-called-line gcov-never-called perl--Pod::Checker perl--Test perl--Test2 perl--Test::Harness weblint guile-file guile-line)))
 
+;; The following was snipped from custom-set-face
+; '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 101 :width normal :foundry "unknown" :family "FiraCode Nerd Font"))))
+; '(minibuffer-prompt ((t (:foreground "color-45"))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 101 :width normal :foundry "unknown" :family "FiraCode Nerd Font"))))
- '(cperl-array-face ((((class color)) (:background "wheat" :foreground "yellow" :weight normal))))
+ '(cperl-array-face ((t (:background "wheat" :foreground "DarkOrange4" :weight normal))))
  '(ediff-current-diff-A ((((class color)) (:background "tomato" :foreground "black"))))
  '(ediff-current-diff-B ((((class color)) (:background "pale green" :foreground "black"))))
  '(ediff-even-diff-A ((((class color)) (:background "skyblue" :foreground "black"))))
@@ -65,7 +65,7 @@
  '(font-lock-doc-face ((t (:inherit font-lock-string-face :slant italic))))
  '(hl-line ((t (:inherit nil :background "orange4"))))
  '(isearch-fail ((t (:background "indianred3"))))
- '(minibuffer-prompt ((t (:foreground "color-45"))))
+ '(minibuffer-prompt ((t (:foreground "white"))))
  '(print-tag-face ((t (:foreground "brightyellow"))))
  '(region ((((class color)) (:background "skyblue2" :foreground "Black"))))
  '(smerge-base ((t (:background "goldenrod4"))))

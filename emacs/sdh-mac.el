@@ -7,7 +7,7 @@
 
 ;(set-default-font "Monaco")
 ;(set-default-font "monofur-13")
-(set-default-font "Monofur Nerd Font-13")
+;(set-default-font "Monofur Nerd Font-13")
 
 (defun sdh-inserter (result)
   `(lambda () (interactive) (insert ,result)))

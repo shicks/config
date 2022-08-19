@@ -303,11 +303,12 @@ to change individual files."
   (git-diff-internal "" 'p4))
 
 (defun git-diff-internal (against vcs)
-  (setq debug-on-error t)
+  ;(setq debug-on-error t)
   (let ((pwd default-directory)
         (buf (get-buffer-create "*git-diff*"))
         (cmd (concat git-diff-helper " " against)))
     (switch-to-buffer buf)
+    (toggle-read-only 0)
     (setq default-directory pwd)
     (shell-command cmd buf)
     (git-diff-mode)

@@ -13,7 +13,7 @@
 (require 'sdh-keys)
 (require 'sdh-sh)
 (require 'sdh-tmux)
-(require 'sdh-colors)
+;(require 'sdh-colors)
 (require 'sdh-ts)
 ;(require 'sdh-color-theme)
 ;(sdh-color-theme)
@@ -39,8 +39,8 @@
     (progn
       (add-to-list 'term-file-aliases '("tmux" . "rxvt"))
       (add-to-list 'term-file-aliases '("alacritty" . "rxvt"))))
-(add-to-list 'default-frame-alist '(background-color . "black"))
-(add-to-list 'default-frame-alist '(foreground-color . "white"))
+;(add-to-list 'default-frame-alist '(background-color . "black"))
+;(add-to-list 'default-frame-alist '(foreground-color . "white"))
 ;;;;;(add-to-list 'default-frame-alist '(foreground-color . "gray"))
 (add-to-list 'default-frame-alist '(height . 45))
 (add-to-list 'default-frame-alist '(width . 90))
@@ -48,7 +48,10 @@
 ; Note: the nerd font (which has powerline and bold) uses a different name for
 ; each font in the family, which breaks italics.  So just use the original.
 (if (string= system-type "darwin")
-    (add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
+    (progn
+      ; TODO - see if we can get Victor Mono (nerd?) installed?
+      ;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
+      )
   (add-to-list 'default-frame-alist '(font . "monofur")))
 
 ;;;;;;;(set-face-attribute 'default nil :family "Monofur Nerd Font")

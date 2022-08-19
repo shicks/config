@@ -102,7 +102,7 @@
       (global-set-key (kbd "C->") 'mc/mark-next-like-this)
       (global-set-key (kbd "C-M-<") 'mc/skip-to-previous-like-this)
       (global-set-key (kbd "C-M->") 'mc/skip-to-next-like-this)
-      (global-set-key (kbd "C-? C-?") 'mc/mark-all-like-this)
+      ;(global-set-key (kbd "C-? C-?") 'mc/mark-all-like-this)
       ;(sdh-global-set-key "C-? C-<" 'mc/skip-to-previous-like-this)
       ;(sdh-global-set-key "C-? C->" 'mc/skip-to-next-like-this)
       ;(sdh-global-set-key "C-c C->" 'mc/mark-more-like-this-extended)
