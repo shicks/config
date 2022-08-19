@@ -1,0 +1,14 @@
+#!/bin/bash
+
+ssh=$(
+  # Remove ourselves from the path to find the "next" match in the path.
+  self=$(dirname "$0")
+  PATH=${PATH#$self:}
+  PATH=${PATH%:$self}
+  PATH=${PATH/:$self:/:}
+  which ssh)
+
+# Then run with $SHELL unset.  For some reason, when $SHELL is a basename
+# (i.e. 'zsh' rather than '/bin/zsh') then it fails with a cryptic error
+# about "Connection closed by UNKNOWN port 65535".
+SHELL= exec "$ssh" "$@"

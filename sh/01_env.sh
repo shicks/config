@@ -16,6 +16,9 @@ prepend_to_list -e PATH ./node_modules/.bin
 if [ "$(uname)" = Darwin ]; then
   export SHELL="$(ps -ocomm= -p $$)"
   SHELL=${SHELL/-/} # note: not a fully qualified name.
+  if [ -n "${SHELL##/*}" ]; then # Ensure it starts with /
+    SHELL=$(which "$SHELL")
+  fi
 else
   export SHELL=$(which "$(ps -ocomm= -q $$)")
 fi
