@@ -3,7 +3,8 @@ if [ "$TERM" != "dumb" ] && [ -x /usr/bin/dircolors ]; then
 fi
 if [ "$(uname)" = Darwin ]; then
   unalias ls
+  ls "$@"
 else
   alias ls='ls --group-directories-first --color=auto'
+  ls --group-directories-first --color=auto "$@"
 fi
-ls --group-directories-first --color=auto "$@"
