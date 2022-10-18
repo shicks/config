@@ -32,10 +32,14 @@ local spawn = require("awful.spawn")
 local watch = require("awful.widget.watch")
 local wibox = require("wibox")
 
-local GET_VOLUME_CMD = 'amixer sget Master'
-local INC_VOLUME_CMD = 'amixer sset Master 5%+'
-local DEC_VOLUME_CMD = 'amixer sset Master 5%-'
-local TOG_VOLUME_CMD = 'amixer sset Master toggle'
+-- local GET_VOLUME_CMD = 'amixer sget Master'
+-- local INC_VOLUME_CMD = 'amixer sset Master 5%+'
+-- local DEC_VOLUME_CMD = 'amixer sset Master 5%-'
+-- local TOG_VOLUME_CMD = 'amixer sset Master toggle'
+local GET_VOLUME_CMD = 'volume get'
+local INC_VOLUME_CMD = 'volume up'
+local DEC_VOLUME_CMD = 'volume down'
+local TOG_VOLUME_CMD = 'volume toggle'
 
 local text = wibox.widget {
     id = "txt",
@@ -65,22 +69,26 @@ volumearc_widget = wibox.container.mirror(volumearc, { horizontal = true })
 local update_graphic = function(widget, stdout, _, _, _)
     local mute = string.match(stdout, "off")
     local volume = string.match(stdout, "(%d?%d?%d)%%")
-    volume = tonumber(string.format("% 3d", volume))
-
-    widget.value = volume / 100
-    if volume == 100 then
-       text.font = "Play 4"
+    if volume then
+       volume = tonumber(string.format("% 3d", volume))
+       widget.value = volume / 100
+       if volume == 100 then
+          text.font = "Play 4"
+       else
+          text.font = "Play 5"
+       end
+       text.text = volume
+       if mute then
+           widget.colors = { "#ff0000" }
+       else
+           widget.colors = { "#aaaaaa" }
+       end
     else
-       text.font = "Play 5"
-    end
-
-    text.text = volume
-    if mute then
-        widget.colors = { "#ff0000" }
-    else
-        widget.colors = { "#aaaaaa" }
+       text.text = "xx"
+       widget.colors = { "#5555ff" }
     end
 end
+
 
 volumearc:connect_signal("button::press", function(_, _, _, button)
     if (button == 4) then awful.spawn(INC_VOLUME_CMD, false)
