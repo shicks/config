@@ -76,6 +76,8 @@
 (global-set-key (kbd "C-z C-z") 'sdh-suspend-frame)
 
 
+(global-set-key (kbd "C-+") 'sdh-increment-number-at-point)
+
 
 ;; visual-regexp
 (if (sdh-try-require 'visual-regexp)
