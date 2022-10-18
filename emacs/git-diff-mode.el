@@ -307,6 +307,7 @@ to change individual files."
   (let ((pwd default-directory)
         (buf (get-buffer-create "*git-diff*"))
         (cmd (concat git-diff-helper " " against)))
+    ;(message (format "shell command: %s" cmd))
     (switch-to-buffer buf)
     (setq default-directory pwd)
     (shell-command cmd buf)

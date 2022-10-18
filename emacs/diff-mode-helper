@@ -8,8 +8,13 @@ use warnings;
 
 use IPC::Run qw/run/;
 
+sub try_run {
+  # Just return 0 if the thing doesn't exist
+  run ['which', $_[0]->[0]], '&>', '/dev/null' and run @_;
+}
+
 # Perform P4DIFF helper functionality
-if ($ENV{P4DIFF} =~ /^$0/) {
+if (defined $ENV{P4DIFF} and $ENV{P4DIFF} =~ /^$0/) {
   my $output = shift;
   unshift @ARGV, '' if @ARGV == 2;  # Handle non-multidiff case.
   while (@ARGV > 2) {
@@ -38,9 +43,9 @@ my $hg = 0;
 my $git = 0;
 my $p4 = 0;
 
-run \@HG_ROOT, '>', \$root, '2>', \$err and $hg = 1
-  or run \@GIT_TOP, '>', \$root, '2>>', \$err and $git = 1
-  or run \@P4_TOP, '|', \@P4_TOP_FILTER, '>', \$root, '2>>', \$err and $p4 = 1
+try_run \@HG_ROOT, '>', \$root, '2>', \$err and $hg = 1
+  or try_run \@GIT_TOP, '>', \$root, '2>>', \$err and $git = 1
+  or try_run \@P4_TOP, '|', \@P4_TOP_FILTER, '>', \$root, '2>>', \$err and $p4 = 1
   or die "Could not find root: $err";
 chomp $root;
 
