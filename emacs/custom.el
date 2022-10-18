@@ -13,7 +13,7 @@
  '(cperl-indent-parens-as-block t)
  '(css-indent-offset 2)
  '(custom-enabled-themes '(tango-dark))
- '(fira-code-mode-disabled-ligatures (quote ("[]" "x")))
+ '(fira-code-mode-disabled-ligatures '("[]" "x"))
  '(google-jdb-port 5005)
  '(google-trailing-newline-modes
    '(html-mode javascript-mode closure-template-html-mode cperl-mode js2-mode protobuf-mode cc-mode c++-mode google3-build-mode python-mode emacs-lisp-mode make-mode borg-mode js-mode css-mode html-mode nxhtml-mode java-mode shell-script-mode jde-mode ess-mode Rd-mode go-mode))
@@ -33,10 +33,7 @@
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(rust-indent-offset 2)
- '(savehist-additional-variables
-   (cons
-    (quote gud-gdb-history)
-    savehist-additional-variables))
+ '(savehist-additional-variables (cons 'gud-gdb-history savehist-additional-variables))
  '(tool-bar-mode nil)
  '(typescript-indent-level 2))
 
@@ -53,13 +50,15 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 101 :width normal :foundry "unknown" :family "FiraCode Nerd Font"))))
- '(cperl-array-face ((((class color)) (:background "wheat" :foreground "yellow" :weight normal))))
+ '(cperl-array-face ((t (:background "wheat" :foreground "saddle brown" :weight normal))))
  '(ediff-current-diff-A ((((class color)) (:background "tomato" :foreground "black"))))
  '(ediff-current-diff-B ((((class color)) (:background "pale green" :foreground "black"))))
  '(ediff-even-diff-A ((((class color)) (:background "skyblue" :foreground "black"))))
  '(ediff-even-diff-B ((((class color)) (:background "skyblue" :foreground "black"))))
  '(ediff-odd-diff-A ((((class color)) (:background "plum" :foreground "black"))))
  '(ediff-odd-diff-B ((((class color)) (:background "plum" :foreground "black"))))
+ '(flymake-error ((((class color)) (:background "color-52"))))
+ '(flymake-warning ((((class color)) (:background "color-17"))))
  '(font-lock-comment-delimiter-face ((t (:inherit font-lock-comment-face :slant italic))))
  '(font-lock-comment-face ((t (:foreground "chocolate1" :slant italic))))
  '(font-lock-doc-face ((t (:inherit font-lock-string-face :slant italic))))
