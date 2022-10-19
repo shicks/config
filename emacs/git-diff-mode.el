@@ -319,6 +319,8 @@ to change individual files."
     (setq git-diff-root nil)
     (setq git-diff-vcs vcs)
     (goto-char 0)
+    ;; Prevent ediff from opening new frames!
+    (defun ediff-window-display-p () nil)
 ))
 
 (defun git-diff-get-root-dir ()
