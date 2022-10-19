@@ -1,9 +1,12 @@
 #!/bin/sh
 
+# Fix headset to use a2dp-sink-sbc instead of headset-head-unit-msbc
+pactl set-card-profile bluez_card.7C_96_D2_85_9A_B7 a2dp-sink-sbc
+
 # NOTE: The pipewire rollout seems to have caused problems.
 # The workaround is as follows:
-rm -r ~/.config/pulse/*
-systemctl --user start pulseaudio
+#rm -r ~/.config/pulse/*
+#systemctl --user start pulseaudio
 
 # Basically, we want to make sure the device is set to the A2DP (high fidelity)
 # profile, rather than the HSP/HFP (headset) profile.  See available profiles
