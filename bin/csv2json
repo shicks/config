@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+
+import csv
+import json
+import sys
+
+sys.stdout.write(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))
