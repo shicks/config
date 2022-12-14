@@ -7,7 +7,7 @@
 
 ;(set-default-font "Monaco")
 ;(set-default-font "monofur-13")
-(set-default-font "Monofur Nerd Font-13")
+;(set-default-font "Monofur Nerd Font-13")
 
 (defun sdh-inserter (result)
   `(lambda () (interactive) (insert ,result)))
@@ -30,4 +30,6 @@
 
 (setenv "PATH" (concat (getenv "HOME") "/local/bin:" (getenv "PATH")))
 
+(when (fboundp 'exec-path-from-shell-initialize)
+    (exec-path-from-shell-initialize))
 (provide 'sdh-mac)

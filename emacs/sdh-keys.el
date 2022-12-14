@@ -50,6 +50,7 @@
 ;(sdh-global-set-key "C-M-," 'smerge-keep-mine)
 ;(sdh-global-set-key "C-M-." 'smerge-keep-other)
 (global-unset-key (kbd "C-/"))
+(global-unset-key (kbd "C-?"))
 (global-set-key (kbd "C-/ C-,") 'smerge-keep-upper)
 (global-set-key (kbd "C-/ C-.") 'smerge-keep-lower)
 (global-set-key (kbd "C-/ C-/") 'smerge-keep-all)
