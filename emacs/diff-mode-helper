@@ -1,85 +1,135 @@
-#!/usr/bin/perl
+#!/usr/bin/env -S npx --yes zx
 
-# Helper to smooth over differences between git and mercurial.
-# TODO(sdh): not bothering w/ copy/rename detection for now.
+// Helper to smooth over differences between git and mercurial.
+// TODO(sdh): not bothering w/ copy/rename detection for now.
 
-use strict;
-use warnings;
-
-use IPC::Run qw/run/;
-
-sub try_run {
-  # Just return 0 if the thing doesn't exist
-  run ['which', $_[0]->[0]], '&>', '/dev/null' and run @_;
-}
-
-# Perform P4DIFF helper functionality
-if (defined $ENV{P4DIFF} and $ENV{P4DIFF} =~ /^$0/) {
-  my $output = shift;
-  unshift @ARGV, '' if @ARGV == 2;  # Handle non-multidiff case.
-  while (@ARGV > 2) {
-    shift;
-    my $a = shift;
-    my $b = shift;
-    $a =~ s/'/'\\''/g;
-    $b =~ s/'/'\\''/g;
-    system "diff -U0 '$a' '$b' >> $output";
+// Perform P4DIFF helper functionality.
+$.verbose = false;
+const self = process.argv[2];
+if ((process.env['P4DIFF'] || '').startsWith(self)) {
+  const args = [...argv._];
+  const outputFile = args.shift();
+  const diffs = [];
+  // Handle non-multidiff case.
+  if (args.length === 2) args.unshift('');
+  for (let i = 0; i < args.length; i += 3) {
+    let [a, b] = args.slice(i + 1, i + 3);
+    a = a.replace(/'/g, String.raw`'\'`);
+    b = b.replace(/'/g, String.raw`'\'`);
+    diffs.push($`diff -U0 ${a} ${b}`);
   }
-  exit;
+  const output = await Promise.all(diffs).join('\n');
+  await fs.writeFile(outputFile, `${output}\n`);
+  process.exit(0);
 }
 
-my @HG_ROOT = qw/hg root/;
-my @HG_DIFF = qw/hg diff --hidden -U0 -r/;
-
-my @GIT_TOP = qw/git rev-parse --show-toplevel/;
-my @GIT_DIFF = qw/git diff -U0/;
-
-my @P4_TOP = qw/p4 info/;
-my @P4_TOP_FILTER = ('sed', '-n', 's/Client root: //p');
-my @P4_DIFF = qw/p4 diff/;
-
-my ($root, $err);
-my $hg = 0;
-my $git = 0;
-my $p4 = 0;
-
-try_run \@HG_ROOT, '>', \$root, '2>', \$err and $hg = 1
-  or try_run \@GIT_TOP, '>', \$root, '2>>', \$err and $git = 1
-  or try_run \@P4_TOP, '|', \@P4_TOP_FILTER, '>', \$root, '2>>', \$err and $p4 = 1
-  or die "Could not find root: $err";
-chomp $root;
-
-if ($p4) {
-  use File::Temp qw/tempfile/;
-  my ($fh, $fn) = tempfile('/tmp/p4-diff-XXXXX');
-  close $fh;
-  $p4 = $fn;
-  $ENV{P4DIFF} = "$0 $fn";
+async function chain(...fns) {
+  let err = '';
+  for (const fn of fns) {
+    try {
+      return await fn();
+    } catch (err) {
+      err += `${err.stderr}\n`;
+    }
+  }
+  throw new Error(`All jobs failed:\n${err}`);
 }
 
-my $rev = shift || ($hg ? '.' : $git ? 'HEAD' : $p4 ? '' : die);
-my @command = $hg ? @HG_DIFF : $git ? @GIT_DIFF : $p4 ? @P4_DIFF : die;
-push @command, $rev unless $p4;
-
-my $diff;
-
-run \@command, '>', \$diff or die 'Could not run diff';
-
-$diff = `cat $p4` if $p4;
-
-my ($added, $removed, $file, $mode);
-for (split /\n/, $diff) {
-  if (m$^--- (?:(?:a|.*/depot)/([^\t]*)|/dev/null)(?:\t.*)?$) {
-    printf "%s %4s %4s %s\n", $mode, $added, $removed, $file if $mode;
-    $added = $removed = 0;
-    $file = $1;
-    $mode = $file ? 'change' : 'create';
-  } elsif (m$^\+\+\+ (?:(?:b|.*/depot)/([^\t]*)|/dev/null)(?:\t.*)?$) {
-    $file = $file || $1;
-    $mode = 'delete' unless $1;
-  } elsif (/^[+-]/) {
-    $added++ if $& eq '+';
-    $removed++ if $& eq '-';
+/**
+ * @param {string} cmd
+ * @return {Promise<boolean>} Whether cmd exists
+ */
+async function which(cmd) {
+  try {
+    await $`which ${cmd}`;
+    return true;
+  } catch (err) {
+    return false;
   }
 }
-printf "%s %4d %4d %s\n", $mode, $added, $removed, $file if $mode;
+
+// Base class
+class Differ {
+  /** @param {string} root */
+  constructor(root) {
+    this.root = root;
+  }
+  /**
+   * @param {string=} branch
+   * @return {Promise<string>}
+   */
+  async diff(branch) {}
+  /** @return {Promise<Differ>} */
+  static async create() {}
+}
+
+class HgDiffer extends Differ {
+  static async create() {
+    if (!await which('hg')) throw new Error(`hg does not exist`);
+    return new HgDiffer(await $`hg root`);
+  }
+  async diff(branch = '.') {
+    return (await $`hg diff --hidden -U0 -r ${branch}`).stdout;
+  }
+}
+
+class GitDiffer extends Differ {
+  static async create() {
+    if (!await which('git')) throw new Error(`git does not exist`);
+    return new GitDiffer(await $`git rev-parse --show-toplevel`);
+  }
+  async diff(branch = 'HEAD') {
+    return (await $`git diff -U0 ${branch}`).stdout;
+  }
+}
+
+class P4Differ extends Differ {
+  static async create() {
+    if (!await which('p4')) throw new Error(`p4 does not exist`);
+    const info = await $`p4 info`;
+    for (const line of info.split('\n')) {
+      const match = /Client root: (.*)/.exec(line);
+      if (match) return new P4Differ(match[1]);
+    }
+    throw new Error(`p4Root: Could not find client root: ${info}`);
+  }
+  async diff() { // branch is ignored
+    // Initialize self as P4DIFF
+    const tmp = await $`mktemp -t p4-diff`;
+    $.env['P4_DIFF'] = `${self} ${tmp}`;
+    await $`p4 diff`;
+    return String(await fs.readFile(tmp));
+  }
+}
+
+
+// TODO - need to communicate which one won?
+const differ = await chain(HgDiffer.create, GitDiffer.create, P4Differ.create);
+const diff = await differ.diff(argv._[0]);
+
+let added = 0;
+let removed = 0;
+let file = '';
+let mode = '';
+function print() {
+  if (!mode) return;
+  console.log(`${mode} ${String(added).padStart(4)} ${String(removed).padStart(4)} ${file}`);
+  mode = '';
+}
+
+for (const line of diff.split('\n')) {
+  let match;
+  if ((match = /^--- (?:(?:a|.*\/depot)\/([^\t]*)|\/dev\/null)(?:\t.*)?/.exec(line))) {
+    print();
+    added = removed = 0;
+    file = match[1];
+    mode = file ? 'change' : 'create';
+  } else if ((match = /^\+\+\+ (?:(?:b|.*\/depot)\/([^\t]*)|\/dev\/null)(?:\t.*)?/.exec(line))) {
+    file = file || match[1];
+    if (!match[1]) mode = 'delete';
+  } else if ((match = /^[+-]/.exec(line))) {
+    if (match[0] === '+') added++ ;
+    if (match[0] === '-') removed++ ;
+  }
+}
+print();
