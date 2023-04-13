@@ -16,5 +16,6 @@ echo "Running fix-mouse $(date) as $(whoami) pid $$"
 xrun "$(dirname "$0")/fix-mouse.pl"
 
 # Note: we need our own config for this, not root's
+#  - The scroll speed and order is set in imwheelrc
 echo "Restarting IMWheel.";
 xrun /usr/bin/imwheel -kb '4 5'

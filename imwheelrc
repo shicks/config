@@ -9,9 +9,12 @@
 # fast, so we go with 3, which is a little slower than we'd like.
 # Shift is also useful for slowing it down even more.
 
+# Update 2023/1/17: We've had ridiculously fast scrolling in Chrome recently,
+# so I'm decreasing it to 2 in an attempt to slow things down.
+
 "^google-chrome$"
-None, Up, Button4, 3
-None, Down, Button5, 3
+None, Up, Button4, 2
+None, Down, Button5, 2
 Control_L, Up, Control_L|Button4
 Control_L, Down, Control_L|Button5
 Control_R, Up, Control_R|Button4
