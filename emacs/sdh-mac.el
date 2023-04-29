@@ -30,4 +30,6 @@
 
 (setenv "PATH" (concat (getenv "HOME") "/local/bin:" (getenv "PATH")))
 
+(when (fboundp 'exec-path-from-shell-initialize)
+    (exec-path-from-shell-initialize))
 (provide 'sdh-mac)

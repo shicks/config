@@ -307,6 +307,7 @@ to change individual files."
   (let ((pwd default-directory)
         (buf (get-buffer-create "*git-diff*"))
         (cmd (concat git-diff-helper " " against)))
+    ;(message (format "shell command: %s" cmd))
     (switch-to-buffer buf)
     (toggle-read-only 0)
     (setq default-directory pwd)
@@ -319,6 +320,8 @@ to change individual files."
     (setq git-diff-root nil)
     (setq git-diff-vcs vcs)
     (goto-char 0)
+    ;; Prevent ediff from opening new frames!
+    (defun ediff-window-display-p () nil)
 ))
 
 (defun git-diff-get-root-dir ()

@@ -47,12 +47,11 @@
 
 ; Note: the nerd font (which has powerline and bold) uses a different name for
 ; each font in the family, which breaks italics.  So just use the original.
-(if (string= system-type "darwin")
-    (progn
-      ; TODO - see if we can get Victor Mono (nerd?) installed?
-      ;(add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
-      )
-  (add-to-list 'default-frame-alist '(font . "monofur")))
+;; NOTE: we've been using Victor Mono lately anyway...
+;; (if (string= system-type "darwin")
+;;     ; TODO - see if we can get Victor Mono (nerd?) installed?
+;;     (add-to-list 'default-frame-alist '(font . "Monofur Nerd Font"))
+;;   (add-to-list 'default-frame-alist '(font . "monofur")))
 
 ;;;;;;;(set-face-attribute 'default nil :family "Monofur Nerd Font")
 ;(set-face-attribute 'font-lock-comment-face nil :family "Monofuritalic Nerd Font")

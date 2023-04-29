@@ -764,6 +764,8 @@ See also: `xah-copy-to-register-1', `insert-register'."
 
 (if (fboundp 'ediff-setup-keymap)
     (add-hook 'ediff-mode-hook 'sdh-ediff-hook))
+;; Don't allow ediff to make a new frame
+(defun ediff-window-display-p () nil)
 
 ;;;;;;;
 
@@ -914,6 +916,16 @@ Does nothing if already in the window system."
     (insert (base64-decode-string str))))
 
 (global-set-key (kbd "M-] 5 2 ; c ;") 'sdh-paste-base64)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; from https://www.emacswiki.org/emacs/IncrementNumber
+(defun sdh-increment-number-at-point ()
+  (interactive)
+  (skip-chars-backward "0-9")
+  (or (looking-at "[0-9]+")
+      (error "No number at point"))
+  (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

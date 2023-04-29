@@ -2,8 +2,21 @@
 # after cat'ting a big binary file.  Also switches some font pages back to
 # the normal defaults.
 
-if [ "$TERM" != dumb -a "$TERM" != eterm-color ]; then
-  echo -ne '\017\033(B\033)0';
-  stty opost onlcr  # fix the "staircase" effect
-  stty icrnl        # fix ^M not sending "enter"
-fi
+case "$TERM" in
+  (dumb|eterm-color)
+    ;;
+  (*)
+    printf "\017\e(B\e)0"
+    stty opost onlcr  # fix the "staircase" effect
+    stty icrnl        # fix ^M not sending "enter"
+    case "$TERM" in
+      (*tmux*)
+        ;;
+      (*)
+        # disable DEC locator reports
+        printf "\e[0'z\e[0'{"  # DECELR 0; DECSLE 0
+        # disable xterm mouse reports
+        printf "\e[?1006l\e[?1003l"  # DECRST 1006; DECRST 1003
+        printf "\e[?1002l\e[?1000l"  # DECRST 1002; DECRST 1000
+    esac
+esac

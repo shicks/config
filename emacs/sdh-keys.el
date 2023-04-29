@@ -50,6 +50,7 @@
 ;(sdh-global-set-key "C-M-," 'smerge-keep-mine)
 ;(sdh-global-set-key "C-M-." 'smerge-keep-other)
 (global-unset-key (kbd "C-/"))
+(global-unset-key (kbd "C-?"))
 (global-set-key (kbd "C-/ C-,") 'smerge-keep-upper)
 (global-set-key (kbd "C-/ C-.") 'smerge-keep-lower)
 (global-set-key (kbd "C-/ C-/") 'smerge-keep-all)
@@ -75,6 +76,8 @@
 (global-unset-key (kbd "C-z"))
 (global-set-key (kbd "C-z C-z") 'sdh-suspend-frame)
 
+
+(global-set-key (kbd "C-+") 'sdh-increment-number-at-point)
 
 
 ;; visual-regexp

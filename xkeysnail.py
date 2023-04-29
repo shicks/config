@@ -58,7 +58,9 @@ define_keymap(re.compile(r"Google-chrome"), {
     # K("M-f"): with_mark(K("C-right")),
     # Beginning/End of line
     K("C-a"): with_mark(K("home")),
+    K("C-Shift-a"): K("C-Shift-a"), # don't override this one (vscode)
     K("C-e"): with_mark(K("end")),
+    K("C-Shift-e"): K("C-Shift-e"), # don't override this one (vscode)
     ## Page up/down
     #K("M-v"): with_mark(K("page_up")),
     #K("C-v"): with_mark(K("page_down")),
@@ -76,8 +78,10 @@ define_keymap(re.compile(r"Google-chrome"), {
     # Delete
     K("C-d"): [K("delete"), set_mark(False)],
     K("M-d"): [K("C-delete"), set_mark(False)],
+    K("C-Shift-d"): K("C-Shift-d"), # preserve just in case
     # Kill line
     K("C-k"): [K("Shift-end"), K("C-x"), set_mark(False)],
+    K("C-Shift-k"): K("C-Shift-k"), # preserve just in case
     # # Undo
     # K("C-slash"): [K("C-z"), set_mark(False)],
     # K("C-Shift-ro"): K("C-z"),
@@ -92,8 +96,10 @@ define_keymap(re.compile(r"Google-chrome"), {
     K("M-Shift-key_5"): K("C-h"),
     # Cancel
     K("C-g"): [K("esc"), set_mark(False)],
+    K("C-Shift-g"): K("C-Shift-g"), # preserve just in case
     # Escape
     K("C-q"): escape_next_key,
+    K("C-Shift-q"): K("C-Shift-q"), # preserve just in case
     # C-x YYY
     #K("C-x"): {
     #    # # C-x h (select all)
