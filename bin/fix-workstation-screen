@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+open XRANDR, '-|', 'xrandr';
+my $main = '';
+my $side = '';
+while (<XRANDR>) {
+  if (/^([-_a-zA-Z0-9]+) connected/) {
+    my $device = $1;
+    $_ = <XRANDR>;
+    $main = $device if /3840x2160/;
+    $side = $device if /1920x1080/;
+  }
+}
+close XRANDR;
+
+if ($main and $side) {
+  system qw/xrandr --dpi 108 --output/, $side, qw/--rotation left --right-of/, $main;
+} else {
+  print STDERR "main: $main\nside: $side\n";
+}
+

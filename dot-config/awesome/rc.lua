@@ -13,7 +13,15 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 
-local batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
+os.execute("sh -c \"> ~/awesome.log\"")
+local function debug_log(c)
+  os.execute("sh -c 'echo " .. c .. " >> ~/awesome.log'")
+end
+
+local batteryarc_widget = pcall(require, "awesome-wm-widgets.batteryarc-widget.batteryarc")
+if not batteryarc_widget then
+   batteryarc_widget = function(...) return nil end
+end
 
 -- Load Debian menu entries
 require("debian.menu")
@@ -116,6 +124,7 @@ mymainmenu = awful.menu({
     { "Debian", debian.menu.Debian_menu.Debian },
     { "open terminal", terminal },
     -- sdh: added a few extra buttons
+    { "settings", "gnome-control-center" }, -- TODO - move into submenu, copy others
     { "chrome", chrome .. " --high-dpi-support=1 --force-device-scale-factor=1" },
     { "lock", lock },
   }})
@@ -245,7 +254,7 @@ awful.screen.connect_for_each_screen(function(s)
 	    --wibox.widget.textbox("hello sailor"),
             mytextclock,
             s.mylayoutbox,
-        },
+        }
     }
 end)
 -- }}}
