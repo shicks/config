@@ -56,3 +56,7 @@ source_if_exists "$NVM_DIR/bash_completion"
 
 export PREZTO_DIR="$HOME/.zprezto"
 source_if_exists "$PREZTO/init.zsh"
+
+if [ "$(hostname)" = giskard ]; then
+  export LIBGL_ALWAYS_INDIRECT=1
+fi
