@@ -58,5 +58,6 @@ export PREZTO_DIR="$HOME/.zprezto"
 source_if_exists "$PREZTO/init.zsh"
 
 if [ "$(hostname)" = giskard ]; then
+  export DISPLAY=DESKTOP-6SBOT1P:0.0
   export LIBGL_ALWAYS_INDIRECT=1
 fi
