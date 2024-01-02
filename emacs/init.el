@@ -67,6 +67,8 @@
 
 ;;This was useful for ubuntu laptop...
 ;(set-default-font "DejaVu Sans Mono-8")
+;(if (string= system-name "giskard")
+;    (set-default-font "VictorMono Nerd Font Regular"))
 
 (if (not (string= system-type "darwin"))
     ;; NOTE: These don't currently work on mac.
