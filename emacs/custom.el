@@ -29,7 +29,7 @@
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "p")
  '(package-selected-packages
-   '(company company-lsp doremi-cmd exec-path-from-shell fira-code-mode flycheck go-mode haskell-mode hl-line+ js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp wc-mode window-jump yasnippet))
+   '(svelte-mode company company-lsp doremi-cmd exec-path-from-shell fira-code-mode flycheck go-mode haskell-mode hl-line+ js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp wc-mode window-jump yasnippet))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(rust-indent-offset 2)

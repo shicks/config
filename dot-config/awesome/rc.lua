@@ -61,7 +61,18 @@ terminal = os.getenv("HOME") .. "/local/bin/alacritty" -- "x-terminal-emulator"
 -- lock = "gnome-screensaver-command -l"
 -- lock = "dm-tool lock"
 lock = "xsecurelock"
-chrome = "google-chrome-stable"
+chrome = os.getenv("HOME") .. "/local/bin/chrome"
+chromeFlags = ""
+
+-- chromeFlags = "--disable-features=UseChromeOSDirectVideoDecoder " ..
+--               "--enable-features=VaapiVideoDecoder,CanvasOopRasterization,VaapiVideoEncoder,WebUIDarkMode " ..
+--               "--ignore-gpu-blocklist " ..
+--               "--high-dpi-support=1 " ..
+--               "--force-device-scale-factor=1 " ..
+--               "--enable-gpu-rasterization " ..
+--               "--enable-zero-copy " ..
+--               "--password-store=gnome "
+
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -125,7 +136,7 @@ mymainmenu = awful.menu({
     { "open terminal", terminal },
     -- sdh: added a few extra buttons
     { "settings", "gnome-control-center" }, -- TODO - move into submenu, copy others
-    { "chrome", chrome .. " --high-dpi-support=1 --force-device-scale-factor=1" },
+    { "chrome", chrome .. " " .. chromeFlags },
     { "lock", lock },
   }})
 

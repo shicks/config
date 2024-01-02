@@ -53,6 +53,7 @@ fi
 export NVM_DIR="$HOME/.nvm"
 source_if_exists "$NVM_DIR/nvm.sh"
 source_if_exists "$NVM_DIR/bash_completion"
+source_if_exists ~/.cargo/env
 
 export PREZTO_DIR="$HOME/.zprezto"
 source_if_exists "$PREZTO/init.zsh"
