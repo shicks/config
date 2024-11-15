@@ -12,6 +12,7 @@ fi
 prepend_to_list -e PATH ~/.cargo/bin
 prepend_to_list -e PATH ~/local/bin
 prepend_to_list -e PATH ./node_modules/.bin
+prepend_to_list -e PATH ~/.local/share/coursier/bin
 
 if [ "$(uname)" = Darwin ]; then
   export SHELL="$(ps -ocomm= -p $$)"
