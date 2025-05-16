@@ -929,4 +929,7 @@ Does nothing if already in the window system."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(setq visible-bell t)
+(setq ring-bell-function 'ignore)
+
 (provide 'sdh-misc)
