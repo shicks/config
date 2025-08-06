@@ -16,8 +16,9 @@ open XINPUT, '-|', 'xinput list';
 my $done = 0;
 while (<XINPUT>) {
   #print;
-  if (/\s*↳?\s*(.*Mouse.*)id=(\d+)/) {
+  if (/\|?\s*↳?\s*(.*Mouse|SONiX.*)id=(\d+)/) {
     my ($name, $id) = ($1, $2);
+    next if $name =~ /Keyboard/;
     my $prop = '';
     open LIST, '-|', "xinput list-props $id";
     while (<LIST>) {
@@ -33,6 +34,11 @@ while (<XINPUT>) {
     }
       #error("Could not find natural scrolling property") unless $prop;
 
+    # if ($name =~ /SONiX/) {
+    #   print "    swapping horizontal scroll\n";
+    #   system qw(/usr/bin/xinput set-button-map), $id, qw/1 2 3 4 5 7 6 8 9/;
+    # }
+      
     if ($name =~ /VerticalMouse/) {
       # Given that we got natural scrolling enabled above, we don't need to
       # fix that here.  Instead, just change the '2' to '3' so that the middle

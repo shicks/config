@@ -8,3 +8,5 @@ ACTION=="bind", DRIVER=="usbhid", SUBSYSTEM=="usb", ATTRS{idVendor}=="04f2", ATT
 
 # Evoluent Verticalmouse4
 ACTION=="bind", SUBSYSTEM=="usb", ATTR{product}=="*Mouse*", RUN+="/home/sdh/local/bin/fix-mouse"
+# Delux vertical mouse
+ACTION=="bind", SUBSYSTEM=="usb", ATTR{product}=="*SONiX*", RUN+="/home/sdh/local/bin/fix-mouse"

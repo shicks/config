@@ -762,9 +762,20 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (define-key ediff-mode-map "k" 'sdh-ediff-previous-and-refine)
   )
 
-(if (fboundp 'ediff-setup-keymap)
-    (add-hook 'ediff-mode-hook 'sdh-ediff-hook))
-;; Don't allow ediff to make a new frame
+(defvar sdh-ediff/last-windows nil)
+
+(defun sdh-ediff/store-pre-ediff-winconfig ()
+  (setq sdh-ediff/last-windows (current-window-configuration)))
+
+(defun sdh-ediff/restore-pre-ediff-winconfig ()
+  (set-window-configuration sdh-ediff/last-windows))
+
+(defun sdh-ediff-setup ()
+  (add-hook 'ediff-mode-hook 'sdh-ediff-hook)
+  (add-hook 'ediff-before-setup-hook #'sdh-ediff/store-pre-ediff-winconfig)
+  (add-hook 'ediff-quit-hook #'sdh-ediff/restore-pre-ediff-winconfig))
+(when (fboundp 'ediff-setup-keymap) (sdh-ediff-setup))
+
 (defun ediff-window-display-p () nil)
 
 ;;;;;;;
@@ -928,5 +939,8 @@ Does nothing if already in the window system."
   (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq visible-bell t)
+(setq ring-bell-function 'ignore)
 
 (provide 'sdh-misc)

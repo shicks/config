@@ -70,6 +70,9 @@ class HgDiffer extends Differ {
   }
   async diff(branch = '.') {
     return (await $`hg diff --hidden -U0 -r ${branch}`).stdout;
+    // TODO: remove ansi codes?
+    //  * run with --color=never
+    //  * postprocess with s/\e\[[0-9,]*m//g
   }
 }
 

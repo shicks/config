@@ -309,13 +309,11 @@ to change individual files."
         (cmd (concat git-diff-helper " " against)))
     ;(message (format "shell command: %s" cmd))
     (switch-to-buffer buf)
-    (toggle-read-only 0)
-    (setq default-directory pwd)
-    (shell-command cmd buf)
-    (git-diff-mode)
-    (toggle-read-only 0)
-    (git-diff-parse)
-    (toggle-read-only 1)
+    (let ((inhibit-read-only t))
+      (setq default-directory pwd)
+      (shell-command cmd buf)
+      (git-diff-mode)
+      (git-diff-parse))
     (setq git-diff-against against)
     (setq git-diff-root nil)
     (setq git-diff-vcs vcs)
@@ -336,6 +334,21 @@ to change individual files."
 
 ;; TODO(sdh): set up more keybindings, possibly with
 ;; better/more automatic ediff integration, back and forth, etc
+
+;; TODO - this could be de-duped with
+(defun git-diff-file (branch)
+  "Opens a single-file diff"
+  (interactive "sBranch: ")
+  (setq git-diff-vcs 'git) ; TODO - support other VCS
+  (let* (
+         (root (git-diff-get-root-dir))
+         (fn (buffer-file-name))
+         (lhs (concat branch ":" fn))
+         (split (+ 1 (length root)))
+         )
+    (shell-command (format "git show %s:./%s" branch (file-name-nondirectory fn)) lhs)
+    (with-current-buffer lhs (read-only-mode t))
+    (ediff-buffers lhs (current-buffer))))
 
 (defun git-diff-open-diff (pos)
   "Starts ediff mode for the given change"
@@ -438,9 +451,8 @@ to change individual files."
       (puthash line aschange git-diff-files)
       (save-excursion
         (goto-char pos)
-        (toggle-read-only nil)
-        (remove-text-properties (point-at-bol) (point-at-eol) '(face nil))
-        (toggle-read-only t)))
+        (let ((inhibit-read-only t))
+          (remove-text-properties (point-at-bol) (point-at-eol) '(face nil)))))
     (shell-command command rhs)
 ))
 
@@ -457,10 +469,9 @@ to change individual files."
       (error "Can only delete adds"))
     (save-excursion
       (goto-char pos)
-      (toggle-read-only nil)
-      (add-text-properties (point-at-bol) (+ 1 (point-at-eol))
-                           '(invisible t intangible t))
-      (toggle-read-only t))
+      (let ((inhibit-read-only t))
+        (add-text-properties (point-at-bol) (+ 1 (point-at-eol))
+                             '(invisible t intangible t))))
     (delete-file rhs-file)
 ))
 

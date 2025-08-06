@@ -95,7 +95,12 @@ alacritty-256color|alacritty terminal emulator,
 # at you, emacs).
 tmux-alacritty|tmux running on top of alacritty,
   use=alacritty,
-  use=screen,
+  use=screen-256color,
+  smkx=,rmkx=,
+
+tmux-alacritty-256color|tmux running on top of alacritty,
+  use=alacritty,
+  use=screen-256color,
   smkx=,rmkx=,
 
 # TODO(sdh): we're having some difficulties w/ iTerm2 connecting to tmux

@@ -230,8 +230,6 @@ function install_gtk {
   safe_link gtkrc-2.0
   safe_link dot-config/gtk-3.0 .config/gtk-3.0
   if which gsettings &>/dev/null; then
-    gsettings set org.cinnamon.desktop.interface gtk-key-theme "Emacs"
-    gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
     gsettings set org.gnome.desktop.wm.preferences focus-mode sloppy
     gsettings set org.gnome.desktop.wm.preferences auto-raise false
     gsettings set org.gnome.desktop.wm.preferences button-layout \

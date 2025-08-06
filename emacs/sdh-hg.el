@@ -48,6 +48,7 @@
 
 ; <C-c h> is prefix keymap for hg commands
 (global-set-key (kbd "C-c h SPC") 'sdh-hg-resolve-mark)
+(global-set-key (kbd "C-c h m") 'sdh-hg-resolve-mark)
 (global-set-key (kbd "C-c h a") 'sdh-hg-add)
 (global-set-key (kbd "C-c h r") 'sdh-hg-rm)
 (global-set-key (kbd "C-c h d") 'git-diff-hg)
