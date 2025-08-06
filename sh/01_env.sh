@@ -53,3 +53,9 @@ source_if_exists "$NVM_DIR/bash_completion"
 
 export PREZTO_DIR="$HOME/.zprezto"
 source_if_exists "$PREZTO/init.zsh"
+
+# bun
+if [ -d "$HOME/.bun" ]; then
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
