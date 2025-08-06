@@ -42,3 +42,6 @@
   cookiefile = ~/.gitcookies
 [pull]
 	rebase = false
+
+[include]
+  path = ~/.gitconfig.local
