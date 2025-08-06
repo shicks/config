@@ -102,6 +102,7 @@
       (global-set-key (kbd "C->") 'mc/mark-next-like-this)
       (global-set-key (kbd "C-M-<") 'mc/skip-to-previous-like-this)
       (global-set-key (kbd "C-M->") 'mc/skip-to-next-like-this)
+      (global-unset-key (kbd "C-?")) ; not sure what this is by default?
       (global-set-key (kbd "C-? C-?") 'mc/mark-all-like-this)
       ;(sdh-global-set-key "C-? C-<" 'mc/skip-to-previous-like-this)
       ;(sdh-global-set-key "C-? C->" 'mc/skip-to-next-like-this)
@@ -271,6 +272,8 @@
 (global-set-key (kbd "M-[ 1 ; 2 B") 'sdh-next-line-visual)  ; S-down
 (global-set-key (kbd "M-[ 1 ~") 'sdh-beginning-of-line)  ; home
 (global-set-key (kbd "<select>") 'end-of-line)  ; end  (M-[ 4 ~)
+
+(global-set-key (kbd "M-[ 4 ~") 'end-of-line)  ; end (on linux?)
 
 ;;;;;;;
 ;; org-mode S-M-arrow bindings

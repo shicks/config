@@ -24,7 +24,7 @@ if ($ENV{P4DIFF} =~ /^$0/) {
 }
 
 my @HG_ROOT = qw/hg root/;
-my @HG_DIFF = qw/hg diff --hidden -U0 -r/;
+my @HG_DIFF = qw/hg diff --color=never --hidden -U0 -r/;
 
 my @GIT_TOP = qw/git rev-parse --show-toplevel/;
 my @GIT_DIFF = qw/git diff -U0/;
@@ -64,6 +64,7 @@ $diff = `cat $p4` if $p4;
 
 my ($added, $removed, $file, $mode);
 for (split /\n/, $diff) {
+  s/\e\[[0-9,]*m//g; # remove ansi codes
   if (m$^--- (?:(?:a|.*/depot)/([^\t]*)|/dev/null)(?:\t.*)?$) {
     printf "%s %4s %4s %s\n", $mode, $added, $removed, $file if $mode;
     $added = $removed = 0;
