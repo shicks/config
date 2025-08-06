@@ -25,6 +25,7 @@
 
 [init]
   templatedir = ~/.gitconfig.d/templates
+  defaultBranch = main
 
 [rerere]
   # TODO(sdh): figure out if/how we want to use this...
@@ -41,4 +42,4 @@
 [http]
   cookiefile = ~/.gitcookies
 [pull]
-	rebase = false
+  rebase = false
