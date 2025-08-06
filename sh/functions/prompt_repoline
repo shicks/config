@@ -1,6 +1,16 @@
 # Calls repoline to set the prompt.
 
-PS1=$(repoline prompt --exit=$_sdh_last_status --left='g!"'$$'@"%h')
+_sdh_prompt_left='g!"'$$'@"%h'
+case "$_sdh_last_status" in
+  (0)  ;;
+  (*)  _sdh_prompt_left="r\"$_sdh_last_status\"%<$_sdh_prompt_left" ;;
+esac
+case "$__hi_active" in
+  (true)  _sdh_prompt_left="$_sdh_prompt_left%>0g\"hi\"" ;;
+  (false) _sdh_prompt_left="$_sdh_prompt_left%>0r\"hi\"" ;;
+esac
+
+PS1=$(repoline prompt --left="$_sdh_prompt_left")
 
 # Make sure there's a blank line if nothing was exec'd.
 if [ "$(basename "$SHELL")" = zsh -a "$_sdh_repoline_state" = precmd ]; then
