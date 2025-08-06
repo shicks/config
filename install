@@ -230,8 +230,6 @@ function install_gtk {
   safe_link gtkrc-2.0
   safe_link dot-config/gtk-3.0 .config/gtk-3.0
   if which gsettings &>/dev/null; then
-    gsettings set org.cinnamon.desktop.interface gtk-key-theme "Emacs"
-    gsettings set org.gnome.desktop.interface gtk-key-theme Emacs
     gsettings set org.gnome.desktop.wm.preferences focus-mode sloppy
     gsettings set org.gnome.desktop.wm.preferences auto-raise false
     gsettings set org.gnome.desktop.wm.preferences button-layout \
@@ -317,3 +315,16 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+cat >&2 <<EOF
+Next steps:
+  git clone git@github.com:shicks/repoline ~/local/src/repoline
+  ln -s ~/local/src/repoline/{ansi,repo}line ~/local/bin/
+
+  sudo apt install aptitude emacs-lucid imwheel xinput awesome cmake rust-all \
+           pkg-config python3 python3-pip libfreetype6-dev libfontconfig1-dev \
+           libxcb-xfixes0-dev libxkbcommon-dev 
+  cargo install alacritty
+  sudo pip3 install xkeysnail
+  echo "blacklist pcspkr" | sudo tee -a /etc/modprobe.d/blacklist.conf
+EOF

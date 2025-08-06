@@ -1,8 +1,15 @@
 #!/bin/sh
 
+home=/home/sdh
+venv=$home/local/opt/xkeysnail/venv
+python=$venv/bin/python3
+xkeysnail=/usr/local/bin/xkeysnail
+config=/home/sdh/config/xkeysnail.py
+log=/home/sdh/xkeysnail.log
+
 xhost +
 sudo true
-sudo nohup /usr/local/bin/xkeysnail /home/sdh/config/xkeysnail.py &> /home/sdh/xkeysnail.log &
+sudo nohup $python $xkeysnail $config &> $log &
 
 sleep 5s
 ps -ef | grep xkeysnail

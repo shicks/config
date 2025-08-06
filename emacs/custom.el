@@ -45,13 +45,18 @@
 ;;;   (quote
 ;;;    (google3-build-log-parser-info google3-build-log-parser-warning google3-build-log-parser-error google3-build-log-parser-python-traceback google3-build-log-parser-info google3-build-log-parser-warning google3-build-log-parser-error google3-build-log-parser-python-traceback google-blaze-error google-blaze-warning google-log-error google-log-warning google-log-info google-log-fatal-message google-forge-python gunit-stack-trace absoft ada aix ant bash borland python-tracebacks-and-caml cmake cmake-info comma cucumber msft edg-1 edg-2 epc ftnchek iar ibm irix java jikes-file maven jikes-line clang-include clang-include gcc-include ruby-Test::Unit gnu lcc makepp mips-1 mips-2 msft omake oracle perl php rxp sparc-pascal-file sparc-pascal-line sparc-pascal-example sun sun-ada watcom 4bsd gcov-file gcov-header gcov-nomark gcov-called-line gcov-never-called perl--Pod::Checker perl--Test perl--Test2 perl--Test::Harness weblint guile-file guile-line)))
 
+;; The following was snipped from custom-set-face
+; '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 101 :width normal :foundry "unknown" :family "FiraCode Nerd Font"))))
+; '(minibuffer-prompt ((t (:foreground "color-45"))))
+; '(default ((t (:inherit nil :extend nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 100 :width normal :foundry "nil" :family "Menlo"))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 101 :width normal :foundry "unknown" :family "FiraCode Nerd Font"))))
- '(cperl-array-face ((t (:background "wheat" :foreground "darkgoldenrod4" :weight normal))))
+ '(cperl-array-face ((((class color)) (:background "wheat" :foreground "yellow" :weight normal))))
  '(diff-added ((t (:inherit diff-changed :extend t :background "#008800"))))
  '(diff-file-header ((t (:extend t :background "dimgray" :weight bold))))
  '(diff-header ((t (:extend t :background "dimgray"))))
@@ -80,6 +85,7 @@
  '(region ((((class color)) (:background "skyblue2" :foreground "Black"))))
  '(smerge-base ((t (:background "goldenrod4"))))
  '(smerge-lower ((t (:background "darkseagreen4"))))
+ '(smerge-markers ((t (:extend t :background "grey85" :foreground "black"))))
  '(smerge-refined-added ((t (:background "seagreen4"))))
  '(smerge-refined-removed ((t (:background "firebrick3"))))
  '(smerge-upper ((t (:background "firebrick4"))))

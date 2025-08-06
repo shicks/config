@@ -26,9 +26,22 @@ fi
 
 xrun /usr/bin/setxkbmap -option caps:ctrl_modifier,compose:menu
 
+# Make sure caps lock isn't stuck on.
+xrun `which python3` -c 'from ctypes import *; X11 = cdll.LoadLibrary("libX11.so.6"); display = X11.XOpenDisplay(None); X11.XkbLockModifiers(display, c_uint(0x0100), c_uint(2), c_uint(0)); X11.XCloseDisplay(display)'
+
+home=/home/sdh
+venv=$home/local/opt/xkeysnail/venv
+python=$venv/bin/python3
+#xkeysnail=/usr/local/bin/xkeysnail
+xkeysnail=$venv/bin/xkeysnail
+config=/home/sdh/config/xkeysnail.py
+log=/home/sdh/xkeysnail.log
+
 killall xkeysnail
-~/local/bin/fix-uinput
-nohup xrun /usr/local/bin/xkeysnail ~/config/xkeysnail.py &>> ~/xkeysnail.log &
+kill `ps -ef | grep xkeysnail | grep -v grep | sed 's/^\S\S*\s\s*//;s/\s.*//'`
+
+# ~/local/bin/fix-uinput
+nohup xrun $python $xkeysnail $config &>> $log &
 # /usr/local/bin/xkeysnail /home/sdh/config/xkeysnail.py &
 
 rm ~/fixkbd

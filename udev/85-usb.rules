@@ -1,6 +1,12 @@
 #ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usbhid", RUN+="/bin/bash /home/sdh/local/bin/usb-replug"
 #ACTION=="bind", SUBSYSTEM=="usb", ATTRS{idVendor}=="1a7c", ATTRS{idProduct}=="0191", RUN+="/home/sdh/local/bin/fix-mouse"
 
+# Microsoft ergonomic keyboard
 ACTION=="bind", DRIVER=="usbhid", SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="00db", RUN+="/home/sdh/local/bin/fix-keyboard"
+# Perixx ergonomic keyboard
+ACTION=="bind", DRIVER=="usbhid", SUBSYSTEM=="usb", ATTRS{idVendor}=="04f2", ATTRS{idProduct}=="2030", RUN+="/home/sdh/local/bin/fix-keyboard"
 
+# Evoluent Verticalmouse4
 ACTION=="bind", SUBSYSTEM=="usb", ATTR{product}=="*Mouse*", RUN+="/home/sdh/local/bin/fix-mouse"
+# Delux vertical mouse
+ACTION=="bind", SUBSYSTEM=="usb", ATTR{product}=="*SONiX*", RUN+="/home/sdh/local/bin/fix-mouse"

@@ -15,6 +15,3 @@ function run_init_scripts {
   done
 }
 run_init_scripts
-
-# bun completions
-[ -s "/usr/local/google/home/sdh/.bun/_bun" ] && source "/usr/local/google/home/sdh/.bun/_bun"

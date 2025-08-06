@@ -58,6 +58,97 @@ define_keymap(re.compile(r"Google-chrome"), {
     # K("M-f"): with_mark(K("C-right")),
     # Beginning/End of line
     K("C-a"): with_mark(K("home")),
+    K("C-Shift-a"): K("C-Shift-a"), # don't override this one (vscode)
+    K("C-e"): with_mark(K("end")),
+    K("C-Shift-e"): K("C-Shift-e"), # don't override this one (vscode)
+    ## Page up/down
+    #K("M-v"): with_mark(K("page_up")),
+    #K("C-v"): with_mark(K("page_down")),
+    # Beginning/End of file
+    K("M-Shift-comma"): with_mark(K("C-home")),
+    K("M-Shift-dot"): with_mark(K("C-end")),
+    # # Newline
+    # K("C-m"): K("enter"),
+    # K("C-j"): K("enter"),
+    # K("C-o"): [K("enter"), K("left")],
+    # Copy
+    # K("C-w"): [K("C-x"), set_mark(False)],
+    # K("M-w"): [K("C-c"), set_mark(False)],
+    # K("C-y"): [K("C-v"), set_mark(False)],
+    # Delete
+    K("C-d"): [K("delete"), set_mark(False)],
+    K("M-d"): [K("C-delete"), set_mark(False)],
+    K("C-Shift-d"): K("C-Shift-d"), # preserve just in case
+    # Kill line
+    K("C-k"): [K("Shift-end"), K("C-x"), set_mark(False)],
+    K("C-Shift-k"): K("C-Shift-k"), # preserve just in case
+    # # Undo
+    # K("C-slash"): [K("C-z"), set_mark(False)],
+    # K("C-Shift-ro"): K("C-z"),
+    # # Mark
+    # K("C-space"): set_mark(True),
+    # K("C-M-space"): with_or_set_mark(K("C-right")),
+    # Search
+    #K("C-s"): [K("C-f"), K("enter")], # K("F3"),
+    #K("C-r"): K("Shift-C-g"), # K("Shift-F3"),
+    #K("C-s"): K("F3"),
+    #K("C-r"): K("Shift-F3"),
+    K("M-Shift-key_5"): K("C-h"),
+    # Cancel
+    K("C-g"): [K("esc"), set_mark(False)],
+    K("C-Shift-g"): K("C-Shift-g"), # preserve just in case
+    # Escape
+    K("C-q"): escape_next_key,
+    K("C-Shift-q"): K("C-Shift-q"), # preserve just in case
+    # C-x YYY
+    #K("C-x"): {
+    #    # # C-x h (select all)
+    #    # K("h"): [K("C-home"), K("C-a"), set_mark(True)],
+    #    # # C-x C-f (open)
+    #    # K("C-f"): K("C-o"),
+    #    # C-x C-s (save)
+    #    K("C-s"): K("C-s"),
+
+    #    # C-x k (kill tab)
+    #    K("k"): K("C-f4"),
+    #    # # C-x C-c (exit)
+    #    # K("C-c"): K("C-q"),
+    #    # cancel
+    #    K("C-g"): pass_through_key,
+    #    # C-x u (undo)
+    #    K("u"): [K("C-z"), set_mark(False)],
+    #    # C-x w (delete)
+    #    K("w"): K("delete"),
+
+    #    # C-x C-x: cut
+    #    K("C-x"): K("C-x"),
+    #    # C-x C-v: paste
+    #    K("C-v"): K("C-v"),
+    #},
+    # Suppress bad things I never want to do
+    K("Shift-C-w"): None, # close window !!
+    K("M-q"): None,       # close all windows !!
+    K("C-w"): K("C-f4"),  # more effective
+    K("M-Shift-x"): K("M-Shift-key_5"), # strike-through in docs
+}, "Emacs-like keys")
+
+# NOTE: this doesn't really work, since it depends too heavily on mouse position
+#define_keymap(re.compile(r".*"), {
+#    K("Shift-Insert"): K("BTN_MIDDLE"),
+#}, "keyboard paste")
+
+define_keymap(re.compile(r"Code"), {
+    # # Cursor
+    # K("C-b"): with_mark(K("left")),
+    # K("C-f"): with_mark(K("right")),
+    # K("C-p"): with_mark(K("up")),
+    # K("C-n"): with_mark(K("down")),
+    # K("C-h"): with_mark(K("backspace")),
+    # # Forward/Backward word
+    # K("M-b"): with_mark(K("C-left")),
+    # K("M-f"): with_mark(K("C-right")),
+    # Beginning/End of line
+    K("C-a"): with_mark(K("home")),
     K("C-e"): with_mark(K("end")),
     ## Page up/down
     #K("M-v"): with_mark(K("page_up")),
@@ -119,14 +210,4 @@ define_keymap(re.compile(r"Google-chrome"), {
     #    # C-x C-v: paste
     #    K("C-v"): K("C-v"),
     #},
-    # Suppress bad things I never want to do
-    K("Shift-C-w"): None, # close window !!
-    K("M-q"): None,       # close all windows !!
-    K("C-w"): K("C-f4"),  # more effective
-    K("M-Shift-x"): K("M-Shift-key_5"), # strike-through in docs
 }, "Emacs-like keys")
-
-# NOTE: this doesn't really work, since it depends too heavily on mouse position
-#define_keymap(re.compile(r".*"), {
-#    K("Shift-Insert"): K("BTN_MIDDLE"),
-#}, "keyboard paste")

@@ -12,10 +12,14 @@ fi
 prepend_to_list -e PATH ~/.cargo/bin
 prepend_to_list -e PATH ~/local/bin
 prepend_to_list -e PATH ./node_modules/.bin
+prepend_to_list -e PATH ~/.local/share/coursier/bin
 
 if [ "$(uname)" = Darwin ]; then
   export SHELL="$(ps -ocomm= -p $$)"
   SHELL=${SHELL/-/} # note: not a fully qualified name.
+  if [ -n "${SHELL##/*}" ]; then # Ensure it starts with /
+    SHELL=$(which "$SHELL")
+  fi
 else
   export SHELL=$(which "$(ps -ocomm= -q $$)")
 fi
@@ -50,6 +54,7 @@ fi
 export NVM_DIR="$HOME/.nvm"
 source_if_exists "$NVM_DIR/nvm.sh"
 source_if_exists "$NVM_DIR/bash_completion"
+source_if_exists ~/.cargo/env
 
 export PREZTO_DIR="$HOME/.zprezto"
 source_if_exists "$PREZTO/init.zsh"
@@ -58,4 +63,9 @@ source_if_exists "$PREZTO/init.zsh"
 if [ -d "$HOME/.bun" ]; then
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"
+fi
+
+if [ "$(hostname)" = giskard ]; then
+  export DISPLAY=DESKTOP-6SBOT1P:0.0
+  export LIBGL_ALWAYS_INDIRECT=1
 fi

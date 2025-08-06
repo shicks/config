@@ -120,7 +120,7 @@ font:
   # OS X only: use thin stroke font rendering. Thin strokes are suitable
   # for retina displays, but for non-retina you probably want this set to
   # false.
-  use_thin_strokes: true
+  #use_thin_strokes: true
   antialias: true
   #rgba: none
 
@@ -199,7 +199,7 @@ visual_bell:
   duration: 0
 
 # Background opacity
-background_opacity: 1.0
+#background_opacity: 1.0
 
 # Mouse bindings
 #
@@ -397,7 +397,7 @@ key_bindings:
   # Consider finding bindings with numpad (Minus, Plus, etc)
   - { key: Key0,     mods: Control, action: ResetFontSize                }
   - { key: Equals,   mods: Control, action: IncreaseFontSize             }
-  - { key: Subtract, mods: Control, action: DecreaseFontSize             }
+  - { key: Minus, mods: Control, action: DecreaseFontSize             }
 
   ## Cursor Keys:
   ##  1. Arrows and Home/End: ^[[<mods><letter>
@@ -575,7 +575,7 @@ key_bindings:
   - { key: Key9,     mods: Control, chars: "\x1b[36~9"                   }
 
   - { key: Grave,    mods: Control, chars: "\x1b[36~`"                   }
-  - { key: Subtract, mods: Control, chars: "\x1b[36~-"                   }
+  - { key: Minus, mods: Control, chars: "\x1b[36~-"                   }
   - { key: Equals,   mods: Control, chars: "\x1b[36~="                   }
   - { key: LBracket, mods: Control, chars: "\x1b[36~["                   }
   - { key: RBracket, mods: Control, chars: "\x1b[36~]"                   }
@@ -662,7 +662,7 @@ key_bindings:
   - { key: Key9,  mods: Control|Alt, chars: "\x1b[36~\x1b9" }
 
   - { key: Grave,      mods: Control|Alt, chars: "\x1b[36~\x1b`"  }
-  - { key: Subtract,   mods: Control|Alt, chars: "\x1b[36~\x1b-"  }
+  - { key: Minus,   mods: Control|Alt, chars: "\x1b[36~\x1b-"  }
   - { key: Equals,     mods: Control|Alt, chars: "\x1b[36~\x1b="  }
   - { key: LBracket,   mods: Control|Alt, chars: "\x1b[36~\x1b["  }
   - { key: RBracket,   mods: Control|Alt, chars: "\x1b[36~\x1b]"  }
@@ -724,7 +724,7 @@ key_bindings:
   - { key: 27,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b}" } # rbracket/rbrace
   - { key: 43,  mods: Control|Shift|Alt, chars: "\x1b[36~\x1b|" } # backslash/pipe
   # skip tilde and underscore since they have dedicated sequences
-  # - { key: Subtract, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b_" }
+  # - { key: Minus, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b_" }
   # - { key: Grave, mods: Control|Shift|Alt, chars: "\x1b[36~\x1b~" }
 
 ## TODO(sdh): Consider the non-number keys in the numpad. Somewhere I saw

@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# Usage: volume [up|down|max|mute|unmute|toggle]
+# For now there is no OSD or audible blip
+
+unmute() {
+  amixer set Master unmute
+  amixer set Headphone unmute
+  amixer set Speaker unmute
+  amixer set PCM unmute
+}
+
+mute() {
+  amixer set Master mute
+}
+
+ismuted() {
+  amixer get Master | grep -q '\[off\]'
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    set -- invalid
+  fi
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      (up)
+        if ismuted; then unmute; fi
+        amixer set Master 1+
+        ;;
+      (down)
+        amixer set Master 1-
+        ;;
+      (max)
+        if ismuted; then unmute; fi
+        amixer set Master 100%
+        ;;
+      (unmute)
+        if ismuted; then unmute; fi
+        ;;
+      (mute)
+        if ! ismuted; then mute; fi
+        ;;
+      (toggle)
+        if ismuted; then
+          unmute
+        else
+          mute
+        fi
+        ;;
+      (*)
+        echo "Usage: volume [up|down|mute|unmute|toggle]"
+        exit 1
+        ;;
+    esac
+    shift
+  done
+}
+
+main "$@"

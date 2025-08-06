@@ -41,7 +41,7 @@ while [ $# -gt 0 ]; do
     done
   fi
   case "$contents" in
-    ('')  eval "$name=$file" ;;
-    (*) eval "$name=$file:$contents" ;;
+    ('')  eval "$name='$file'" ;;
+    (*) eval "$name='$file:$contents'" ;;
   esac
 done

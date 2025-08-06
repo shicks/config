@@ -1,60 +1,72 @@
-#!/bin/sh
+#!/usr/bin/perl
 
-# Usage: volume [up|down|max|mute|unmute|toggle]
+# Usage: volume [up|down|max|mute|unmute|toggle|get]
 # For now there is no OSD or audible blip
 
-unmute() {
-  amixer set Master unmute
-  amixer set Headphone unmute
-  amixer set Speaker unmute
-  amixer set PCM unmute
+use strict;
+use warnings;
+
+sub usage {
+  print STDERR "Usage: volume [up|down|max|mute|unmute|toggle|get]\n";
+  exit shift;
 }
 
-mute() {
-  amixer set Master mute
+sub pactl {
+  #local($") = ' ';
+  #print "pactl @_\n";
+  system 'pactl', @_;
 }
 
-ismuted() {
-  amixer get Master | grep -q '\[off\]'
+my $cmd = shift || '';
+usage 1 unless $cmd;
+usage 0 if $cmd =~ /(--)?help/;
+
+open SINKS, '-|', 'pactl', 'list', 'sinks';
+my $num = -1;
+my $state = 'IDLE';
+my $mute = 0;
+my $volume = 0;
+while (<SINKS>) {
+  if (/^Sink \#(\d+)/) {
+    last if $num >= 0 and $state eq 'RUNNING';
+    $num = $1;
+    $state = 'IDLE';
+  } elsif (/^\s+State: (\w+)/) {
+    $state = $1;
+  } elsif ($state ne 'RUNNING' or $num < 0) {
+    next; # skip the later cases
+  } elsif (/^\s+Mute: (yes|no)/) {
+    $mute = ($1 eq 'yes');
+  } elsif (/^\s+Volume: .*?(\d+)%/) {
+    $volume = $1;
+  }
 }
 
-main() {
-  if [ $# -eq 0 ]; then
-    set -- invalid
-  fi
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      (up)
-        if ismuted; then unmute; fi
-        amixer set Master 1+
-        ;;
-      (down)
-        amixer set Master 1-
-        ;;
-      (max)
-        if ismuted; then unmute; fi
-        amixer set Master 100%
-        ;;
-      (unmute)
-        if ismuted; then unmute; fi
-        ;;
-      (mute)
-        if ! ismuted; then mute; fi
-        ;;
-      (toggle)
-        if ismuted; then
-          unmute
-        else
-          mute
-        fi
-        ;;
-      (*)
-        echo "Usage: volume [up|down|mute|unmute|toggle]"
-        exit 1
-        ;;
-    esac
-    shift
-  done
+if ($state ne 'RUNNING' or $num < 0) {
+  print STDERR "Could not find a running sink\n";
+  exit 1;
 }
 
-main "$@"
+if ($cmd eq 'get') {
+  my $offon = $mute ? 'off' : 'on';
+  print "Volume #${num}: ${volume}\% $offon\n";
+} elsif ($cmd eq 'up') {
+  $volume += 5;
+  $volume = 100 if $volume > 100;
+  pactl('set-sink-volume', $num, "${volume}%");
+} elsif ($cmd eq 'down') {
+  $volume -= 5;
+  $volume = 0 if $volume < 0;
+  pactl('set-sink-volume', $num, "${volume}%");
+} elsif ($cmd eq 'max') {
+  pactl('set-sink-volume', $num, '100%');
+} elsif ($cmd eq 'mute') {
+  pactl('set-sink-mute', $num, 'yes');
+} elsif ($cmd eq 'unmute') {
+  pactl('set-sink-mute', $num, 'no');
+} elsif ($cmd eq 'toggle') {
+  pactl('set-sink-mute', $num, ($mute ? 'no' : 'yes'));
+} else {
+  print STDERR "Unknown command: $cmd\n";
+  usage 1;
+}

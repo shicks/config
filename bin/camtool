@@ -9,11 +9,14 @@
 
 use strict;
 use warnings;
+use File::Temp qw/tempfile/;
 
 my $in_regex = 'game capture';
 my $out_regex = 'dummy video';
 my $crop = 1;
 my $text = '';
+my $freeze = 0;
+my $loop = 0;
 
 while (@ARGV) {
   $_ = shift;
@@ -23,6 +26,12 @@ while (@ARGV) {
     $in_regex = shift;
   } elsif ($_ eq '--nocrop') {
     $crop = 0;
+  } elsif ($_ eq '--freeze') {
+    $freeze = 1;
+  } elsif ($_ eq '--loop') {
+    # NOTE: --loop is pretty bad right now...
+    # It also lags the computer terribly.
+    $loop = 1;
   } elsif ($_ eq '--text') {
     $text = shift;
     $in_regex = 'ABCDEFGHIJKLMNOP'; # should never match
@@ -76,6 +85,16 @@ sub is_video {
   return $found;
 }
 
+sub ensure_not_running {
+  my $bin = shift;
+  if (is_running($bin)) {
+    system 'killall', $bin;
+    sleep 1;
+    sleep 1 if is_running($bin);
+  }
+  die "Existing process could not be killed." if is_running($bin);
+}
+
 # First order of business: make sure the loopback module is installed
 my $needs_module = 1;
 open LSMOD, '-|', 'lsmod';
@@ -116,17 +135,20 @@ die "Could not find /$out_regex/ in [$cams]" unless $out;
 my @args = ();
 
 if ($text) {
+  my ($fh, $tmp) = tempfile(SUFFIX => '.jpg');
+  close $fh;
   # Pick an image, caption it.
   my $img = `ls ~/bg/??*/*.jpg | shuf | head -1`;
   chomp $img;
   print "Selected image $img\n";
   system 'convert', $img, qw/-font Arial -pointsize 64 -draw/,
     "gravity center fill black text 0,4 \'$text\' fill white text 4,0 \'$text\' ",
-    '/tmp/cam.jpg';
+    $tmp;
   $crop = 0;
-  $in = '/tmp/cam.jpg';
+  $in = $tmp;
   push @args, qw/-loop 1/;
 }
+
 push @args, '-i', $in, qw/-f v4l2 -pix_fmt yuv420p/;
 if ($crop) {
   #push @args, '-filter:v', 'scale=720:568,crop=640:360:40:60';
@@ -136,28 +158,52 @@ if ($crop) {
   #push @args, '-filter:v', 'scale=640:360';
   push @args, '-filter:v', 'scale=1280:720';
 }
+
+if ($freeze or $loop) {
+  ensure_not_running('ffmpeg');
+  system 'fuser', $in or die "Device $in already in use";
+  my ($fh, $tmp) = tempfile(SUFFIX => $freeze ? '.jpg' : '.mp4');
+  close $fh; unlink $tmp;
+  if ($freeze) {
+    system qw/ffmpeg -i/, $in, qw/-frames 1/, $tmp;
+    @args = (qw/-loop 1/, @args);
+  } else {
+    my @args2 = @args;
+    @args2 = grep { not /^(-f|v4l2)$/ } @args2;
+    for (my $i = 0; $i < @args; $i++) {
+      if ($args[$i] eq '-filter:v') {
+        $args[$i] = '-filter_complex';
+        $args[++$i] = 
+            '[0]reverse[r];[0][r]concat';#,loop=5:250,setpts=N/25/TB';
+      }
+    }
+    @args = (qw/-stream_loop -1/, @args);
+    push @args2, qw/-frames 120/, $tmp;
+    print "ffmpeg @args2\n";
+    system 'ffmpeg', @args2;
+  }
+  @args = map { $_ eq $in ? $tmp : $_ } @args;
+  $in = $tmp;
+}
+
 push @args, $out;
 
 # See if ffmpeg is already running?
-if (is_running('ffmpeg')) {
-  system qw/killall ffmpeg/;
-  sleep 1;
-}
-die "Existing process could not be killed." if is_running('ffmpeg');
-
+ensure_not_running('ffmpeg');
 system 'fuser', $in or die "Device $in already in use";
 
 @args = map {
   if (m([^-:=/_a-zA-Z0-9])) {
-    s/'/'"'"'/g;
-    $_ = "'$_'";
+    s/'/'\\''"'\\''"'\\''/g;
+    $_ = "'\\''$_'\\''";
   }
   $_
 } @args;
 
-print STDERR join("\n", @args);
+print STDERR join("\n", @args). "\n";
 #system "echo 'nohup ffmpeg @args > /tmp/ffmpeg.out 2> /tmp/ffmpeg.err' | at now";
 my $args = join(' ', @args);
+print "echo 'nohup ffmpeg $args > /dev/null 2> /dev/null' | at now\n";
 system "echo 'nohup ffmpeg $args > /dev/null 2> /dev/null' | at now";
 sleep 1;
 

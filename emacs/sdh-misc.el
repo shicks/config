@@ -774,8 +774,9 @@ See also: `xah-copy-to-register-1', `insert-register'."
   (add-hook 'ediff-mode-hook 'sdh-ediff-hook)
   (add-hook 'ediff-before-setup-hook #'sdh-ediff/store-pre-ediff-winconfig)
   (add-hook 'ediff-quit-hook #'sdh-ediff/restore-pre-ediff-winconfig))
-
 (when (fboundp 'ediff-setup-keymap) (sdh-ediff-setup))
+
+(defun ediff-window-display-p () nil)
 
 ;;;;;;;
 
@@ -928,5 +929,18 @@ Does nothing if already in the window system."
 (global-set-key (kbd "M-] 5 2 ; c ;") 'sdh-paste-base64)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; from https://www.emacswiki.org/emacs/IncrementNumber
+(defun sdh-increment-number-at-point ()
+  (interactive)
+  (skip-chars-backward "0-9")
+  (or (looking-at "[0-9]+")
+      (error "No number at point"))
+  (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq visible-bell t)
+(setq ring-bell-function 'ignore)
 
 (provide 'sdh-misc)

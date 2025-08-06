@@ -13,7 +13,15 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 
-local batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
+os.execute("sh -c \"> ~/awesome.log\"")
+local function debug_log(c)
+  os.execute("sh -c 'echo " .. c .. " >> ~/awesome.log'")
+end
+
+local batteryarc_widget = pcall(require, "awesome-wm-widgets.batteryarc-widget.batteryarc")
+if not batteryarc_widget then
+   batteryarc_widget = function(...) return nil end
+end
 
 -- Load Debian menu entries
 require("debian.menu")
@@ -53,7 +61,18 @@ terminal = os.getenv("HOME") .. "/local/bin/alacritty" -- "x-terminal-emulator"
 -- lock = "gnome-screensaver-command -l"
 -- lock = "dm-tool lock"
 lock = "xsecurelock"
-chrome = "google-chrome-stable"
+chrome = os.getenv("HOME") .. "/local/bin/chrome"
+chromeFlags = ""
+
+-- chromeFlags = "--disable-features=UseChromeOSDirectVideoDecoder " ..
+--               "--enable-features=VaapiVideoDecoder,CanvasOopRasterization,VaapiVideoEncoder,WebUIDarkMode " ..
+--               "--ignore-gpu-blocklist " ..
+--               "--high-dpi-support=1 " ..
+--               "--force-device-scale-factor=1 " ..
+--               "--enable-gpu-rasterization " ..
+--               "--enable-zero-copy " ..
+--               "--password-store=gnome "
+
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -71,14 +90,14 @@ awful.layout.layouts = {
     awful.layout.suit.tile.left,
     awful.layout.suit.tile.bottom,
     awful.layout.suit.tile.top,
-    -- awful.layout.suit.fair,
-    -- awful.layout.suit.fair.horizontal,
-    -- awful.layout.suit.spiral,
-    -- awful.layout.suit.spiral.dwindle,
-    -- awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
-    -- awful.layout.suit.magnifier,
-    -- awful.layout.suit.corner.nw,
+    awful.layout.suit.fair.horizontal, -- sdh: This one is awesome!
+    awful.layout.suit.fair, -- sdh: I'm dubious on this
+    awful.layout.suit.spiral, -- sdh: Testing this provisionally?
+    awful.layout.suit.spiral.dwindle, -- sdh: Testing this provisionally?
+    awful.layout.suit.max,
+    -- awful.layout.suit.max.fullscreen, -- sdh: Covers top bar
+    -- awful.layout.suit.magnifier, -- sdh: I don't find this useful
+    -- awful.layout.suit.corner.nw, -- sdh: I dislike how inflexible this is
     -- awful.layout.suit.corner.ne, -- sdh: commented out by default
     -- awful.layout.suit.corner.sw, -- sdh: commented out by default
     -- awful.layout.suit.corner.se, -- sdh: commented out by default
@@ -116,7 +135,8 @@ mymainmenu = awful.menu({
     { "Debian", debian.menu.Debian_menu.Debian },
     { "open terminal", terminal },
     -- sdh: added a few extra buttons
-    { "chrome", chrome .. " --high-dpi-support=1 --force-device-scale-factor=1" },
+    { "settings", "gnome-control-center" }, -- TODO - move into submenu, copy others
+    { "chrome", chrome .. " " .. chromeFlags },
     { "lock", lock },
   }})
 
@@ -245,7 +265,7 @@ awful.screen.connect_for_each_screen(function(s)
 	    --wibox.widget.textbox("hello sailor"),
             mytextclock,
             s.mylayoutbox,
-        },
+        }
     }
 end)
 -- }}}
