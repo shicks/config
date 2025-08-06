@@ -38,6 +38,8 @@ config=/home/sdh/config/xkeysnail.py
 log=/home/sdh/xkeysnail.log
 
 killall xkeysnail
+kill `ps -ef | grep xkeysnail | grep -v grep | sed 's/^\S\S*\s\s*//;s/\s.*//'`
+
 # ~/local/bin/fix-uinput
 nohup xrun $python $xkeysnail $config &>> $log &
 # /usr/local/bin/xkeysnail /home/sdh/config/xkeysnail.py &
