@@ -7,6 +7,7 @@
 
 ;; Set up load path
 (add-to-list 'load-path "~/config/emacs")
+(add-to-list 'load-path "~/config/emacs/wiki")
 
 ;; My own settings
 (require 'sdh-misc)
