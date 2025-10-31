@@ -49,8 +49,9 @@
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
   (add-hook 'before-save-hook #'lsp-organize-imports t t))
 
-(with-eval-after-load 'go-mode
-   (require 'go-autocomplete))
+;; NOTE: go-autocomplete is giving early errors all over the place
+;; (with-eval-after-load 'go-mode
+;;    (require 'go-autocomplete))
 
 ;; TODO - Might be nice to get this enabled...
 ;; See https://github.com/dominikh/go-mode.el

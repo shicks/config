@@ -193,11 +193,6 @@
       (global-set-key (kbd "ESC M-O D") 'window-jump-left)
 ))
 
-(if (sdh-try-require 'doremi-cmd)
-    (progn
-      (global-set-key (kbd "C-c t w") 'doremi-window-height+)
-      ))
-
 ;; Obsolete bindings
 ;(global-set-key "\C-CC-Z" '(replace-regexp "<[^<>]*>" "")) ;; For c++ errors
 ;(global-set-key "\C-x5a" 'beginning-of-buffer)
