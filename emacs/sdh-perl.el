@@ -20,7 +20,8 @@
 ;  (setq cperl-extra-newline-before-brace t)
   (set-face-background 'cperl-array-face "wheat")
   (set-face-background 'cperl-hash-face "wheat")
-  (cperl-define-key "}" 'cperl-electric-terminator)
+  ;; NOTE: cperl-define-key is no longer a thing...?
+  ;;(cperl-define-key "}" 'cperl-electric-terminator)
   (cperl-init-faces)
   ;; don't align parens!
   (custom-set-variables '(cperl-indent-parens-as-block t))
