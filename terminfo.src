@@ -97,11 +97,13 @@ tmux-alacritty|tmux running on top of alacritty,
   use=alacritty,
   use=screen-256color,
   smkx=,rmkx=,
+  Tc,
 
 tmux-alacritty-256color|tmux running on top of alacritty,
   use=alacritty,
   use=screen-256color,
   smkx=,rmkx=,
+  Tc,
 
 # TODO(sdh): we're having some difficulties w/ iTerm2 connecting to tmux
 # over SSH and running emacs.  For some reason, emacs sets smkx (cursor
