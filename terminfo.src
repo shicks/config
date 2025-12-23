@@ -31,6 +31,9 @@ true-color|mixin for true-color,
   setf24=\E[38;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
   Tc,
 
+alacritty-underlines|mixin for colored underlines,
+  Setulc=\E[58\:2\:\:%p1%{65536}%/%d\:%p1%{256}%/%{255}%&%d\:%p1%{255}%&%d%;m,
+
 # Note: The keypad versions of the arrow keys don't seem to work nicely with
 # tmux and/or zsh, so just use the same as the cursor versions.
 alacritty-keyboard|mixin for the keybindings we set in alacritty.yml,
@@ -78,6 +81,7 @@ alacritty|alacritty terminal emulator,
   use=xterm-clipboard,
   use=xterm-cursor-color,
   use=xterm-256color,
+  use=alacritty-underlines,
 # NOTE: xterm-256color MUST GO LAST since it's not a mixin!
 
 #  use=xterm+256setaf,
@@ -96,14 +100,14 @@ alacritty-256color|alacritty terminal emulator,
 tmux-alacritty|tmux running on top of alacritty,
   use=alacritty,
   use=screen-256color,
+  use=true-color,
   smkx=,rmkx=,
-  Tc,
 
 tmux-alacritty-256color|tmux running on top of alacritty,
   use=alacritty,
   use=screen-256color,
+  use=true-color,
   smkx=,rmkx=,
-  Tc,
 
 # TODO(sdh): we're having some difficulties w/ iTerm2 connecting to tmux
 # over SSH and running emacs.  For some reason, emacs sets smkx (cursor
