@@ -296,6 +296,10 @@ to change individual files."
   "Version of git-diff for Hg."
   (interactive "sRev: ")
   (git-diff-internal rev 'hg))
+(defun hg-diff (rev)
+  "Version of git-diff for Hg."
+  (interactive "sRev: ")
+  (git-diff-internal rev 'hg))
 
 (defun git-diff-p4 ()
   "Version of git-diff for P4."
