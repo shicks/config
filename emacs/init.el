@@ -72,10 +72,8 @@
 ;    (set-default-font "VictorMono Nerd Font Regular"))
 
 (if (not (string= system-type "darwin"))
-    ;; NOTE: These don't currently work on mac.
-    (progn (require 'closure-template-html-mode)
-           (require 'sdh-flymake)
-           ))
+    ;; NOTE: This doesn't currently work on mac.
+    (require 'sdh-flymake))
 
 (require 'sdh-go)
 (require 'fill-column-indicator)

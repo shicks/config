@@ -53,7 +53,7 @@
    '(company company-lsp counsel doremi-cmd exec-path-from-shell fira-code-mode
              flycheck flymake-go go-mode haskell-mode hl-line+ js2-mode
              kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode
-             markdown-mode multiple-cursors phi-search phi-search-mc
+             magit markdown-mode multiple-cursors phi-search phi-search-mc
              protobuf-mode rainbow-mode rust-mode typescript-mode visual-regexp
              window-jump yasnippet))
  '(perl6-indent-offset 2)
