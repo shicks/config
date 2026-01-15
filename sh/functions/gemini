@@ -1,0 +1,30 @@
+local tmpdir=$(mktemp -d)
+local cmdfile="$tmpdir/gemini_cmd.sh"
+local tty=$(tty)
+
+cleanup() {
+  rm -rf "$tmpdir"
+}
+trap cleanup EXIT
+
+local cmd_str
+if [ -n "$GEMINI_COMMAND" ]; then
+  cmd_str="$GEMINI_COMMAND"
+else
+  cmd_str="command gemini"
+fi
+
+# Append arguments with proper quoting for the shell script
+for arg in "$@"; do
+  # Escape single quotes for inclusion within single quotes
+  escaped_arg=$(printf '%s\n' "$arg" | sed "s/'/'\\''/g")
+  cmd_str+=" '"$escaped_arg"'"
+done
+
+# Create the temporary script
+echo "#!/bin/sh" > "$cmdfile"
+echo "$cmd_str" >> "$cmdfile"
+chmod +x "$cmdfile"
+
+# Run script, pipe its STDOUT to gemini_title_filter, which writes to the current TTY
+script -qefc "$cmdfile" /dev/null | gemini_title_filter > "$tty"
