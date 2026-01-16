@@ -193,20 +193,28 @@ func main() {
 			outFile.WriteString(processed)
 		}
 
-		// --- Check for incomplete UTF-8 at the end of remaining ---
-		tempRemaining := ""
-		r, size := utf8.DecodeLastRuneInString(remaining)
-		if r == utf8.RuneError && size == 1 && len(remaining) < utf8.UTFMax {
-			// Potential partial rune at the end, keep all of it for next buffer read
-			tempRemaining = remaining
-		} else {
-			// No partial rune, so clear (should be empty if loop exited due to no delimiters)
-		}
-		currentLine.Reset()
-		currentLine.WriteString(tempRemaining)
-
-	}
-
+		        // --- Check for incomplete sequences at the end of remaining ---
+		        if strings.HasSuffix(remaining, "\x1b") {
+		            // Ends with ESC, potential start of an ANSI sequence, keep it.
+		            currentLine.Reset()
+		            currentLine.WriteString(remaining)
+		        } else {
+		            r, size := utf8.DecodeLastRuneInString(remaining)
+		            if r == utf8.RuneError && size == 1 {
+		                // Potential partial UTF-8 rune at the end, keep it.
+		                currentLine.Reset()
+		                currentLine.WriteString(remaining)
+		            } else {
+		                // Otherwise, any content in 'remaining' is complete and can be written.
+		                if len(remaining) > 0 {
+		                    os.Stdout.WriteString(remaining)
+		                    os.Stdout.Sync()
+		                    outFile.WriteString(remaining)
+		                }
+		                currentLine.Reset()
+		            }
+		        }
+		    } // End of outer for loop
 	// Flush any remaining buffer
 	if currentLine.Len() > 0 {
 		final := strings.ReplaceAll(currentLine.String(), "\r", "")
