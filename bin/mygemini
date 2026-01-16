@@ -16,6 +16,8 @@ binmode(STDIN, ':utf8');
 
 use IO::Handle;
 
+$| = 1;
+
 # Read any existing title.
 my $base_title = $ENV{MY_TERMINAL_TITLE} || 'G:' . `basename $(pwd)`;
 chomp $base_title;
@@ -24,11 +26,8 @@ sub main {
   # Figure out the command to run.
   my $cmd = $ENV{GEMINI_COMMAND} || escape_word(`command -v gemini`);
   chomp $cmd;
-  print STDERR "ARGV: @ARGV\n";
   my @args = map { escape_word($_) } @ARGV;
-  print STDERR "args: @args\n";
   $cmd .= " @args";
-  print STDERR "cmd: $cmd\n";
 
   print STDERR "\e[1;30mscript -e -c '$cmd' /dev/null |\e[m\n";
   open my $pipe, '-|:utf8', 'script', '-e', '-c', $cmd, '/dev/null'
