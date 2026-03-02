@@ -10,3 +10,5 @@ ACTION=="bind", DRIVER=="usbhid", SUBSYSTEM=="usb", ATTRS{idVendor}=="04f2", ATT
 ACTION=="bind", SUBSYSTEM=="usb", ATTR{product}=="*Mouse*", RUN+="/home/sdh/local/bin/fix-mouse"
 # Delux vertical mouse
 ACTION=="bind", SUBSYSTEM=="usb", ATTRS{idVendor}=="320f", ATTRS{idProduct}=="2218", RUN+="/home/sdh/local/bin/fix-mouse"
+# Razer Basilisk V3 mouse
+ACTION=="bind", SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0099", RUN+="/home/sdh/local/bin/fix-mouse"
