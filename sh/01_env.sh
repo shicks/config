@@ -10,9 +10,10 @@ if [ -d ~/.sh.d/paths ]; then
 fi
 
 prepend_to_list -e PATH ~/.cargo/bin
+prepend_to_list -e PATH ~/.local/bin
 prepend_to_list -e PATH ~/local/bin
-prepend_to_list -e PATH ./node_modules/.bin
 prepend_to_list -e PATH ~/.local/share/coursier/bin
+prepend_to_list -e PATH ./node_modules/.bin
 
 if [ "$(uname)" = Darwin ]; then
   export SHELL="$(ps -ocomm= -p $$)"
@@ -68,4 +69,9 @@ fi
 if [ "$(hostname)" = giskard ]; then
   export DISPLAY=DESKTOP-6SBOT1P:0.0
   export LIBGL_ALWAYS_INDIRECT=1
+fi
+
+if [ -d "$HOME/go/bin" ]; then
+  # TODO - do we need anything else here?
+  export PATH="$PATH:$HOME/go/bin"
 fi

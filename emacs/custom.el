@@ -50,12 +50,18 @@
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "\3p")
  '(package-selected-packages
-   '(company company-lsp counsel doremi-cmd exec-path-from-shell fira-code-mode
-             flycheck flymake-go go-mode haskell-mode hl-line+ js2-mode
-             kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode
-             magit markdown-mode multiple-cursors phi-search phi-search-mc
-             protobuf-mode rainbow-mode rust-mode typescript-mode visual-regexp
-             window-jump yasnippet))
+   '(a68-mode apache-mode async bar-cursor bm boxquote browse-kill-ring
+              color-theme-modern company company-lsp counsel dart-mode dash
+              diminish doremi-cmd editorconfig epl eproject ess
+              exec-path-from-shell f fira-code-mode flx flycheck flymake-go
+              folding go-mode goto-chg graphviz-dot-mode haskell-mode helm
+              helm-core hl-line+ ht htmlize ido-completing-read+ initsplit
+              js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui
+              lua-mode lv magit markdown-mode memoize multiple-cursors
+              phi-search phi-search-mc pkg-info protobuf-mode puppet-mode
+              rainbow-mode rust-mode s session tabbar typescript-mode undo-tree
+              visual-regexp which-key window-jump yaml-mode yasnippet
+              yasnippet-snippets zenburn-theme))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(rust-indent-offset 2)

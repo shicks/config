@@ -46,3 +46,5 @@
 
 [include]
   path = ~/.gitconfig.local
+[safe]
+	bareRepository = all
