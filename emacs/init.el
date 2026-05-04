@@ -7,6 +7,7 @@
 
 ;; Set up load path
 (add-to-list 'load-path "~/config/emacs")
+(add-to-list 'load-path "~/config/emacs/wiki")
 
 ;; My own settings
 (require 'sdh-misc)
@@ -71,10 +72,8 @@
 ;    (set-default-font "VictorMono Nerd Font Regular"))
 
 (if (not (string= system-type "darwin"))
-    ;; NOTE: These don't currently work on mac.
-    (progn (require 'closure-template-html-mode)
-           (require 'sdh-flymake)
-           ))
+    ;; NOTE: This doesn't currently work on mac.
+    (require 'sdh-flymake))
 
 (require 'sdh-go)
 (require 'fill-column-indicator)

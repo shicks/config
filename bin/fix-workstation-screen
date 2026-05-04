@@ -6,18 +6,26 @@ use warnings;
 open XRANDR, '-|', 'xrandr';
 my $main = '';
 my $side = '';
+my $lowres = 0;
 while (<XRANDR>) {
   if (/^([-_a-zA-Z0-9]+) connected/) {
     my $device = $1;
     $_ = <XRANDR>;
     $main = $device if /3840x2160/;
-    $side = $device if /1920x1080/;
+    $side = $device if /1920x1080/ or /1024x768/;
+    $lowres = 1 if /1024x768/;
   }
 }
 close XRANDR;
 
 if ($main and $side) {
-  system qw/xrandr --dpi 108 --output/, $side, qw/--rotation left --right-of/, $main;
+  my $dpi = 108;
+  my @res = ();
+  if ($lowres) {
+    @res = qw/--mode 1600x900/;
+    $dpi = 96;
+  }
+  system qw/xrandr --dpi/, $dpi, '--output', $side, @res, qw/--rotation left --right-of/, $main;
 } else {
   print STDERR "main: $main\nside: $side\n";
 }

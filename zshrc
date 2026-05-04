@@ -15,3 +15,7 @@ function run_init_scripts {
   done
 }
 run_init_scripts
+
+# --- Gas Town Integration (managed by gt) ---
+[[ -f "$HOME/.config/gastown/shell-hook.sh" ]] && source "$HOME/.config/gastown/shell-hook.sh"
+# --- End Gas Town ---

@@ -2,6 +2,7 @@
 # by default, xterm does not define that capability, and if we don't
 # put anything, we'll get terminal spam.
 local title=${FIXED_TITLE:-$1}
+local original_title=$title
 
 case "$(basename "$SHELL")" in
   # In zsh only, add colors to the first character inside a repo.  Usually this
@@ -15,4 +16,8 @@ case "$(basename "$SHELL")" in
        ;;
 esac
 
+if [ "$original_title" != "..." ]; then
+  export MY_TERMINAL_TITLE="$title"
+fi
 echo -ne "\033]2;$title\007"
+

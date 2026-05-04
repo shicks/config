@@ -9,16 +9,36 @@
  '(column-number-mode t)
  '(company-idle-delay nil)
  '(compilation-error-regexp-alist
-   '(google-blaze-error google-blaze-warning google-log-error google-log-warning google-log-info google-log-fatal-message google-forge-python gunit-stack-trace absoft ada aix ant bash borland python-tracebacks-and-caml cmake cmake-info comma cucumber msft edg-1 edg-2 epc ftnchek iar ibm irix java jikes-file maven jikes-line clang-include clang-include gcc-include ruby-Test::Unit gnu lcc makepp mips-1 mips-2 msft omake oracle perl php rxp sparc-pascal-file sparc-pascal-line sparc-pascal-example sun sun-ada watcom 4bsd gcov-file gcov-header gcov-nomark gcov-called-line gcov-never-called perl--Pod::Checker perl--Test perl--Test2 perl--Test::Harness weblint guile-file guile-line))
+   '(google-blaze-error google-blaze-warning google-log-error google-log-warning
+                        google-log-info google-log-fatal-message
+                        google-forge-python gunit-stack-trace absoft ada aix ant
+                        bash borland python-tracebacks-and-caml cmake cmake-info
+                        comma cucumber msft edg-1 edg-2 epc ftnchek iar ibm irix
+                        java jikes-file maven jikes-line clang-include
+                        clang-include gcc-include ruby-Test::Unit gnu lcc makepp
+                        mips-1 mips-2 msft omake oracle perl php rxp
+                        sparc-pascal-file sparc-pascal-line sparc-pascal-example
+                        sun sun-ada watcom 4bsd gcov-file gcov-header
+                        gcov-nomark gcov-called-line gcov-never-called
+                        perl--Pod::Checker perl--Test perl--Test2
+                        perl--Test::Harness weblint guile-file guile-line))
  '(cperl-indent-parens-as-block t)
  '(css-indent-offset 2)
  '(custom-enabled-themes '(tango-dark))
  '(fira-code-mode-disabled-ligatures '("[]" "x"))
  '(google-jdb-port 5005)
  '(google-trailing-newline-modes
-   '(html-mode javascript-mode closure-template-html-mode cperl-mode js2-mode protobuf-mode cc-mode c++-mode google3-build-mode python-mode emacs-lisp-mode make-mode borg-mode js-mode css-mode html-mode nxhtml-mode java-mode shell-script-mode jde-mode ess-mode Rd-mode go-mode))
+   '(html-mode javascript-mode closure-template-html-mode cperl-mode js2-mode
+               protobuf-mode cc-mode c++-mode google3-build-mode python-mode
+               emacs-lisp-mode make-mode borg-mode js-mode css-mode html-mode
+               nxhtml-mode java-mode shell-script-mode jde-mode ess-mode Rd-mode
+               go-mode))
  '(google-trailing-whitespace-modes
-   '(html-mode javascript-mode closure-template-html-mode cperl-mode js2-mode protobuf-mode cc-mode c++-mode google3-build-mode python-mode emacs-lisp-mode make-mode borg-mode js-mode css-mode html-mode nxhtml-mode java-mode shell-script-mode jde-mode ess-mode Rd-mode go-mode))
+   '(html-mode javascript-mode closure-template-html-mode cperl-mode js2-mode
+               protobuf-mode cc-mode c++-mode google3-build-mode python-mode
+               emacs-lisp-mode make-mode borg-mode js-mode css-mode html-mode
+               nxhtml-mode java-mode shell-script-mode jde-mode ess-mode Rd-mode
+               go-mode))
  '(history-delete-duplicates t)
  '(history-length t)
  '(js-indent-level 2)
@@ -30,7 +50,18 @@
  '(menu-bar-mode nil)
  '(p4-global-key-prefix "\3p")
  '(package-selected-packages
-   '(counsel flymake-go fira-code-mode company company-lsp doremi-cmd exec-path-from-shell flycheck go-mode haskell-mode hl-line+ js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui lua-mode markdown-mode multiple-cursors phi-search phi-search-mc protobuf-mode rainbow-mode rust-mode tide typescript-mode visual-regexp window-jump yasnippet))
+   '(a68-mode apache-mode async bar-cursor bm boxquote browse-kill-ring
+              color-theme-modern company company-lsp counsel dart-mode dash
+              diminish doremi-cmd editorconfig epl eproject ess
+              exec-path-from-shell f fira-code-mode flx flycheck flymake-go
+              folding go-mode goto-chg graphviz-dot-mode haskell-mode helm
+              helm-core hl-line+ ht htmlize ido-completing-read+ initsplit
+              js2-mode kotlin-mode ledger-mode lsp-mode lsp-typescript lsp-ui
+              lua-mode lv magit markdown-mode memoize multiple-cursors
+              phi-search phi-search-mc pkg-info protobuf-mode puppet-mode
+              rainbow-mode rust-mode s session tabbar typescript-mode undo-tree
+              visual-regexp which-key window-jump yaml-mode yasnippet
+              yasnippet-snippets zenburn-theme))
  '(perl6-indent-offset 2)
  '(python-indent-offset 2)
  '(rust-indent-offset 2)

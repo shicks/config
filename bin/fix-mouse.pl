@@ -16,7 +16,7 @@ open XINPUT, '-|', 'xinput list';
 my $done = 0;
 while (<XINPUT>) {
   #print;
-  if (/\|?\s*↳?\s*(.*Mouse|SONiX.*)id=(\d+)/) {
+  if (/\|?\s*↳?\s*(.*Mouse|SONiX.*|.*Razer Basilisk.*)id=(\d+)/) {
     my ($name, $id) = ($1, $2);
     next if $name =~ /Keyboard/;
     my $prop = '';

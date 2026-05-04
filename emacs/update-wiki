@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+# Usage: ./update-wiki
+#
+# Pulls the latest version of *.el files that come from emacswiki.
+
+use strict;
+use warnings;
+use File::Basename qw/dirname/;
+
+my $dir = dirname($0);
+opendir DIR, "$dir/wiki";
+while ($_ = readdir DIR) {
+  next if /^\./;
+  my $local = "$dir/wiki/$_";
+  my $url = "https://www.emacswiki.org/emacs/download/$_";
+  $url =~ s/\+/%2b/g;
+  system 'curl', '-o', $local, $url;
+}

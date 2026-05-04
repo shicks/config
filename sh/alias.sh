@@ -18,3 +18,5 @@ alias dirs="dirs -v"
 if which fzf-tmux &> /dev/null; then
   alias fzf=fzf-tmux
 fi
+
+alias gemini=mygemini

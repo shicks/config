@@ -18,6 +18,9 @@
 (global-set-key (kbd "C-c `") 'flymake-goto-next-error)
 (global-set-key "\C-Cq" 'flymake-stop-all-syntax-checks)
 
+;; Default position of flymake margin on the left is maddening.
+;; Move it to the right fringe instead so as not to add extra spaces.
+(setq flymake-margin-indicator-position 'right-margin)
 
 
 (provide 'sdh-flymake)
