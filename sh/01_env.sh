@@ -69,3 +69,8 @@ if [ "$(hostname)" = giskard ]; then
   export DISPLAY=DESKTOP-6SBOT1P:0.0
   export LIBGL_ALWAYS_INDIRECT=1
 fi
+
+if [ -d "$HOME/.cargo" ]; then
+  [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+  PATH="$HOME/.cargo/bin:$PATH"
+fi
